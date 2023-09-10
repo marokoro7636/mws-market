@@ -6,8 +6,10 @@ from typing import Optional
 
 router = APIRouter()
 
+
 class Log(BaseModel):
     text: Optional[str]
+
 
 @router.post("/test")
 def post_text(text: Log):
@@ -17,4 +19,4 @@ def post_text(text: Log):
     # except:
     #      return {"error":"failed to write"}
     # return {"text":safe_text}
-    return {"text":text}
+    return {"text": text}
