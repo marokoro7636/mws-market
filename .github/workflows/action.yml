@@ -1,0 +1,21 @@
+on: push
+name: Deploy to Server
+jobs:
+  run-ssh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+          name: ssh_key
+          config: |
+            Host server
+              HostName ${{ secrets.HOST_NAME }}
+              User ${{ secrets.USER_NAME }}
+              IdentityFile ~/.ssh/ssh_key
+      - name: run
+        run: |
+          ssh server "cd mws-market&&git pull"
+          ssh server "~/docker-scripts/restart.sh"
