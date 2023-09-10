@@ -1,0 +1,14 @@
+# for Fast API
+fastapi
+uvicorn
+python-multipart
+
+# Dotenv
+python-dotenv
+
+# Firebase
+firebase-admin
+
+# Lint
+flake8
+black

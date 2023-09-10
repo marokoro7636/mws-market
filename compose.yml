@@ -1,0 +1,23 @@
+version: "3.8"
+services:
+  web:
+    container_name: mws-market
+    image: mws-market:latest
+    ports:
+      - "18181:18181"
+    volumes:
+      - "./api:/app"
+      - "./creds/:/app/creds"
+      # - "./public:/app/public"
+    environment:
+      - "DOT_ENV=/app/creds/.env"
+    command: uvicorn main:app --host 0.0.0.0 --port 18181 --reload
+  lint:
+    build: 
+      context: .
+      network: host
+    image: mws-market:latest
+    command: bash -c 'black . ;flake8 --ignore=E501 .'
+    volumes:
+      - "./api:/app/api"
+      - "./creds/:/app/creds"
