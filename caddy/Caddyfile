@@ -1,0 +1,27 @@
+http://* {
+    handle_path /api/* {
+        rewrite * /api{uri}
+        reverse_proxy http://mws-market-api:18181
+    }
+
+    handle_path /docs {
+        rewrite * /docs
+        reverse_proxy http://mws-market-api:18181
+    }
+
+    handle_path /openapi.json {
+        rewrite * /openapi.json
+        reverse_proxy http://mws-market-api:18181
+    }
+
+    handle_path /* {
+
+        reverse_proxy http://mws-market-frontend:3000 http://mws-market-frontend-dev:3000 {
+            lb_policy first
+            health_path /health
+            health_interval 30s
+            health_timeout 30s
+            health_status 200
+        }
+    }
+}

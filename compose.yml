@@ -17,10 +17,10 @@ services:
     environment:
       - "DOT_ENV=/app/creds/.env"
     command: uvicorn main:app --host 0.0.0.0 --port 18181 --reload
-  api-lint:
-    profiles: ["dev"]
-    image: mws-market-api:latest
-    command: bash -c 'black . ;flake8 --ignore=E501 .'
+  # api-lint:
+  #   profiles: ["dev"]
+  #   image: mws-market-api:latest
+  #   command: bash -c 'black . ;flake8 --ignore=E501 .'
 
   frontend:
     profiles: ["prod"]
@@ -43,3 +43,12 @@ services:
     volumes:
       - "./frontend:/app"
     command: npm run dev
+
+  rev-proxy:
+    image: caddy:2.7.4-alpine
+    container_name: mws-market-rev-proxy
+    profiles: ["prod", "dev"]
+    ports:
+      - "18180:80"
+    volumes:
+      - "./caddy/Caddyfile:/etc/caddy/Caddyfile"
