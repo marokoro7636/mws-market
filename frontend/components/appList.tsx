@@ -14,7 +14,7 @@ const AppList = () => {
             <List component="nav">
                 {
                     appList.map((item) => (
-                        <ListItemButton divider href={`/apps/${item.id}`}>
+                        <ListItemButton divider href={`/apps/${item.id}`} key={item.id}>
                             <ListItemText primary={item.name} />
                             <Button variant="contained">インストール</Button>
                         </ListItemButton>
