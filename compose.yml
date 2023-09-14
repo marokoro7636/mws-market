@@ -47,8 +47,17 @@ services:
   rev-proxy:
     image: caddy:2.7.4-alpine
     container_name: mws-market-rev-proxy
-    profiles: ["prod", "dev"]
+    profiles: ["prod"]
     ports:
       - "18180:80"
     volumes:
       - "./caddy/Caddyfile:/etc/caddy/Caddyfile"
+
+  rev-proxy-dev:
+    image: caddy:2.7.4-alpine
+    container_name: mws-market-rev-proxy-dev
+    profiles: ["dev"]
+    ports:
+      - "18180:80"
+    volumes:
+      - "./caddy/Caddydev:/etc/caddy/Caddyfile"

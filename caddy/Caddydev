@@ -15,6 +15,6 @@ http://* {
     }
 
     handle_path /* {
-        reverse_proxy http://mws-market-frontend:3000
+        reverse_proxy http://mws-market-frontend-dev:3000 
     }
 }
