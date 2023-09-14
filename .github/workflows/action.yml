@@ -1,7 +1,10 @@
-on: push
+on:
+  push:
+    branches:
+      - master
 name: Deploy to Server
 jobs:
-  run-ssh:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Install SSH key
@@ -18,5 +21,5 @@ jobs:
       - name: run
         run: |
           ssh server "cd mws-market&&git pull"
-          ssh server "sudo ~/docker-scripts/build.sh; echo BUILD DONE"
+          ssh server "sudo ~/docker-scripts/build.sh"
           ssh server "sudo ~/docker-scripts/restart.sh"
