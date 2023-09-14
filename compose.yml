@@ -1,8 +1,13 @@
 version: "3.8"
 services:
-  web:
-    container_name: mws-market
-    image: mws-market:latest
+  api:
+    profiles: ["prod", "dev"]
+    container_name: mws-market-api
+    image: mws-market-api:latest
+    build: 
+      context: ./api
+      network: host
+      dockerfile: Dockerfile
     ports:
       - "18181:18181"
     volumes:
@@ -12,12 +17,38 @@ services:
     environment:
       - "DOT_ENV=/app/creds/.env"
     command: uvicorn main:app --host 0.0.0.0 --port 18181 --reload
-  lint:
+  # api-lint:
+  #   profiles: ["dev"]
+  #   image: mws-market-api:latest
+  #   command: bash -c 'black . ;flake8 --ignore=E501 .'
+
+  frontend:
+    profiles: ["prod"]
+    container_name: mws-market-frontend
     build: 
-      context: .
-      network: host
-    image: mws-market:latest
-    command: bash -c 'black . ;flake8 --ignore=E501 .'
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: mws-market-frontend:latest
+    ports:
+      - "18182:3000"
+    command: sh -c 'npm run build && npm run start'
+  frontend-dev:
+    profiles: ["dev"]
+    container_name: mws-market-frontend-dev
+    image: mws-market-frontend:latest
+    environment:
+      - WATCHPACK_POLLING=true 
+    ports:
+      - "18182:3000"
     volumes:
-      - "./api:/app/api"
-      - "./creds/:/app/creds"
+      - "./frontend:/app"
+    command: npm run dev
+
+  rev-proxy:
+    image: caddy:2.7.4-alpine
+    container_name: mws-market-rev-proxy
+    profiles: ["prod", "dev"]
+    ports:
+      - "18180:80"
+    volumes:
+      - "./caddy/Caddyfile:/etc/caddy/Caddyfile"
