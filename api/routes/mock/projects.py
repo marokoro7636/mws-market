@@ -23,6 +23,7 @@ class ProjectRequest(BaseModel):
 class ProjectInfo(BaseModel):
     name: str
     description: str
+    youtube: str
     details: Optional[project_details.ProjectDetails]
     demo: Optional[None]
     review: Optional[dict[str, str]]
@@ -33,6 +34,7 @@ class ProjectSummary(BaseModel):
     id: str
     name: str
     description: str
+    youtube: str
     team: str
 
 @router.get("/", response_model=list[ProjectSummary])

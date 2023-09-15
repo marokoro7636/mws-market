@@ -29,6 +29,26 @@ def post_project_description(project_id: str, description: str):
     #     raise StarletteHTTPException(status_code=500, detail="Failed to post project description")
     return API_OK()
 
+@router.post("/{project_id}/youtube", response_model=API_OK)
+def post_project_youtube(project_id: str, youtube: str):
+    # if db.get_project_by_id(project_id) is None:
+    #     raise StarletteHTTPException(status_code=404, detail="Project not found")
+    # try:
+    #     db.update_project_youtube(project_id, youtube)
+    # except:
+    #     raise StarletteHTTPException(status_code=500, detail="Failed to post project youtube")
+    return API_OK()
+
+@router.delete("/{project_id}/youtube", response_model=API_OK)
+def delete_project_youtube(project_id: str):
+    # if db.get_project_by_id(project_id) is None:
+    #     raise StarletteHTTPException(status_code=404, detail="Project not found")
+    # try:
+    #     db.delete_project_youtube(project_id)
+    # except:
+    #     raise StarletteHTTPException(status_code=500, detail="Failed to delete project youtube")
+    return API_OK()
+
 @router.post("/{project_id}/hidden", response_model=API_OK)
 def post_project_index(project_id: str, is_hidden: bool):
     # if db.get_project_by_id(project_id) is None:
