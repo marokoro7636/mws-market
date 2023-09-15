@@ -1,19 +1,14 @@
-from pydantic import BaseModel
 from fastapi import APIRouter
-from typing import Optional
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from helper.util import sha1_hash
 import datetime
 
 from helper.response import API_OK
 
-router = APIRouter()
+from models.requests import Team
 
-class Team(BaseModel):
-    name: str
-    year: int
-    description: str
-    members: list[str]
+
+router = APIRouter()
 
 @router.get("/", response_model=list[Team])
 def get_teams():

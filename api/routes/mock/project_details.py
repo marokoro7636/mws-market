@@ -1,33 +1,12 @@
-from pydantic import BaseModel
 from fastapi import APIRouter
-from typing import Optional
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from helper.util import sha1_hash
 import datetime
 from fastapi import FastAPI, File, UploadFile
-
+from models.requests import RequiredSpec, Install, ProjectDetails, SimpleSpecResponse
 from helper.response import API_OK
 
 router = APIRouter()
-
-class RequiredSpec(BaseModel):
-    item: str
-    required: str
-
-class Install(BaseModel):
-    method: str
-    info: str
-    additional: Optional[str]
-
-class ProjectDetails(BaseModel):
-    img_screenshot: Optional[list[str]]
-    required_spec: Optional[list[RequiredSpec]]
-    install: Optional[list[Install]]
-    forjob: Optional[str]
-
-class SimpleSpecResponse(BaseModel):
-    spec_id: str
-    data: Optional[RequiredSpec]
 
 @router.post("/{project_id}/details/imgs/{img_id}", response_model=API_OK)
 def post_project_name(project_id: str, img_id:int, img: UploadFile):

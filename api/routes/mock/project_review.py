@@ -1,18 +1,11 @@
-from pydantic import BaseModel
 from fastapi import APIRouter
-from typing import Optional
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from helper.util import sha1_hash
 import datetime
 
 from helper.response import API_OK
-
+from models.requests import ProjectReview
 router = APIRouter()
-
-class ProjectReview(BaseModel):
-    title: str
-    content: str
-    rating: int
 
 @router.post("/{project_id}/review", response_model=API_OK)
 def post_project_review(project_id: str, review: ProjectReview):

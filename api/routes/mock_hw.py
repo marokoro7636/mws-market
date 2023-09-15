@@ -2,13 +2,9 @@
 
 from pydantic import BaseModel
 from fastapi import APIRouter
-from typing import Optional
+from models.requests import Log
 
 router = APIRouter()
-
-
-class Log(BaseModel):
-    text: Optional[str]
 
 
 @router.post("/test")

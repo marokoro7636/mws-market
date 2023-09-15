@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from starlette.middleware.cors import CORSMiddleware
 import routes.mock_router as mock
+import routes.v0_router as v0
 from helper.check import check_env
 from helper.init import init_firebase
 import os
@@ -36,3 +37,4 @@ init_firebase()
 # app.mount("/", StaticFiles(directory="./public", html=True), name="public")
 
 app.include_router(mock.get_router(), prefix="/api/mock", tags=["api_mock"])
+app.include_router(v0.get_router(), prefix="/api/v0", tags=["api_v0"])

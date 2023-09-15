@@ -1,15 +1,15 @@
+from pydantic import BaseModel
 from fastapi import APIRouter
+from typing import Optional
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from helper.util import sha1_hash
 import datetime
 
-import routes.mock.project_info as project_info
-import routes.mock.project_details as project_details
+from models.requests import ProjectDetails, ProjectSimpleResponse, ProjectRequest, ProjectInfo, ProjectSummary
+import routes.v0.project_info as project_info
+# import routes.v0.project_details as project_details
 
-import routes.mock.project_details as project_details
-
-from models.requests import ProjectSimpleResponse, ProjectRequest, ProjectInfo, ProjectSummary
-
+from models.projects import Project
 
 router = APIRouter()
 
@@ -62,14 +62,11 @@ def get_project(project_id: str):
 
 @router.post("/", response_model=ProjectSimpleResponse)
 def post_project(req: ProjectRequest):
-    # try:
-    #     project_id = db.create_project(req.owner, req.name)
-    # except:
-    #     raise StarletteHTTPException(status_code=500, detail="Failed to post project")
-    timestamp = 0 #datetime.now().strftime("%Y%m%d%H%M%S")
-    project_hash_seed = f"{req.team}{req.name}{timestamp}"
-    project_id = sha1_hash(project_hash_seed)
-    return ProjectSimpleResponse(project_id=project_id)
+    try:
+        prj = Project.create(req.team, req.name)
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to post project")
+    return ProjectSimpleResponse(project_id=prj.id)
 
 @router.delete("/{project_id}", response_model=ProjectSimpleResponse)
 def delete_project(project_id: str):
@@ -82,4 +79,4 @@ def delete_project(project_id: str):
     return ProjectSimpleResponse(project_id=project_id)
 
 router.include_router(project_info.router, prefix="", tags=["project_info"])
-router.include_router(project_details.router, prefix="", tags=["project_details"])
+# router.include_router(project_details.router, prefix="", tags=["project_details"])
