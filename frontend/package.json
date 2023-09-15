@@ -11,6 +11,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
+    "@mdxeditor/editor": "^0.22.5",
     "@mui/material": "^5.14.8",
     "@types/node": "20.6.0",
     "@types/react": "18.2.21",
@@ -19,6 +20,7 @@
     "eslint": "8.49.0",
     "eslint-config-next": "13.4.19",
     "next": "13.4.19",
+    "next-mdx-remote": "^4.4.1",
     "postcss": "8.4.29",
     "react": "18.2.0",
     "react-dom": "18.2.0",
