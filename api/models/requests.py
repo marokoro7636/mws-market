@@ -8,17 +8,17 @@ class RequiredSpec(BaseModel):
 class Install(BaseModel):
     method: str
     info: str
-    additional: Optional[str]
+    additional: Optional[str] = None
 
 class ProjectDetails(BaseModel):
-    img_screenshot: Optional[list[str]]
-    required_spec: Optional[list[RequiredSpec]]
-    install: Optional[list[Install]]
-    forjob: Optional[str]
+    img_screenshot: Optional[list[str]] = None
+    required_spec: Optional[list[RequiredSpec]] = None
+    install: Optional[list[Install]] = None
+    forjob: Optional[str] = None
 
 class SimpleSpecResponse(BaseModel):
     spec_id: str
-    data: Optional[RequiredSpec]
+    data: Optional[RequiredSpec] = None
 
 class ProjectReview(BaseModel):
     title: str
@@ -36,12 +36,12 @@ class ProjectInfo(BaseModel):
     id: str
     name: str
     team: str
-    description: Optional[str]
-    youtube: Optional[str]
-    details: Optional[ProjectDetails]
-    demo: Optional[None]
-    review: Optional[dict[str, str]]
-    isIndex: Optional[bool]
+    description: Optional[str] = None
+    youtube: Optional[str] = None
+    details: Optional[ProjectDetails] = None
+    demo: Optional[None] = None
+    review: Optional[dict[str, str]] = None
+    isIndex: Optional[bool] = None
 
 class ProjectSummary(BaseModel):
     id: str
@@ -57,4 +57,4 @@ class Team(BaseModel):
     members: list[str]
 
 class Log(BaseModel):
-    text: Optional[str]
+    text: Optional[str] = None

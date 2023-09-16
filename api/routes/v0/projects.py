@@ -5,7 +5,13 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from helper.util import sha1_hash
 import datetime
 
-from models.requests import ProjectDetails, ProjectSimpleResponse, ProjectRequest, ProjectInfo, ProjectSummary
+from models.requests import (
+    ProjectDetails,
+    ProjectSimpleResponse,
+    ProjectRequest,
+    ProjectInfo,
+    ProjectSummary,
+)
 import routes.v0.project_info as project_info
 # import routes.v0.project_details as project_details
 
