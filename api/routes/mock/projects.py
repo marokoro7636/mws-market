@@ -8,7 +8,12 @@ import routes.mock.project_details as project_details
 
 import routes.mock.project_details as project_details
 
-from models.requests import ProjectSimpleResponse, ProjectRequest, ProjectInfo, ProjectSummary
+from models.requests import (
+    ProjectSimpleResponse,
+    ProjectRequest,
+    ProjectInfo,
+    ProjectSummary,
+)
 
 
 router = APIRouter()
