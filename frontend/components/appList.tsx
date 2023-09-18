@@ -1,26 +1,31 @@
 import React from 'react';
-import {Button, List, ListItemButton, ListItemText} from "@mui/material";
+import {Grid} from "@mui/material";
+import AppCard from "@/components/AppCard";
 
 interface App {
-    id: number,
-    name: string
+    id: string,
+    name: string,
+    description: string,
+    youtube: string,
+    team: string
 }
 
 const AppList = () => {
-    const appList: App[] = [...Array(10)].map((_, i): App => ({id: i, name: `app ${i}`}))
+    const appListData: App[] = [...Array(10)].map((_, i): App => (
+        {id: i.toString(), name: `app ${i}`, description: `description ${i}`, youtube: `youtube ${i}`, team: "team"})
+    )
 
     return (
-        <div>
-            <List component="nav">
+        <div style={{marginTop: "20px"}}>
+            <Grid container spacing={2} rowSpacing={5}>
                 {
-                    appList.map((item) => (
-                        <ListItemButton divider href={`/apps/${item.id}`} key={item.id}>
-                            <ListItemText primary={item.name} />
-                            <Button variant="contained">インストール</Button>
-                        </ListItemButton>
+                    appListData.map((item) => (
+                        <Grid item xs={4}>
+                            <AppCard id={item.id} name={item.name} team={item.team} description={item.description}/>
+                        </Grid>
                     ))
                 }
-            </List>
+            </Grid>
         </div>
     );
 };
