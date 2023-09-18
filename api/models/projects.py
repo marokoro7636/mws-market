@@ -1,7 +1,13 @@
 from firebase_admin import firestore
 from helper.util import sha1_hash
-
-from models.requests import ProjectInfo, ProjectRequest, RequiredSpec, SimpleSpecResponse
+from urllib.parse import urlparse
+from urllib.request import urlopen
+from models.requests import (
+    ProjectInfo,
+    ProjectRequest,
+    RequiredSpec,
+    SimpleSpecResponse
+)
 
 
 class Project:
@@ -50,7 +56,7 @@ class Project:
 
     # project_info
     @staticmethod
-    def update_project_name(project_id, name):
+    def update_project_name(project_id: str, name: str):
         db = firestore.client()
         db.collection("projects").document(project_id).update(
             {
@@ -59,7 +65,7 @@ class Project:
         )
 
     @staticmethod
-    def update_project_description(project_id, description):
+    def update_project_description(project_id: str, description: str):
         db = firestore.client()
         db.collection("projects").document(project_id).set(
             {
@@ -68,7 +74,19 @@ class Project:
         , merge=True)
 
     @staticmethod
-    def update_project_youtube(project_id, youtube):
+    def update_project_youtube(project_id: str, youtube: str):
+        url = urlparse(youtube)
+        # YoutubeのURLか
+        if url.scheme not in ["https", "http"] or url.hostname != "www.youtube.com":
+            raise
+
+        # URLが存在しているか
+        try:
+            res = urlopen(youtube)
+            res.close()
+        except:
+            raise
+
         db = firestore.client()
         db.collection("projects").document(project_id).set(
             {
@@ -77,7 +95,7 @@ class Project:
         , merge=True)
 
     @staticmethod
-    def delete_project_youtube(project_id):
+    def delete_project_youtube(project_id: str):
         db = firestore.client()
         data = db.collection("projects").document(id).get().to_dict()
         if "youtube" in data:
@@ -88,7 +106,7 @@ class Project:
             )
 
     @staticmethod
-    def update_project_index(project_id, is_hidden):
+    def update_project_index(project_id: str, is_hidden: bool):
         db = firestore.client()
         db.collection("projects").document(project_id).set(
             {
