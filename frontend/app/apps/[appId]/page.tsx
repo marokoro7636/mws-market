@@ -10,7 +10,7 @@ Check the EditorComponent.tsx file for the code .
 
 const save = (md:string) => { markdown = md }
 
-// TODO 状態管理方法
+// TODO 状態管理方法 ←Zustandが良さそう
 
 export default function Page({ params }: { params: { appId: string } }) {
     return <div>
