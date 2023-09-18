@@ -97,7 +97,7 @@ class Project:
     @staticmethod
     def delete_project_youtube(project_id: str):
         db = firestore.client()
-        data = db.collection("projects").document(id).get().to_dict()
+        data = db.collection("projects").document(project_id).get().to_dict()
         if "youtube" in data:
             db.collection("projects").document(project_id).update(
                 {
@@ -110,7 +110,7 @@ class Project:
         db = firestore.client()
         db.collection("projects").document(project_id).set(
             {
-                "isIndex": is_hidden,
+                "isIndex": not is_hidden,
             }
         , merge=True)
 

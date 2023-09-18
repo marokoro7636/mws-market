@@ -54,7 +54,7 @@ def delete_project_youtube(project_id: str):
 
 @router.post("/{project_id}/hidden", response_model=API_OK)
 def post_project_index(project_id: str, is_hidden: bool):
-    if Project.get_project_by_id(project_id) is None:
+    if Project.get_by_id(project_id) is None:
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
         Project.update_project_index(project_id, is_hidden)
