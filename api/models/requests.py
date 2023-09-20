@@ -36,6 +36,7 @@ class ProjectInfo(BaseModel):
     id: str
     name: str
     team: str
+    short_description: Optional[str] = None
     description: Optional[str] = None
     youtube: Optional[str] = None
     details: Optional[ProjectDetails] = None

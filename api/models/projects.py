@@ -1,7 +1,7 @@
 from firebase_admin import firestore
 from helper.util import sha1_hash
-from urllib.parse import urlparse
 from urllib.request import urlopen
+import re
 from models.requests import (
     ProjectInfo,
     ProjectRequest,
@@ -28,17 +28,18 @@ class Project:
         )
         return Project(id=id)
 
+
     @staticmethod
-    def get_by_id(id):
+    def load_by_id(id: str):
         db = firestore.client()
         doc = db.collection("projects").document(id).get()
         if doc.exists:
-            return ProjectInfo(**doc.to_dict())
+            return Project(id=id)
         else:
             return None
 
     @staticmethod
-    def is_exist(id):
+    def is_exist(id: str):
         db = firestore.client()
         doc = db.collection("projects").document(id).get()
         if doc.exists:
@@ -46,69 +47,62 @@ class Project:
         else:
             return False
 
-    def set_name(self, new_name):
+    def get_info(self):
         db = firestore.client()
-        db.collection("projects").document(self.id).update(
-            {
-                "name": new_name,
-            }
-        )
+        doc = db.collection("projects").document(self.id).get()
+        return ProjectInfo(**doc.to_dict())
+
 
     # project_info
-    @staticmethod
-    def update_project_name(project_id: str, name: str):
+    def set_name(self, name: str):
         db = firestore.client()
-        db.collection("projects").document(project_id).update(
+        db.collection("projects").document(self.id).update(
             {
                 "name": name,
             }
         )
 
-    @staticmethod
-    def update_project_description(project_id: str, description: str):
+    def set_short_description(self, short_description: str):
         db = firestore.client()
-        db.collection("projects").document(project_id).set(
+        db.collection("projects").document(self.id).set(
+            {
+                "short_description": short_description,
+            }
+        , merge=True)
+
+    def set_description(self, description: str):
+        db = firestore.client()
+        db.collection("projects").document(self.id).set(
             {
                 "description": description,
             }
         , merge=True)
 
-    @staticmethod
-    def update_project_youtube(project_id: str, youtube: str):
-        url = urlparse(youtube)
+    def set_youtube(self, youtube: str):
         # YoutubeのURLか
-        if url.scheme not in ["https", "http"] or url.hostname != "www.youtube.com":
-            raise
-
-        # URLが存在しているか
-        try:
-            res = urlopen(youtube)
-            res.close()
-        except:
+        if re.match(r'https?:\/\/(www.youtube.com\/|youtu.be\/)(\w+)', youtube) is None:
             raise
 
         db = firestore.client()
-        db.collection("projects").document(project_id).set(
+        db.collection("projects").document(self.id).set(
             {
                 "youtube": youtube,
             }
         , merge=True)
 
-    @staticmethod
-    def delete_project_youtube(project_id: str):
+    def delete_youtube(self):
         db = firestore.client()
-        data = db.collection("projects").document(project_id).get().to_dict()
+        data = db.collection("projects").document(self.id).get().to_dict()
         if "youtube" in data:
-            db.collection("projects").document(project_id).update(
+            db.collection("projects").document(self.id).update(
                 {
-                    "youtube": firestore.DELETE_FIELD ,
+                    "youtube": firestore.DELETE_FIELD,
                 }
             )
 
-    @staticmethod
-    def update_project_index(project_id: str, is_hidden: bool):
+    def set_index(self, is_hidden: bool):
         db = firestore.client()
-        db.collection("projects").document(project_id).set(
+        db.collection("projects").document(self.id).set(
             {
                 "isIndex": not is_hidden,
             }
