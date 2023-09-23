@@ -19,8 +19,8 @@ const AppList = () => {
         <div style={{marginTop: "20px"}}>
             <Grid container spacing={2} rowSpacing={5}>
                 {
-                    appListData.map((item) => (
-                        <Grid item xs={4}>
+                    appListData.map((item, i) => (
+                        <Grid item xs={4} key={i}>
                             <AppCard id={item.id} name={item.name} team={item.team} description={item.description}/>
                         </Grid>
                     ))
