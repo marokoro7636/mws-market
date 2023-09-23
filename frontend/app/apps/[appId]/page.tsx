@@ -1,7 +1,9 @@
-import Viewer from '@/components/MdViewer'
 import dynamic from 'next/dynamic'
 import React, { Suspense } from 'react'
-import {Button, Container, Grid, Rating, Stack} from "@mui/material";
+import {Box, Button, Container, Grid, Rating, Stack, Typography} from "@mui/material";
+import ScreenshotCarousel from "@/components/ScreenshotCarousel";
+
+
 const Editor = dynamic(() => import('@/components/MdEdtior'), { ssr: false })
 
 interface AppDetail{
@@ -42,10 +44,10 @@ export default function Page({ params }: { params: { appId: string } }) {
         id: appId,
         name: `App ${appId}`,
         team: `team ${appId}`,
-        description: `description ${appId}`,
+        description: `description ${appId} `.repeat(50),
         youtube: `https://${appId}`,
         details: {
-            img_screenshot: ["img1"],
+            img_screenshot: ["https://picsum.photos/600/400", "https://picsum.photos/600/400?grayscale"],
             required_spec: [
                 {
                     item: "",
@@ -66,24 +68,33 @@ export default function Page({ params }: { params: { appId: string } }) {
     return (
         <div>
             <Container sx={{mt: 3}}>
-                <Grid container>
-                    <Grid item xs={2}>
-                        <img src="/icon128.png"/>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Stack>
-                            <h1>{appDetailMock.name}</h1>
-                            <p>{appDetailMock.team}</p>
-                            <Rating name="read-only" value={3} size="small"/>
-                        </Stack>
-                    </Grid>
-                    <Grid item xs={2}>
-                        <Button variant="contained">インストール</Button>
-                    </Grid>
-                </Grid>
-                {/*<Suspense fallback={null}>*/}
-                {/*    <Viewer markdown={markdown} />*/}
-                {/*</Suspense>*/}
+                <Stack spacing={5}>
+                    <Box component="div">
+                        <Grid container alignItems="center" justifyContent="center">
+                            <Grid item xs={3}>
+                                <img src="/icon128.png"/>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Box>
+                                    <Typography variant="h3">{appDetailMock.name}</Typography>
+                                    <Typography variant="subtitle1">{appDetailMock.team}</Typography>
+                                    <Rating name="read-only" value={3} size="small" sx={{mt: 2}}/>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={3}>
+                                <Button variant="contained" sx={{width: 2/3, height: 50}}>インストール</Button>
+                            </Grid>
+                        </Grid>
+                    </Box>
+                    <Stack spacing={2}>
+                        <Typography variant="h4">このアプリについて</Typography>
+                        <Typography component="div">{appDetailMock.description}</Typography>
+                    </Stack>
+                    <Box>
+                        <ScreenshotCarousel imgList={appDetailMock.details.img_screenshot}/>
+                    </Box>
+                </Stack>
+
             </Container>
         </div>
     );
