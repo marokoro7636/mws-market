@@ -47,7 +47,7 @@ export default function Page({ params }: { params: { appId: string } }) {
         description: `description ${appId} `.repeat(50),
         youtube: "https://youtu.be/ZaZMZ9jePKw?si=x96UEomj8VWoHw0-",
         details: {
-            imgScreenshot: ["https://plasticmouldingsnorthern.co.uk/wp-content/uploads/2014/03/dummy-image-600x400.jpg", "https://picsum.photos/600/400", "https://picsum.photos/600/400?grayscale"],
+            imgScreenshot: ["https://dummyimage.com/800x16:9/000/fff.png", "https://dummyimage.com/640x16:9/09f/fff.png", "https://dummyimage.com/400x16:9/cccccc/000000.png"],
             requiredSpec: [
                 {
                     item: "",
@@ -87,7 +87,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                     <Typography variant="h4">このアプリについて</Typography>
                     <Typography component="div">{appDetailMock.description}</Typography>
                 </Stack>
-                <Box sx={{display: "flex", justifyContent: "center", mt: 5}}>
+                <Box sx={{mt: 5}}>
                     <ScreenshotCarousel imgList={appDetailMock.details.imgScreenshot}/>
                 </Box>
                 <Stack spacing={2} mt={5}>
