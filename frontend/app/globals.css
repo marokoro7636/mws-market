@@ -1,3 +1,19 @@
 body {
     margin: 0;
 }
+
+.video {
+    position: relative;
+    width:100%; /* 横幅は100%で固定 */
+    height:0; /* 高さは0にしておく(padding-topで高さを指定するため) */
+    padding-top: 56.25%; /* 高さを指定(16:9) */
+}
+
+/* YouTube埋め込み用のiframe */
+.video iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
