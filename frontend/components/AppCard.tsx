@@ -34,7 +34,7 @@ const AppCard = ({ id, name, team, description }: AppCardProps) => {
                         <Typography variant="body2" color="text.secondary">
                             {team}
                         </Typography>
-                        <Rating name="read-only" value={3} size="small" sx={{mt: 1}}/>
+                        <Rating value={3} size="small" sx={{mt: 1}} readOnly/>
                         <Typography variant="body2" color="text.secondary" sx={{mt: 2}}>
                             {description}
                         </Typography>
