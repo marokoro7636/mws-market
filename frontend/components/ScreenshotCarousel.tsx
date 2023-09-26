@@ -19,8 +19,8 @@ const ScreenshotCarousel = ({imgList}: ScreenshotCarouselProps) => {
             infinite
             items={
                 imgList.map((item, i) => (
-                    <Box width={imgWidth+spacing}>
-                        <Box component="img" src={item} key={i} draggable={false} width={imgWidth}/>
+                    <Box width={imgWidth+spacing} key={i}>
+                        <Box component="img" src={item} draggable={false} width={imgWidth}/>
                     </Box>
                 ))
             }
