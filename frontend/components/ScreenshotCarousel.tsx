@@ -1,6 +1,7 @@
 "use client"
 import React from 'react';
 import Carousel from "react-material-ui-carousel";
+import {Box} from "@mui/material";
 
 interface ScreenshotCarouselProps {
     imgList: string[]
@@ -8,13 +9,18 @@ interface ScreenshotCarouselProps {
 
 const ScreenshotCarousel = ({imgList}: ScreenshotCarouselProps) => {
     return (
-        <Carousel autoPlay={false}>
-            {
-                imgList.map((item) => (
-                    <img src={item} alt="Image 1"/>
-                ))
-            }
-        </Carousel>
+        <Box sx={{width: "600px"}}>
+            <Carousel
+                autoPlay={false}
+                navButtonsAlwaysVisible={true}
+                animation="slide"
+                cycleNavigation={true}
+            >
+                {
+                    imgList.map((item, i) => <Box component="img" src={item} key={i}/>)
+                }
+            </Carousel>
+        </Box>
     );
 };
 
