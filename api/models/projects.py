@@ -149,37 +149,25 @@ class Project:
         db = firestore.client()
         db.collection("projects").document(self.id).collection("ProjectDetails").document("img_screenshot").collection("list").document(img_id).delete()
 
-    # required_specに関して記述していく
-    ## add function
-    @staticmethod
-    def add_project_required_spec(project_id, spec_id, required_spec):
+    ## required_spec
+    def add_required_spec(self, spec_id: str, required_spec: RequiredSpec):
         db = firestore.client()
-        print(type(required_spec))
-        db.collection("projects").document(project_id).collection("ProjectDetails").document(spec_id).set(
+        db.collection("projects").document(self.id).collection("ProjectDetails").document("required_spec").collection("list").document(spec_id).set(
             {
                 "item" : required_spec.item,
                 "required" : required_spec.required
             }
         )
 
-    ## get function
-    @staticmethod
-    def get_project_required_specs(project_id, spec_id):
+    def get_required_specs(self):
         db = firestore.client()
-        docs = db.collection("projects").document(project_id).collection("ProjectDetails").stream()
-        # if not docs.exist:
-        #   return None
-        data = [{"spec_id": doc.id, "data" :doc.to_dict()} for doc in docs ]
+        docs = db.collection("projects").document(self.id).collection("ProjectDetails").document("required_spec").collection("list").stream()
+        data = [SimpleSpecResponse(spec_id=doc.id, data=doc.to_dict()) for doc in docs]
         return data
 
-    ## delete function
-    @staticmethod
-    def delete_project_required_spec(project_id, spec_id):
+    def delete_required_spec(self, spec_id: str):
         db = firestore.client()
-        # if not docs.exist:
-        #   return None
-        db.collection("projects").document(project_id).collection("ProjectDetails").document(spec_id).delete()
-        return
+        db.collection("projects").document(self.id).collection("ProjectDetails").document("required_spec").collection("list").document(spec_id).delete()
 
     # get_projectsの実装 by Yamamoto
     ## Projectのドキュメントを全てリストに集める
