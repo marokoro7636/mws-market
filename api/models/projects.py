@@ -1,6 +1,11 @@
 from firebase_admin import firestore
 from helper.util import sha1_hash
 from urllib.request import urlopen
+import base64
+import shutil
+import tempfile
+import imghdr
+from fastapi import UploadFile
 import re
 from models.requests import (
     ProjectInfo,
@@ -9,6 +14,12 @@ from models.requests import (
     SimpleSpecResponse
 )
 
+# 許可する画像の種類
+# 参考: https://docs.python.org/ja/3/library/imghdr.html
+ALLOW_IMAGE_FORMAT = ["png", "jpeg", "bmp"]
+
+# 許可する画像の最大サイズ(byte)
+ALLOW_IMAGE_SIZE = 2 * 1024 * 1024
 
 class Project:
     def __init__(self, id):
@@ -46,6 +57,18 @@ class Project:
             return True
         else:
             return False
+
+    @staticmethod
+    def check_img(img: UploadFile):
+        img_format = imghdr.what(img.file)
+        img.file.seek(0, 2)
+        img_size = img.file.tell()
+
+        if img_format in ALLOW_IMAGE_FORMAT and img_size <= ALLOW_IMAGE_SIZE:
+            return True
+        else:
+            return False
+
 
     def get_info(self):
         db = firestore.client()
@@ -107,6 +130,24 @@ class Project:
                 "isIndex": not is_hidden,
             }
         , merge=True)
+
+    # project_detail
+    def add_img(self, img_id: str, img: UploadFile):
+        db = firestore.client()
+        with tempfile.NamedTemporaryFile(delete=True, dir=".", suffix=".stl") as tmp:
+            shutil.copyfileobj(img.file, tmp)
+            data = base64.b64encode(tmp.read())
+
+        db.collection("projects").document(self.id).collection("ProjectDetails").document("img_screenshot").collection("list").document(img_id).set(
+            {
+                "img_id": img_id,
+                "img": base64.b64encode(data),
+            }
+        )
+
+    def delete_img(self, img_id: str):
+        db = firestore.client()
+        db.collection("projects").document(self.id).collection("ProjectDetails").document("img_screenshot").collection("list").document(img_id).delete()
 
     # required_specに関して記述していく
     ## add function
