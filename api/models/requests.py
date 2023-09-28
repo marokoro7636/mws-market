@@ -36,6 +36,7 @@ class ProjectInfo(BaseModel):
     id: str
     name: str
     team: str
+    short_description: Optional[str] = None
     description: Optional[str] = None
     youtube: Optional[str] = None
     details: Optional[ProjectDetails] = None
@@ -55,6 +56,9 @@ class Team(BaseModel):
     year: int
     description: str
     members: list[str]
+
+class TeamSimpleResponse(BaseModel):
+    team_id: str
 
 class Log(BaseModel):
     text: Optional[str] = None
