@@ -16,7 +16,8 @@ from models.requests import (
     SimpleSpecResponse,
     Team,
     TeamSimpleResponse,
-    ProjectReview
+    ProjectReview,
+    Install
 )
 
 class Project:
@@ -364,6 +365,34 @@ class Project:
         else:
             return dict()
 
+    def add_install(self, install: Install):
+        db = firestore.client()
+        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        install_id = sha1_hash(f"{self.id}{install}{timestamp}")
+
+        db.collection("projects").document(self.id).update(
+            {
+                f"ProjectDetails.install.{install_id}": {
+                    "method" : install.method,
+                    "info" : install.info,
+                }
+            }
+        )
+        if install.additional is not None:
+            db.collection("projects").document(self.id).update(
+                {
+                    f"ProjectDetails.install.{install_id}.additional": install.additional
+                }
+            )
+
+    def delete_install(self, install_id: str):
+        db = firestore.client()
+        db.collection("projects").document(self.id).update(
+            {
+                f"ProjectDetails.install.{install_id}": firestore.DELETE_FIELD,
+            }
+        )
+
     ## forjob
     def get_forjob(self):
         db = firestore.client()
@@ -372,6 +401,22 @@ class Project:
             return doc.to_dict()["ProjectDetails"]["forjob"]
         else:
             return None
+
+    def set_forjob(self, forjob: str):
+        db = firestore.client()
+        db.collection("projects").document(self.id).update(
+            {
+                "ProjectDetails.forjob": forjob,
+            }
+        )
+
+    def delete_forjob(self):
+        db = firestore.client()
+        db.collection("projects").document(self.id).update(
+            {
+                "ProjectDetails.forjob": firestore.DELETE_FIELD,
+            }
+        )
 
     # project_review
     def get_review(self):
