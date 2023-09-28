@@ -79,13 +79,3 @@ def delete_project_required_spec(project_id: str, required_spec_id: str):
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project required spec")
     return API_OK()
-
-@router.get("/{project_id}/details/img_screenshot")
-def get_project_img_screenshot(project_id: str):
-    if not Project.is_exist(project_id):
-        raise StarletteHTTPException(status_code=404, detail="Project not found")
-    try:
-        data = Project.load_by_id(project_id).get_img_screenshot()
-    except:
-        raise StarletteHTTPException(status_code=500, detail="Failed to get project required spec")
-    return data
