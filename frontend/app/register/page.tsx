@@ -23,7 +23,7 @@ export default function Register() {
 
     const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
         try {
-            alert(JSON.stringify(inputs))
+            console.log(inputs)
         } catch (e) {
             alert(e)
         }
@@ -85,13 +85,21 @@ export default function Register() {
                     <Controller
                         control={control}
                         rules={{
-                            required: "入力してください"
+                            required: "入力してください",
+                            validate: (value) => {
+                                if(value.type === "image/png" || value.type === "image/jpeg"){
+                                    return true
+                                } else {
+                                    return "pngもしくはjpg画像を選択してください";
+                                }
+                            }
                         }}
                         render={({field, fieldState: {error}}) => (
                                 <MuiFileInput
                                     {...field}
                                     error={!!error}
                                     helperText={error?.message as string}
+                                    inputProps={{accept: ".png, .jpeg, .jpg"}}
                                 />
                             )}
                         name="icon"
@@ -102,13 +110,21 @@ export default function Register() {
                         <Controller
                             control={control}
                             rules={{
-                                required: "入力してください"
+                                required: "入力してください",
+                                validate: (value) => {
+                                    if(value.type === "image/png" || value.type === "image/jpeg"){
+                                        return true
+                                    } else {
+                                        return "pngもしくはjpg画像を選択してください";
+                                    }
+                                }
                             }}
                             render={({field, fieldState: {error}}) => (
                                 <MuiFileInput
                                     {...field}
                                     error={!!error}
                                     helperText={error?.message as string}
+                                    inputProps={{accept: ".png, .jpeg, .jpg"}}
                                 />
                             )}
                             name="screenshots.0"
@@ -116,13 +132,21 @@ export default function Register() {
                         <Controller
                             control={control}
                             rules={{
-                                required: "入力してください"
+                                required: "入力してください",
+                                validate: (value) => {
+                                    if(value.type === "image/png" || value.type === "image/jpeg"){
+                                        return true
+                                    } else {
+                                        return "pngもしくはjpg画像を選択してください";
+                                    }
+                                }
                             }}
                             render={({field, fieldState: {error}}) => (
                                 <MuiFileInput
                                     {...field}
                                     error={!!error}
                                     helperText={error?.message as string}
+                                    inputProps={{accept: ".png, .jpeg, .jpg"}}
                                 />
                             )}
                             name="screenshots.1"
@@ -130,13 +154,21 @@ export default function Register() {
                         <Controller
                             control={control}
                             rules={{
-                                required: "入力してください"
+                                required: "入力してください",
+                                validate: (value) => {
+                                    if(value.type === "image/png" || value.type === "image/jpeg"){
+                                        return true
+                                    } else {
+                                        return "pngもしくはjpg画像を選択してください";
+                                    }
+                                }
                             }}
                             render={({field, fieldState: {error}}) => (
                                     <MuiFileInput
                                         {...field}
                                         error={!!error}
                                         helperText={error?.message as string}
+                                        inputProps={{accept: ".png, .jpeg, .jpg"}}
                                     />
                                 )}
                             name="screenshots.2"
