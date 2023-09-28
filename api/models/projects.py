@@ -1,10 +1,10 @@
 from firebase_admin import firestore
 from helper.util import sha1_hash
-import base64
 import shutil
 import tempfile
 import os
 import datetime
+import imghdr
 from fastapi import UploadFile
 from firebase_admin import storage
 import re
@@ -12,6 +12,7 @@ from models.requests import (
     ProjectInfo,
     ProjectRequest,
     RequiredSpec,
+    ProjectDetails,
     SimpleSpecResponse
 )
 
@@ -54,9 +55,20 @@ class Project:
 
     # project_info
     def get_info(self):
-        db = firestore.client()
-        doc = db.collection("projects").document(self.id).get()
-        return ProjectInfo(**doc.to_dict())
+        return {
+            "id": self.id,
+            "name": self.get_name(),
+            "team": self.get_team(),
+            "short_description": self.get_short_description(),
+            "description": self.get_description(),
+            "youtube": self.get_youtube(),
+            "details": self.get_details(),
+            "demo": None,
+            "review": self.get_review(),
+            "isIndex": self.get_index(),
+            "icon": self.get_icon(),
+            "img": self.get_img()
+        }
 
     def set_name(self, name: str):
         db = firestore.client()
@@ -66,6 +78,26 @@ class Project:
             }
         )
 
+    def get_name(self):
+        db = firestore.client()
+        doc = db.collection("projects").document(self.id).get()
+
+        return doc.to_dict()["name"]
+
+    def set_team(self, team: str):
+        db = firestore.client()
+        db.collection("projects").document(self.id).update(
+            {
+                "team": team,
+            }
+        )
+
+    def get_team(self):
+        db = firestore.client()
+        doc = db.collection("projects").document(self.id).get()
+
+        return doc.to_dict()["team"]
+
     def set_short_description(self, short_description: str):
         db = firestore.client()
         db.collection("projects").document(self.id).set(
@@ -74,6 +106,14 @@ class Project:
             }
         , merge=True)
 
+    def get_short_description(self):
+        db = firestore.client()
+        doc = db.collection("projects").document(self.id).get()
+        if "short_description" in doc.to_dict():
+            return doc.to_dict()["short_description"]
+        else:
+            return None
+
     def set_description(self, description: str):
         db = firestore.client()
         db.collection("projects").document(self.id).set(
@@ -81,6 +121,14 @@ class Project:
                 "description": description,
             }
         , merge=True)
+
+    def get_description(self):
+        db = firestore.client()
+        doc = db.collection("projects").document(self.id).get()
+        if "description" in doc.to_dict():
+            return doc.to_dict()["description"]
+        else:
+            return None
 
     def set_youtube(self, youtube: str):
         # YoutubeのURLか
@@ -102,6 +150,14 @@ class Project:
             }
         )
 
+    def get_youtube(self):
+        db = firestore.client()
+        doc = db.collection("projects").document(self.id).get()
+        if "youtube" in doc.to_dict():
+            return doc.to_dict()["youtube"]
+        else:
+            return None
+
     def set_index(self, is_hidden: bool):
         db = firestore.client()
         db.collection("projects").document(self.id).set(
@@ -110,26 +166,51 @@ class Project:
             }
         , merge=True)
 
+    def get_index(self):
+        db = firestore.client()
+        doc = db.collection("projects").document(self.id).get()
+        if "isIndex" in doc.to_dict():
+            return doc.to_dict()["isIndex"]
+        else:
+             return None
+
     def set_icon(self, img: UploadFile):
         db = firestore.client()
         bucket = storage.bucket("mws-market.appspot.com")
-        dst_path  = os.path.join(self.id, "icon")
-        blob = bucket.blob(dst_path)
+        path  = os.path.join(self.id, f"icon.{imghdr.what(img.file)}")
+        blob = bucket.blob(path)
 
         with tempfile.NamedTemporaryFile(delete=True, dir=".", suffix=".stl") as tmp:
             shutil.copyfileobj(img.file, tmp)
             blob.upload_from_filename(tmp.name)
         db.collection("projects").document(self.id).set(
             {
-                "icon": os.path.join("gs://mws-market.appspot.com/", dst_path),
+                "icon": path,
             }
         , merge=True)
+
+    def get_icon(self):
+        db = firestore.client()
+        doc = db.collection("projects").document(self.id).get()
+        if "icon" in doc.to_dict():
+            path = doc.to_dict()["icon"]
+            bucket = storage.bucket("mws-market.appspot.com")
+            blob = bucket.blob(path)
+
+            return blob.generate_signed_url(
+                version="v4",
+                expiration=datetime.timedelta(seconds=60),
+                method="GET",
+            )
+        else:
+            return None
+
 
     def delete_icon(self):
         db = firestore.client()
         bucket = storage.bucket("mws-market.appspot.com")
-        dst_path  = os.path.join(self.id, "icon")
-        blob = bucket.blob(dst_path)
+        path  = os.path.join(self.id, "icon")
+        blob = bucket.blob(path)
         if blob.exists():
             blob.delete()
         db.collection("projects").document(self.id).update(
@@ -141,23 +222,23 @@ class Project:
     def set_img(self, img: UploadFile):
         db = firestore.client()
         bucket = storage.bucket("mws-market.appspot.com")
-        dst_path  = os.path.join(self.id, "img")
-        blob = bucket.blob(dst_path)
+        path  = os.path.join(self.id, f"img.{imghdr.what(img.file)}")
+        blob = bucket.blob(path)
 
         with tempfile.NamedTemporaryFile(delete=True, dir=".", suffix=".stl") as tmp:
             shutil.copyfileobj(img.file, tmp)
             blob.upload_from_filename(tmp.name)
         db.collection("projects").document(self.id).set(
             {
-                "img": os.path.join("gs://mws-market.appspot.com/", dst_path),
+                "img": path,
             }
         , merge=True)
 
     def delete_img(self):
         db = firestore.client()
         bucket = storage.bucket("mws-market.appspot.com")
-        dst_path  = os.path.join(self.id, "img")
-        blob = bucket.blob(dst_path)
+        path  = os.path.join(self.id, "img")
+        blob = bucket.blob(path)
         if blob.exists():
             blob.delete()
         db.collection("projects").document(self.id).update(
@@ -166,15 +247,39 @@ class Project:
             }
         )
 
+    def get_img(self):
+        db = firestore.client()
+        doc = db.collection("projects").document(self.id).get()
+        if "img" in doc.to_dict():
+            path = doc.to_dict()["img"]
+            bucket = storage.bucket("mws-market.appspot.com")
+            blob = bucket.blob(path)
+
+            return blob.generate_signed_url(
+                version="v4",
+                expiration=datetime.timedelta(seconds=60),
+                method="GET",
+            )
+        else:
+            return None
+
     # project_detail
+    def get_details(self):
+        return {
+            "img_screenshot": self.get_img_screenshot(),
+            "required_spec": self.get_required_spec(),
+            "install": self.get_install(),
+            "forjob": self.get_forjob()
+        }
+
     def add_img_screenshot(self, img: UploadFile):
         timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         img_id = sha1_hash(f"{self.id}{img}{timestamp}")
 
         db = firestore.client()
         bucket = storage.bucket("mws-market.appspot.com")
-        dst_path  = os.path.join(self.id, "img_screenshot", img_id)
-        blob = bucket.blob(dst_path)
+        path  = os.path.join(self.id, "img_screenshot", f"{img_id}.{imghdr.what(img.file)}")
+        blob = bucket.blob(path)
 
         with tempfile.NamedTemporaryFile(delete=True, dir=".", suffix=".stl") as tmp:
             shutil.copyfileobj(img.file, tmp)
@@ -182,49 +287,98 @@ class Project:
 
         db.collection("projects").document(self.id).update(
             {
-                "ProjectDetails.img_screenshot."+img_id: os.path.join("gs://mws-market.appspot.com/", dst_path),
+                f"ProjectDetails.img_screenshot.{img_id}": path,
             }
         )
 
     def delete_img_screenshot(self, img_id: str):
         db = firestore.client()
         bucket = storage.bucket("mws-market.appspot.com")
-        dst_path  = os.path.join(self.id, "img_screenshot", img_id)
-        blob = bucket.blob(dst_path)
+        path  = os.path.join(self.id, "img_screenshot", img_id)
+        blob = bucket.blob(path)
         if blob.exists():
             blob.delete()
         db.collection("projects").document(self.id).update(
             {
-                "ProjectDetails.img_screenshot."+img_id: firestore.DELETE_FIELD,
+                f"ProjectDetails.img_screenshot.{img_id}": firestore.DELETE_FIELD,
             }
         )
+    def get_img_screenshot(self):
+        db = firestore.client()
+        doc = db.collection("projects").document(self.id).get()
+
+        if "ProjectDetails" in doc.to_dict() and "img_screenshot" in doc.to_dict()["ProjectDetails"]:
+            data = dict()
+            for img_id, path in doc.to_dict()["ProjectDetails"]["img_screenshot"].items():
+                bucket = storage.bucket("mws-market.appspot.com")
+                blob = bucket.blob(path)
+                data[img_id] = blob.generate_signed_url(
+                    version="v4",
+                    expiration=datetime.timedelta(seconds=60),
+                    method="GET",
+                )
+            return data
+        else:
+            return dict()
 
     ## required_spec
-    def add_required_spec(self, spec_id: str, required_spec: RequiredSpec):
+    def add_required_spec(self, required_spec: RequiredSpec):
         db = firestore.client()
+        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        spec_id = sha1_hash(f"{self.id}{required_spec}{timestamp}")
+
         db.collection("projects").document(self.id).update(
             {
-                "ProjectDetails.required_spec."+spec_id: {
+                f"ProjectDetails.required_spec.{spec_id}": {
                     "item" : required_spec.item,
                     "required" : required_spec.required
                 }
             }
         )
 
-    def get_required_specs(self):
+    def get_required_spec(self):
         db = firestore.client()
         doc = db.collection("projects").document(self.id).get()
-        data = doc.to_dict()
-        ret = [SimpleSpecResponse(spec_id=key, data=value) for key, value in data["ProjectDetails"]["required_spec"].items()]
-        return ret
+        if "ProjectDetails" in doc.to_dict() and "required_spec" in doc.to_dict()["ProjectDetails"]:
+            return doc.to_dict()["ProjectDetails"]["required_spec"]
+        else:
+            return dict()
 
     def delete_required_spec(self, spec_id: str):
         db = firestore.client()
         db.collection("projects").document(self.id).update(
             {
-                "ProjectDetails.required_spec."+spec_id: firestore.DELETE_FIELD,
+                f"ProjectDetails.required_spec.{spec_id}": firestore.DELETE_FIELD,
             }
         )
+
+    ## install
+    def get_install(self):
+        db = firestore.client()
+        doc = db.collection("projects").document(self.id).get()
+        if "ProjectDetails" in doc.to_dict() and "install" in doc.to_dict()["ProjectDetails"]:
+            return doc.to_dict()["ProjectDetails"]["install"]
+        else:
+            return dict()
+
+    ## forjob
+    def get_forjob(self):
+        db = firestore.client()
+        doc = db.collection("projects").document(self.id).get()
+        if "ProjectDetails" in doc.to_dict() and "forjob" in doc.to_dict()["ProjectDetails"]:
+            return doc.to_dict()["ProjectDetails"]["forjob"]
+        else:
+            return None
+
+    # project_review
+    def get_review(self):
+        db = firestore.client()
+        doc = db.collection("projects").document(self.id).get()
+        if "ProjectReview" in doc.to_dict():
+            return doc.to_dict()["ProjectReview"]
+        else:
+            return dict()
+
     # get_projectsの実装 by Yamamoto
     ## Projectのドキュメントを全てリストに集める
     ## 要求データは存在すると仮定
