@@ -19,32 +19,30 @@ interface AppCardProps {
 
 const AppCard = ({ id, name, team, description }: AppCardProps) => {
     return (
-        <div>
-            <Card sx={{ maxWidth: 345 }}>
-                <CardActionArea href={`/apps/${id}`}>
-                    <CardMedia
-                        component="img"
-                        height="140"
-                        image="https://t3.ftcdn.net/jpg/02/48/42/64/240_F_248426448_NVKLywWqArG2ADUxDq6QprtIzsF82dMF.jpg"
-                    />
-                    <CardContent>
-                        <Typography gutterBottom variant="h5" component="div">
-                            {name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            {team}
-                        </Typography>
-                        <Rating value={3} size="small" sx={{mt: 1}} readOnly/>
-                        <Typography variant="body2" color="text.secondary" sx={{mt: 2}}>
-                            {description}
-                        </Typography>
-                    </CardContent>
-                </CardActionArea>
-                <CardActions>
-                    <Button variant="contained" fullWidth={true}>インストール</Button>
-                </CardActions>
-            </Card>
-        </div>
+        <Card sx={{ maxWidth: 345 }}>
+            <CardActionArea href={`/apps/${id}`}>
+                <CardMedia
+                    component="img"
+                    height="140"
+                    image="https://t3.ftcdn.net/jpg/02/48/42/64/240_F_248426448_NVKLywWqArG2ADUxDq6QprtIzsF82dMF.jpg"
+                />
+                <CardContent>
+                    <Typography gutterBottom variant="h5" component="div">
+                        {name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        {team}
+                    </Typography>
+                    <Rating value={3} size="small" sx={{mt: 1}} readOnly/>
+                    <Typography variant="body2" color="text.secondary" sx={{mt: 2}}>
+                        {description}
+                    </Typography>
+                </CardContent>
+            </CardActionArea>
+            <CardActions>
+                <Button variant="contained" fullWidth={true}>インストール</Button>
+            </CardActions>
+        </Card>
     );
 };
 

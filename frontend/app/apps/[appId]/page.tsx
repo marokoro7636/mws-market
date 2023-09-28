@@ -66,7 +66,7 @@ export default function Page({ params }: { params: { appId: string } }) {
     }
 
     return (
-        <div>
+        <>
             <Container sx={{mt: 3}}>
                 <Grid container alignItems="center">
                     <Grid item xs={3}>
@@ -97,6 +97,6 @@ export default function Page({ params }: { params: { appId: string } }) {
                     </Box>
                 </Stack>
             </Container>
-        </div>
+        </>
     );
 }
