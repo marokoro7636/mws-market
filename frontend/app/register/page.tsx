@@ -39,16 +39,14 @@ export default function Register() {
                         rules={{
                             required: "入力してください"
                         }}
-                        render={({field, fieldState: {error}}) => {
-                            // console.log(!!errors)
-                            return (
+                        render={({field, fieldState: {error}}) => (
                                 <TextField
                                     label="アプリ名"
                                     {...field}
                                     error={!!error}
                                     helperText={error?.message as string}
                                 />
-                            )}}
+                            )}
                         name="name"
                     />
                     <Controller
@@ -59,6 +57,8 @@ export default function Register() {
                         render={({field, fieldState: {error}}) => (
                                 <TextField
                                     label="アプリの説明"
+                                    multiline
+                                    rows={10}
                                     {...field}
                                     error={!!error}
                                     helperText={error?.message as string}
