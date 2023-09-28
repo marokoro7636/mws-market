@@ -14,6 +14,7 @@ from models.requests import (
 )
 import routes.v0.project_info as project_info
 import routes.v0.project_details as project_details
+import routes.v0.project_review as project_review
 
 from models.projects import Project
 
@@ -86,3 +87,4 @@ def delete_project(project_id: str):
 
 router.include_router(project_info.router, prefix="", tags=["project_info"])
 router.include_router(project_details.router, prefix="", tags=["project_details"])
+router.include_router(project_review.router, prefix="", tags=["project_review"])

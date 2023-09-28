@@ -16,6 +16,7 @@ from models.requests import (
     SimpleSpecResponse,
     Team,
     TeamSimpleResponse,
+    ProjectReview
 )
 
 class Project:
@@ -380,6 +381,29 @@ class Project:
             return doc.to_dict()["ProjectReview"]
         else:
             return dict()
+
+    def add_review(self, review: ProjectReview):
+        db = firestore.client()
+        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        review_id = sha1_hash(f"{self.id}{review}{timestamp}")
+
+        db.collection("projects").document(self.id).update(
+            {
+                f"ProjectReview.{review_id}": {
+                    "title": review.title,
+                    "content": review.content,
+                    "rating": review.rating
+                }
+            }
+        )
+
+    def delete_review(self, review_id: str):
+        db = firestore.client()
+        db.collection("projects").document(self.id).update(
+            {
+                f"ProjectReview.{review_id}": firestore.DELETE_FIELD,
+            }
+        )
 
     # get_projectsの実装 by Yamamoto
     ## Projectのドキュメントを全てリストに集める
