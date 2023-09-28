@@ -1,5 +1,5 @@
 import React from 'react';
-import {Grid} from "@mui/material";
+import {Box, Grid} from "@mui/material";
 import AppCard from "@/components/AppCard";
 
 interface App {
@@ -16,7 +16,7 @@ const AppList = () => {
     )
 
     return (
-        <div style={{marginTop: "20px"}}>
+        <Box sx={{mt: 3}}>
             <Grid container spacing={2} rowSpacing={5}>
                 {
                     appListData.map((item, i) => (
@@ -26,7 +26,7 @@ const AppList = () => {
                     ))
                 }
             </Grid>
-        </div>
+        </Box>
     );
 };
 
