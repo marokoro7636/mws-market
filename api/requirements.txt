@@ -8,6 +8,7 @@ python-dotenv
 
 # Firebase
 firebase-admin
+google-cloud-storage
 
 # Lint
 flake8

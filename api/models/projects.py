@@ -3,7 +3,10 @@ from helper.util import sha1_hash
 import base64
 import shutil
 import tempfile
+import os
+import datetime
 from fastapi import UploadFile
+from firebase_admin import storage
 import re
 from models.requests import (
     ProjectInfo,
@@ -93,13 +96,11 @@ class Project:
 
     def delete_youtube(self):
         db = firestore.client()
-        data = db.collection("projects").document(self.id).get().to_dict()
-        if "youtube" in data:
-            db.collection("projects").document(self.id).update(
-                {
-                    "youtube": firestore.DELETE_FIELD,
-                }
-            )
+        db.collection("projects").document(self.id).update(
+            {
+                "youtube": firestore.DELETE_FIELD,
+            }
+        )
 
     def set_index(self, is_hidden: bool):
         db = firestore.client()
@@ -111,85 +112,119 @@ class Project:
 
     def set_icon(self, img: UploadFile):
         db = firestore.client()
+        bucket = storage.bucket("mws-market.appspot.com")
+        dst_path  = os.path.join(self.id, "icon")
+        blob = bucket.blob(dst_path)
+
         with tempfile.NamedTemporaryFile(delete=True, dir=".", suffix=".stl") as tmp:
             shutil.copyfileobj(img.file, tmp)
-            data = base64.b64encode(tmp.read())
-
+            blob.upload_from_filename(tmp.name)
         db.collection("projects").document(self.id).set(
             {
-                "icon": base64.b64encode(data),
+                "icon": os.path.join("gs://mws-market.appspot.com/", dst_path),
             }
         , merge=True)
 
     def delete_icon(self):
         db = firestore.client()
-        data = db.collection("projects").document(self.id).get().to_dict()
-        if "icon" in data:
-            db.collection("projects").document(self.id).update(
-                {
-                    "icon": firestore.DELETE_FIELD,
-                }
-            )
+        bucket = storage.bucket("mws-market.appspot.com")
+        dst_path  = os.path.join(self.id, "icon")
+        blob = bucket.blob(dst_path)
+        if blob.exists():
+            blob.delete()
+        db.collection("projects").document(self.id).update(
+            {
+                "icon": firestore.DELETE_FIELD,
+            }
+        )
 
     def set_img(self, img: UploadFile):
         db = firestore.client()
+        bucket = storage.bucket("mws-market.appspot.com")
+        dst_path  = os.path.join(self.id, "img")
+        blob = bucket.blob(dst_path)
+
         with tempfile.NamedTemporaryFile(delete=True, dir=".", suffix=".stl") as tmp:
             shutil.copyfileobj(img.file, tmp)
-            data = base64.b64encode(tmp.read())
-
+            blob.upload_from_filename(tmp.name)
         db.collection("projects").document(self.id).set(
             {
-                "img": base64.b64encode(data),
+                "img": os.path.join("gs://mws-market.appspot.com/", dst_path),
             }
         , merge=True)
 
     def delete_img(self):
         db = firestore.client()
-        data = db.collection("projects").document(self.id).get().to_dict()
-        if "img" in data:
-            db.collection("projects").document(self.id).update(
-                {
-                    "img": firestore.DELETE_FIELD,
-                }
-            )
+        bucket = storage.bucket("mws-market.appspot.com")
+        dst_path  = os.path.join(self.id, "img")
+        blob = bucket.blob(dst_path)
+        if blob.exists():
+            blob.delete()
+        db.collection("projects").document(self.id).update(
+            {
+                "img": firestore.DELETE_FIELD,
+            }
+        )
 
     # project_detail
-    def add_img_screenshot(self, img_id: str, img: UploadFile):
+    def add_img_screenshot(self, img: UploadFile):
+        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        img_id = sha1_hash(f"{self.id}{img}{timestamp}")
+
         db = firestore.client()
+        bucket = storage.bucket("mws-market.appspot.com")
+        dst_path  = os.path.join(self.id, "img_screenshot", img_id)
+        blob = bucket.blob(dst_path)
+
         with tempfile.NamedTemporaryFile(delete=True, dir=".", suffix=".stl") as tmp:
             shutil.copyfileobj(img.file, tmp)
-            data = base64.b64encode(tmp.read())
+            blob.upload_from_filename(tmp.name)
 
-        db.collection("projects").document(self.id).collection("ProjectDetails").document("img_screenshot").collection("list").document(img_id).set(
+        db.collection("projects").document(self.id).update(
             {
-                "img": base64.b64encode(data),
+                "ProjectDetails.img_screenshot."+img_id: os.path.join("gs://mws-market.appspot.com/", dst_path),
             }
         )
 
     def delete_img_screenshot(self, img_id: str):
         db = firestore.client()
-        db.collection("projects").document(self.id).collection("ProjectDetails").document("img_screenshot").collection("list").document(img_id).delete()
+        bucket = storage.bucket("mws-market.appspot.com")
+        dst_path  = os.path.join(self.id, "img_screenshot", img_id)
+        blob = bucket.blob(dst_path)
+        if blob.exists():
+            blob.delete()
+        db.collection("projects").document(self.id).update(
+            {
+                "ProjectDetails.img_screenshot."+img_id: firestore.DELETE_FIELD,
+            }
+        )
 
     ## required_spec
     def add_required_spec(self, spec_id: str, required_spec: RequiredSpec):
         db = firestore.client()
-        db.collection("projects").document(self.id).collection("ProjectDetails").document("required_spec").collection("list").document(spec_id).set(
+        db.collection("projects").document(self.id).update(
             {
-                "item" : required_spec.item,
-                "required" : required_spec.required
+                "ProjectDetails.required_spec."+spec_id: {
+                    "item" : required_spec.item,
+                    "required" : required_spec.required
+                }
             }
         )
 
     def get_required_specs(self):
         db = firestore.client()
-        docs = db.collection("projects").document(self.id).collection("ProjectDetails").document("required_spec").collection("list").stream()
-        data = [SimpleSpecResponse(spec_id=doc.id, data=doc.to_dict()) for doc in docs]
-        return data
+        doc = db.collection("projects").document(self.id).get()
+        data = doc.to_dict()
+        ret = [SimpleSpecResponse(spec_id=key, data=value) for key, value in data["ProjectDetails"]["required_spec"].items()]
+        return ret
 
     def delete_required_spec(self, spec_id: str):
         db = firestore.client()
-        db.collection("projects").document(self.id).collection("ProjectDetails").document("required_spec").collection("list").document(spec_id).delete()
-
+        db.collection("projects").document(self.id).update(
+            {
+                "ProjectDetails.required_spec."+spec_id: firestore.DELETE_FIELD,
+            }
+        )
     # get_projectsの実装 by Yamamoto
     ## Projectのドキュメントを全てリストに集める
     ## 要求データは存在すると仮定

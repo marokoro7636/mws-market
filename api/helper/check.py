@@ -22,7 +22,7 @@ def check_img(img: UploadFile):
     img_format = imghdr.what(img.file)
     img.file.seek(0, 2)
     img_size = img.file.tell()
-
+    img.file.seek(0, os.SEEK_SET)
     if img_format in ALLOW_IMAGE_FORMAT and img_size <= ALLOW_IMAGE_SIZE:
         return True
     else:

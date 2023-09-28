@@ -15,16 +15,14 @@ from models.projects import Project
 
 router = APIRouter()
 
-from models.projects import Project as db
-
-@router.post("/{project_id}/details/imgs/{img_id}", response_model=API_OK)
-def post_project_img(project_id: str, img_id:str, img: UploadFile):
+@router.post("/{project_id}/details/imgs", response_model=API_OK)
+def post_project_img(project_id: str, img: UploadFile):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     if check_img(img) is False:
         raise StarletteHTTPException(status_code=400, detail="Invalid image")
     try:
-        Project.load_by_id(project_id).add_img_screenshot(img_id, img)
+        Project.load_by_id(project_id).add_img_screenshot(img)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project image")
     return API_OK()
