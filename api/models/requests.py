@@ -43,6 +43,8 @@ class ProjectInfo(BaseModel):
     demo: Optional[None] = None
     review: Optional[dict[str, str]] = None
     isIndex: Optional[bool] = None
+    icon: Optional[str] = None
+    img: Optional[str] = None
 
 class ProjectSummary(BaseModel):
     id: str
