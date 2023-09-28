@@ -57,5 +57,8 @@ class Team(BaseModel):
     description: str
     members: list[str]
 
+class TeamSimpleResponse(BaseModel):
+    team_id: str
+
 class Log(BaseModel):
     text: Optional[str] = None
