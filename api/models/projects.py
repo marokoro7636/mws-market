@@ -13,12 +13,19 @@ from models.requests import (
     ProjectRequest,
     RequiredSpec,
     ProjectDetails,
+    ProjectReview,
+    Install,
     SimpleSpecResponse,
     Team,
     TeamSimpleResponse,
-    ProjectReview,
-    Install
 )
+
+# 許可する画像の種類
+# 参考: https://docs.python.org/ja/3/library/imghdr.html
+ALLOW_IMAGE_FORMAT = ["png", "jpeg", "bmp"]
+
+# 許可する画像の最大サイズ(byte)
+ALLOW_IMAGE_SIZE = 2 * 1024 * 1024
 
 class Project:
     def __init__(self, id):
@@ -449,6 +456,72 @@ class Project:
                 f"ProjectReview.{review_id}": firestore.DELETE_FIELD,
             }
         )
+
+    #team.pyに関連するメソッド
+    @staticmethod
+    def add_team(team: Team):
+        # IDは適切に生成する
+        id = sha1_hash(team.name)
+        db = firestore.client()
+        db.collection("Teams").document(id).set(
+            {
+                "name": team.name,
+                "year": team.year,
+                "description": team.description,
+                "members": team.members,
+            }
+        )
+        return TeamSimpleResponse(team_id = id)
+    
+    @staticmethod
+    def get_teams():
+        db = firestore.client()
+        docs = db.collection("Teams").stream()
+        data = [Team(name = doc.get("name"),year = doc.get("year"), description = doc.get("description"), members = doc.get("members")) for doc in docs]
+        return data
+    @staticmethod
+    def update_team_name(team_id: str, name: str):
+        db = firestore.client()
+        db.collection("Teams").document(team_id).update(
+            {
+                "name": name,
+            }
+        )
+    @staticmethod
+    def update_team_year(team_id: str, year: int):
+        db = firestore.client()
+        db.collection("Teams").document(team_id).update(
+            {
+                "year": year,
+            }
+        )
+    @staticmethod
+    def update_team_description(team_id: str, description: str):
+        db = firestore.client()
+        db.collection("Teams").document(team_id).update(
+            {
+                "description": description,
+            }
+        )
+    @staticmethod
+    def add_team_members(team_id: str, new_members: list[str]):
+        db = firestore.client()
+        print("check")
+        print(db.collection("Teams").document(team_id).get().to_dict())
+        db.collection("Teams").document(team_id).update(
+            {
+                "members": firestore.ArrayUnion(new_members)
+            }
+        )
+    @staticmethod
+    def get_team_by_id(team_id):
+        db = firestore.client()
+        doc = db.collection("Teams").document(team_id).get()
+        if doc.exists:
+            return TeamSimpleResponse(team_id = team_id)
+        else:
+            return None
+
 
     # get_projectsの実装 by Yamamoto
     ## Projectのドキュメントを全てリストに集める
