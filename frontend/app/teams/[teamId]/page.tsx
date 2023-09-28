@@ -226,7 +226,7 @@ export default function Page({ params }: { params: { teamId: string } }) {
                         <Typography sx={{ pb: 4 }}>
                             過去のチームのsecretを設定することで，継承されたチームであることを表現できます(仮文)
                         </Typography>
-                        <Grid container spacing={2} alignItems="center" justify="center">
+                        <Grid container spacing={2} alignItems="center">
                             <Grid item xs={6}>
                                 <Typography align="center" variant="h5" >
                                     リンク済み： Team {parseInt(teamInternalInfoMock.id) - 1}
