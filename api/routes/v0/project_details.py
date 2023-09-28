@@ -15,16 +15,25 @@ from models.projects import Project
 
 router = APIRouter()
 
-from models.projects import Project as db
 
-@router.post("/{project_id}/details/imgs/{img_id}", response_model=API_OK)
-def post_project_img(project_id: str, img_id:str, img: UploadFile):
+@router.get("/{project_id}/details", response_model=ProjectDetails)
+def get_project_details(project_id: str):
+    if not Project.is_exist(project_id):
+        raise StarletteHTTPException(status_code=404, detail="Project not found")
+    try:
+        data = Project.load_by_id(project_id).get_details()
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to post project image")
+    return ProjectDetails(**data)
+
+@router.post("/{project_id}/details/imgs", response_model=API_OK)
+def post_project_img(project_id: str, img: UploadFile):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     if check_img(img) is False:
         raise StarletteHTTPException(status_code=400, detail="Invalid image")
     try:
-        Project.load_by_id(project_id).add_img_screenshot(img_id, img)
+        Project.load_by_id(project_id).add_img_screenshot(img)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project image")
     return API_OK()
@@ -39,34 +48,29 @@ def delete_project_img(project_id: str, img_id:str):
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project image")
     return API_OK()
 
-@router.post("/{project_id}/details/required_spec", response_model=SimpleSpecResponse)
+@router.post("/{project_id}/details/required_spec", response_model=API_OK)
 def post_project_required_spec(project_id: str, required_spec: RequiredSpec):
     #対象のproject_idのprojectがなければ404
     if not Project.is_exist(project_id):
          raise StarletteHTTPException(status_code=404, detail="Project not found")
-    #時間情報からspec_idを作成
-    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    project_hash_seed = f"{project_id}{required_spec}{timestamp}"
-    spec_id = sha1_hash(project_hash_seed)
     #DBへ格納
     try:
-        Project.load_by_id(project_id).add_required_spec(spec_id, required_spec)
+        Project.load_by_id(project_id).add_required_spec(required_spec)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project required spec")
-    #Spec_idを返す
-    return SimpleSpecResponse(spec_id=spec_id, data=required_spec)
+    return API_OK()
 
 @router.get("/{project_id}/details/required_spec", response_model=list[SimpleSpecResponse])
 def get_project_required_spec(project_id: str):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        data = Project.load_by_id(project_id).get_required_specs()
+        data = Project.load_by_id(project_id).get_required_spec()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to get project required spec")
-    return data
+    return [SimpleSpecResponse(spec_id=key, data=value) for key, value in data.items()]
 
-@router.delete("/{project_id}/details/required_spec/{required_spec_id}", response_model=SimpleSpecResponse)
+@router.delete("/{project_id}/details/required_spec/{required_spec_id}", response_model=API_OK)
 def delete_project_required_spec(project_id: str, required_spec_id: str):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
@@ -74,4 +78,44 @@ def delete_project_required_spec(project_id: str, required_spec_id: str):
         Project.load_by_id(project_id).delete_required_spec(required_spec_id)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project required spec")
-    return SimpleSpecResponse(spec_id=required_spec_id)
+    return API_OK()
+
+@router.post("/{project_id}/details/install", response_model=API_OK)
+def post_project_install(project_id: str, install: Install):
+    if not Project.is_exist(project_id):
+         raise StarletteHTTPException(status_code=404, detail="Project not found")
+    try:
+        Project.load_by_id(project_id).add_install(install)
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to post project install")
+    return API_OK()
+
+@router.delete("/{project_id}/details/install/{install_id}", response_model=API_OK)
+def delete_project_install(project_id: str, install_id: str):
+    if not Project.is_exist(project_id):
+        raise StarletteHTTPException(status_code=404, detail="Project not found")
+    try:
+        Project.load_by_id(project_id).delete_install(install_id)
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to delete project install")
+    return API_OK()
+
+@router.post("/{project_id}/details/forjob", response_model=API_OK)
+def post_project_forjob(project_id: str, forjob: str):
+    if not Project.is_exist(project_id):
+         raise StarletteHTTPException(status_code=404, detail="Project not found")
+    try:
+        Project.load_by_id(project_id).set_forjob(forjob)
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to post project forjob")
+    return API_OK()
+
+@router.delete("/{project_id}/details/forjob", response_model=API_OK)
+def delete_project_forjob(project_id: str):
+    if not Project.is_exist(project_id):
+        raise StarletteHTTPException(status_code=404, detail="Project not found")
+    try:
+        Project.load_by_id(project_id).delete_forjob()
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to delete project forjob")
+    return API_OK()
