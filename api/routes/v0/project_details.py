@@ -79,3 +79,43 @@ def delete_project_required_spec(project_id: str, required_spec_id: str):
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project required spec")
     return API_OK()
+
+@router.post("/{project_id}/details/install", response_model=API_OK)
+def post_project_install(project_id: str, install: Install):
+    if not Project.is_exist(project_id):
+         raise StarletteHTTPException(status_code=404, detail="Project not found")
+    try:
+        Project.load_by_id(project_id).add_install(install)
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to post project install")
+    return API_OK()
+
+@router.delete("/{project_id}/details/install/{install_id}", response_model=API_OK)
+def delete_project_install(project_id: str, install_id: str):
+    if not Project.is_exist(project_id):
+        raise StarletteHTTPException(status_code=404, detail="Project not found")
+    try:
+        Project.load_by_id(project_id).delete_install(install_id)
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to delete project install")
+    return API_OK()
+
+@router.post("/{project_id}/details/forjob", response_model=API_OK)
+def post_project_forjob(project_id: str, forjob: str):
+    if not Project.is_exist(project_id):
+         raise StarletteHTTPException(status_code=404, detail="Project not found")
+    try:
+        Project.load_by_id(project_id).set_forjob(forjob)
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to post project forjob")
+    return API_OK()
+
+@router.delete("/{project_id}/details/forjob", response_model=API_OK)
+def delete_project_forjob(project_id: str):
+    if not Project.is_exist(project_id):
+        raise StarletteHTTPException(status_code=404, detail="Project not found")
+    try:
+        Project.load_by_id(project_id).delete_forjob()
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to delete project forjob")
+    return API_OK()
