@@ -11,9 +11,9 @@ class Install(BaseModel):
     additional: Optional[str] = None
 
 class ProjectDetails(BaseModel):
-    img_screenshot: Optional[list[str]] = None
-    required_spec: Optional[list[RequiredSpec]] = None
-    install: Optional[list[Install]] = None
+    img_screenshot: Optional[dict[str, str]] = None
+    required_spec: Optional[dict[str, RequiredSpec]] = None
+    install: Optional[dict[str, Install]] = None
     forjob: Optional[str] = None
 
 class SimpleSpecResponse(BaseModel):
@@ -41,7 +41,7 @@ class ProjectInfo(BaseModel):
     youtube: Optional[str] = None
     details: Optional[ProjectDetails] = None
     demo: Optional[None] = None
-    review: Optional[dict[str, str]] = None
+    review: Optional[dict[str, ProjectReview]] = None
     isIndex: Optional[bool] = None
     icon: Optional[str] = None
     img: Optional[str] = None
