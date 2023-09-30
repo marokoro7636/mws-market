@@ -73,6 +73,11 @@ class Project:
             }
         )
 
+    def get_team(self):
+        db = firestore.client()
+        data = db.collection("projects").document(self.id).get().to_dict()
+        return data["team"]
+
     def set_short_description(self, short_description: str):
         db = firestore.client()
         db.collection("projects").document(self.id).set(
