@@ -58,6 +58,7 @@ class Team(BaseModel):
     year: int
     description: str
     members: list[str]
+    secret: str
 
 class Log(BaseModel):
     text: Optional[str] = None
