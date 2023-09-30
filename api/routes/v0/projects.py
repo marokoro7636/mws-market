@@ -23,49 +23,20 @@ router = APIRouter()
 @router.get("/", response_model=list[ProjectSummary])
 def get_projects():
     try:
-        data = Project.get_projects()
+        data = Project.get_project()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to get projects")
-    data = [
-        ProjectSummary(
-            name="Project1",
-            description="Project1 description",
-            # details={
-            #     "img_screenshot": "https://demo.sirv.com/chair.jpg",
-            #     "required": "detail2",
-            # },
-            # install={
-            #     "install1": "install1",
-            #     "install2": "install2",
-            # },
-            # forjob={
-            #     "forjob1": "forjob1",
-            #     "forjob2": "forjob2",
-            # },
-            # demo={
-            #     "demo1": "demo1",
-            #     "demo2": "demo2",
-            # },
-            # review={
-            #     "review1": "review1",
-            #     "review2": "review2",
-            # },
-            # isIndex=True,
-            # members=["member1", "member2"],
-        ),
-    ]
-    return data
+    return [ProjectSummary(id = key, **value) for key, value in data.items()]
 
 @router.get("/{project_id}", response_model=ProjectInfo)
 def get_project(project_id: str):
-    if Project.is_exist(project_id) is None:
+    if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        data = Project.get_project_by_id(project_id)
+        data = Project.load_by_id(project_id).get_info()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to get projects")
-    data = ProjectInfo()
-    return data
+    return ProjectInfo(id=project_id, **data)
 
 @router.post("/", response_model=ProjectSimpleResponse)
 def post_project(req: ProjectRequest):
@@ -77,10 +48,10 @@ def post_project(req: ProjectRequest):
 
 @router.delete("/{project_id}", response_model=ProjectSimpleResponse)
 def delete_project(project_id: str):
-    if Project.is_exist(project_id) is None:
+    if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.delete_project(project_id)
+        Project.load_by_id(project_id).delete()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project")
     return ProjectSimpleResponse(project_id=project_id)

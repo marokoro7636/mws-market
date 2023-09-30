@@ -23,7 +23,7 @@ def get_project_details(project_id: str):
     try:
         data = Project.load_by_id(project_id).get_details()
     except:
-        raise StarletteHTTPException(status_code=500, detail="Failed to post project image")
+        raise StarletteHTTPException(status_code=500, detail="Failed to post project details")
     return ProjectDetails(**data)
 
 @router.post("/{project_id}/details/imgs", response_model=API_OK)

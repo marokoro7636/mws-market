@@ -42,16 +42,16 @@ class ProjectInfo(BaseModel):
     details: Optional[ProjectDetails] = None
     demo: Optional[None] = None
     review: Optional[dict[str, ProjectReview]] = None
-    isIndex: Optional[bool] = None
+    hidden: Optional[bool] = None
     icon: Optional[str] = None
     img: Optional[str] = None
 
 class ProjectSummary(BaseModel):
     id: str
     name: str
-    description: str
-    youtube: str
-    team: str
+    description: Optional[str] = None
+    youtube: Optional[str] = None
+    team: Optional[str] = None
 
 class Team(BaseModel):
     name: str

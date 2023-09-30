@@ -67,13 +67,13 @@ def delete_project_youtube(project_id: str):
     return API_OK()
 
 @router.post("/{project_id}/hidden", response_model=API_OK)
-def post_project_index(project_id: str, is_hidden: bool):
+def post_project_hidden(project_id: str, hidden: bool):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).set_index(is_hidden)
+        Project.load_by_id(project_id).set_hidden(hidden)
     except:
-        raise StarletteHTTPException(status_code=500, detail="Failed to post project index")
+        raise StarletteHTTPException(status_code=500, detail="Failed to post project hidden")
     return API_OK()
 
 @router.post("/{project_id}/icon", response_model=API_OK)
