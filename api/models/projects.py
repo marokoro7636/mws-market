@@ -64,7 +64,7 @@ class Project:
         if "img" in data:
             data["img"] = Project.gen_img_url(data["img"])
         if "details" in data and "img_screenshot" in data["details"]:
-            data["details"]["img_screenshot"] = {img_id: Project.gen_img_url(path) for img_id, path in data["details"]["img_screenshot"]}
+            data["details"]["img_screenshot"] = {img_id: Project.gen_img_url(path) for img_id, path in data["details"]["img_screenshot"].items()}
 
         return data
 
