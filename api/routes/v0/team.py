@@ -1,11 +1,11 @@
 from fastapi import APIRouter
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from helper.util import sha1_hash
-import datetime
+from typing import Optional
+from fastapi import Header
 
+from helper.auth import isAuthed
 from helper.response import API_OK
 from models.requests import Team, TeamSimpleResponse
-from models.projects import Project
 from models.teams import Teams
 
 
@@ -20,7 +20,9 @@ def get_teams():
     return data
 
 @router.post("/", response_model=TeamSimpleResponse)
-def post_team(team: Team):
+def post_team(team: Team, x_auth_token: Optional[str] = Header(None)):
+    if not isAuthed(team.members, x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         res = Teams.add_team(team)
     except:
@@ -28,9 +30,12 @@ def post_team(team: Team):
     return TeamSimpleResponse(team_id = res.id)
 
 @router.post("/{team_id}/name", response_model=API_OK)
-def post_team_name(team_id: str, name: str):
+def post_team_name(team_id: str, name: str, x_auth_token: Optional[str] = Header(None)):
     if not Teams.is_exist(team_id):
         raise StarletteHTTPException(status_code=404, detail="Team not found")
+    if not isAuthed(Teams(team_id).get_members(), x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
+
     try:
         Teams(team_id).update_name(name)
     except:
@@ -38,9 +43,11 @@ def post_team_name(team_id: str, name: str):
     return API_OK()
 
 @router.post("/{team_id}/year", response_model=API_OK)
-def post_team_year(team_id: str, year: int):
+def post_team_year(team_id: str, year: int, x_auth_token: Optional[str] = Header(None)):
     if not Teams.is_exist(team_id):
         raise StarletteHTTPException(status_code=404, detail="Team not found")
+    if not isAuthed(Teams(team_id).get_members(), x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Teams(team_id).update_year(year)
     except:
@@ -48,9 +55,11 @@ def post_team_year(team_id: str, year: int):
     return API_OK()
 
 @router.post("/{team_id}/description", response_model=API_OK)
-def post_team_description(team_id: str, description: str):
+def post_team_description(team_id: str, description: str, x_auth_token: Optional[str] = Header(None)):
     if not Teams.is_exist(team_id):
         raise StarletteHTTPException(status_code=404, detail="Team not found")
+    if not isAuthed(Teams(team_id).get_members(), x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Teams(team_id).update_description(description)
     except:
@@ -58,9 +67,11 @@ def post_team_description(team_id: str, description: str):
     return API_OK()
 
 @router.delete("/{team_id}/members", response_model=API_OK)
-def delete_team_members(team_id: str, member_id: str):
+def delete_team_members(team_id: str, member_id: str, x_auth_token: Optional[str] = Header(None)):
     if not Teams.is_exist(team_id):
         raise StarletteHTTPException(status_code=404, detail="Team not found")
+    if not isAuthed(Teams(team_id).get_members(), x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Teams(team_id).delete_member(member_id)
     except:
@@ -76,9 +87,11 @@ def get_team_with_secret(team_secret: str):
     return Team(**data)
 
 @router.post("/invitation/{team_secret}", response_model=API_OK)
-def post_team_members(team_secret: str, team_id: str, member_id: str):
+def post_team_members(team_secret: str, team_id: str, member_id: str, x_auth_token: Optional[str] = Header(None)):
     if not Teams.is_exist(team_id):
         raise StarletteHTTPException(status_code=404, detail="Team not found")
+    if not isAuthed([member_id], x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Teams(team_id).add_member(team_secret, member_id)
     except:

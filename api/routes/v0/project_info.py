@@ -9,6 +9,7 @@ from helper.auth import isAuthed
 from helper.check import check_img
 from helper.response import API_OK
 from models.projects import Project
+from models.teams import Teams
 
 router = APIRouter()
 
@@ -16,7 +17,7 @@ router = APIRouter()
 def post_project_name(project_id: str, name: str, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).set_name(name)
@@ -30,7 +31,7 @@ def post_project_name(project_id: str, name: str, x_auth_token: Optional[str] = 
 def post_project_short_description(project_id: str, short_description: str, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).set_short_description(short_description)
@@ -44,7 +45,7 @@ def post_project_short_description(project_id: str, short_description: str, x_au
 def post_project_description(project_id: str, description: str, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).set_description(description)
@@ -58,7 +59,7 @@ def post_project_description(project_id: str, description: str, x_auth_token: Op
 def post_project_youtube(project_id: str, youtube: str, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).set_youtube(youtube)
@@ -70,7 +71,7 @@ def post_project_youtube(project_id: str, youtube: str, x_auth_token: Optional[s
 def delete_project_youtube(project_id: str, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).delete_youtube()
@@ -82,7 +83,7 @@ def delete_project_youtube(project_id: str, x_auth_token: Optional[str] = Header
 def post_project_hidden(project_id: str, hidden: bool, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).set_hidden(hidden)
@@ -94,7 +95,7 @@ def post_project_hidden(project_id: str, hidden: bool, x_auth_token: Optional[st
 def post_project_icon(project_id: str, icon: UploadFile, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     if check_img(icon.file) is False:
         raise StarletteHTTPException(status_code=400, detail="Invalid image")
@@ -108,7 +109,7 @@ def post_project_icon(project_id: str, icon: UploadFile, x_auth_token: Optional[
 def delete_project_icon(project_id: str, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).delete_icon()
@@ -120,7 +121,7 @@ def delete_project_icon(project_id: str, x_auth_token: Optional[str] = Header(No
 def post_project_img(project_id: str, img: UploadFile, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     if check_img(img.file) is False:
         raise StarletteHTTPException(status_code=400, detail="Invalid image")
@@ -134,7 +135,7 @@ def post_project_img(project_id: str, img: UploadFile, x_auth_token: Optional[st
 def delete_project_img(project_id: str, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).delete_img()

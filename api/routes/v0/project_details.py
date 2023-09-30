@@ -15,6 +15,7 @@ from models.requests import (
 )
 from helper.response import API_OK
 from models.projects import Project
+from models.teams import Teams
 
 router = APIRouter()
 
@@ -33,7 +34,7 @@ def get_project_details(project_id: str):
 def post_project_img(project_id: str, img: UploadFile, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     if check_img(img.file) is False:
         raise StarletteHTTPException(status_code=400, detail="Invalid image")
@@ -47,7 +48,7 @@ def post_project_img(project_id: str, img: UploadFile, x_auth_token: Optional[st
 def delete_project_img(project_id: str, img_id:str, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).delete_img_screenshot(img_id)
@@ -57,7 +58,7 @@ def delete_project_img(project_id: str, img_id:str, x_auth_token: Optional[str] 
 
 @router.post("/{project_id}/details/required_spec", response_model=API_OK)
 def post_project_required_spec(project_id: str, required_spec: RequiredSpec, x_auth_token: Optional[str] = Header(None)):
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     #対象のproject_idのprojectがなければ404
     if not Project.is_exist(project_id):
@@ -83,7 +84,7 @@ def get_project_required_spec(project_id: str):
 def delete_project_required_spec(project_id: str, required_spec_id: str, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).delete_required_spec(required_spec_id)
@@ -93,7 +94,7 @@ def delete_project_required_spec(project_id: str, required_spec_id: str, x_auth_
 
 @router.post("/{project_id}/details/install", response_model=API_OK)
 def post_project_install(project_id: str, install: Install, x_auth_token: Optional[str] = Header(None)):
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     if not Project.is_exist(project_id):
          raise StarletteHTTPException(status_code=404, detail="Project not found")
@@ -107,7 +108,7 @@ def post_project_install(project_id: str, install: Install, x_auth_token: Option
 def delete_project_install(project_id: str, install_id: str, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).delete_install(install_id)
@@ -117,7 +118,7 @@ def delete_project_install(project_id: str, install_id: str, x_auth_token: Optio
 
 @router.post("/{project_id}/details/forjob", response_model=API_OK)
 def post_project_forjob(project_id: str, forjob: str, x_auth_token: Optional[str] = Header(None)):
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     if not Project.is_exist(project_id):
          raise StarletteHTTPException(status_code=404, detail="Project not found")
@@ -131,7 +132,7 @@ def post_project_forjob(project_id: str, forjob: str, x_auth_token: Optional[str
 def delete_project_forjob(project_id: str, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).delete_forjob()

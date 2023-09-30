@@ -9,14 +9,14 @@ class AuthedUser:
     role: str
     pass
 
-def isAuthed(team_id: str, idToken: Optional[str]):
+def isAuthed(member: list[str], idToken: Optional[str]):
     if idToken is None:
         return True
         # return False
     try:
         decoded_token = auth.verify_id_token(idToken)
         user_id = decoded_token['user_id']
-        if Teams(team_id).is_member(user_id):
+        if user_id in  member:
             return True
         else:
             return False

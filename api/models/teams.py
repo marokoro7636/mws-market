@@ -107,10 +107,7 @@ class Teams:
             }
         )
 
-    def is_member(self, member_id: str):
+    def get_members(self):
         db = firestore.client()
         data = db.collection("teams").document(self.id).get().to_dict()
-        if member_id in data["members"]:
-            return True
-        else:
-            return False
+        return data["members"]
