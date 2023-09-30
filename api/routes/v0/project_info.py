@@ -96,10 +96,10 @@ def post_project_icon(project_id: str, icon: UploadFile, x_auth_token: Optional[
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if check_img(icon) is False:
+    if check_img(icon.file) is False:
         raise StarletteHTTPException(status_code=400, detail="Invalid image")
     try:
-        Project(project_id).set_icon(icon)
+        Project(project_id).set_icon(icon.file)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project icon")
     return API_OK()
@@ -122,10 +122,10 @@ def post_project_img(project_id: str, img: UploadFile, x_auth_token: Optional[st
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if check_img(img) is False:
+    if check_img(img.file) is False:
         raise StarletteHTTPException(status_code=400, detail="Invalid image")
     try:
-        Project(project_id).set_img(img)
+        Project(project_id).set_img(img.file)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project img")
     return API_OK()

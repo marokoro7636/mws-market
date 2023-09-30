@@ -1,5 +1,4 @@
 import os
-from fastapi import UploadFile
 import imghdr
 
 # 許可する画像の種類
@@ -18,11 +17,11 @@ def check_env(required):
         if not os.environ.get(env):
             raise EnvironmentError(f"Environment variable {env} is not set")
 
-def check_img(img: UploadFile):
-    img_format = imghdr.what(img.file)
-    img.file.seek(0, 2)
-    img_size = img.file.tell()
-    img.file.seek(0, os.SEEK_SET)
+def check_img(img):
+    img_format = imghdr.what(img)
+    img.seek(0, 2)
+    img_size = img.tell()
+    img.seek(0, os.SEEK_SET)
     if img_format in ALLOW_IMAGE_FORMAT and img_size <= ALLOW_IMAGE_SIZE:
         return True
     else:
