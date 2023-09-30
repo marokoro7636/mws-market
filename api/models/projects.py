@@ -5,7 +5,6 @@ import tempfile
 import os
 import datetime
 import imghdr
-from fastapi import UploadFile
 from firebase_admin import storage
 import re
 from models.requests import (
@@ -25,7 +24,8 @@ class Project:
     @staticmethod
     def create(team, name):
         # IDは適切に生成する，timestamp + team + name とか
-        id = sha1_hash(team + name)
+        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        id = sha1_hash(team + name + timestamp)
         db = firestore.client()
         db.collection("projects").document(id).set(
             {
@@ -118,9 +118,9 @@ class Project:
         , merge=True)
 
 
-    def set_icon(self, img: UploadFile):
+    def set_icon(self, img):
         db = firestore.client()
-        path  = os.path.join(self.id, f"icon.{imghdr.what(img.file)}")
+        path  = os.path.join(self.id, f"icon.{imghdr.what(img)}")
         Project.save_img(path, img)
         db.collection("projects").document(self.id).set(
             {
@@ -140,9 +140,9 @@ class Project:
             }
         )
 
-    def set_img(self, img: UploadFile):
+    def set_img(self, img):
         db = firestore.client()
-        path  = os.path.join(self.id, f"img.{imghdr.what(img.file)}")
+        path  = os.path.join(self.id, f"img.{imghdr.what(img)}")
         Project.save_img(path, img)
         db.collection("projects").document(self.id).set(
             {
@@ -173,12 +173,12 @@ class Project:
         else:
             return dict()
 
-    def add_img_screenshot(self, img: UploadFile):
+    def add_img_screenshot(self, img):
         timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         img_id = sha1_hash(f"{self.id}{img}{timestamp}")
 
         db = firestore.client()
-        path  = os.path.join(self.id, "img_screenshot", f"{img_id}.{imghdr.what(img.file)}")
+        path  = os.path.join(self.id, "img_screenshot", f"{img_id}.{imghdr.what(img)}")
         Project.save_img(path, img)
         db.collection("projects").document(self.id).update(
             {
@@ -340,11 +340,11 @@ class Project:
         )
 
     @staticmethod
-    def save_img(path: str, img: UploadFile):
+    def save_img(path: str, img):
         bucket = storage.bucket("mws-market.appspot.com")
         blob = bucket.blob(path)
         with tempfile.NamedTemporaryFile(delete=True, dir=".", suffix=".stl") as tmp:
-            shutil.copyfileobj(img.file, tmp)
+            shutil.copyfileobj(img, tmp)
             blob.upload_from_filename(tmp.name)
 
     @staticmethod

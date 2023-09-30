@@ -35,10 +35,10 @@ def post_project_img(project_id: str, img: UploadFile, x_auth_token: Optional[st
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if check_img(img) is False:
+    if check_img(img.file) is False:
         raise StarletteHTTPException(status_code=400, detail="Invalid image")
     try:
-        Project(project_id).add_img_screenshot(img)
+        Project(project_id).add_img_screenshot(img.file)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project image")
     return API_OK()
