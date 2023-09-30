@@ -106,3 +106,11 @@ class Teams:
                 "members": firestore.firestore.ArrayRemove([member_id])
             }
         )
+
+    def is_member(self, member_id: str):
+        db = firestore.client()
+        data = db.collection("teams").document(self.id).get().to_dict()
+        if member_id in data["members"]:
+            return True
+        else:
+            return False
