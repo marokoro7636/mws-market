@@ -60,5 +60,8 @@ class Team(BaseModel):
     members: list[str]
     secret: str
 
+class TeamSimpleResponse(BaseModel):
+    team_id: str
+
 class Log(BaseModel):
     text: Optional[str] = None

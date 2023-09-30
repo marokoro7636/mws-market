@@ -4,78 +4,67 @@ from helper.util import sha1_hash
 import datetime
 
 from helper.response import API_OK
-
-from models.requests import Team
+from models.requests import Team, TeamSimpleResponse
+from models.projects import Project
+from models.teams import Teams
 
 
 router = APIRouter()
 
 @router.get("/", response_model=list[Team])
 def get_teams():
-    # try:
-    #     data = db.get_teams()
-    # except:
-    #     raise StarletteHTTPException(status_code=500, detail="Failed to get teams")
-    data = [
-        Team(
-            name="Team1",
-            year=2021,
-            description="Team1 description",
-            members=["member1", "member2"],
-        ),
-        Team(
-            name="Team2",
-            year=2021,
-            description="Team2 description",
-            members=["member1", "member2"],
-        ),
-    ]
+    try:
+        data = Teams.get_teams()
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to get teams")
     return data
 
-@router.post("/", response_model=API_OK)
+@router.post("/", response_model=TeamSimpleResponse)
 def post_team(team: Team):
-    # try:
-    #     db.add_team(team)
-    # except:
-    #     raise StarletteHTTPException(status_code=500, detail="Failed to post team")
-    return API_OK()
+    print("team")
+    try:
+        res = Teams.add_team(team)
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to post team")
+    print(res)
+    return TeamSimpleResponse(team_id = res.team_id)
 
 @router.post("/{team_id}/name", response_model=API_OK)
 def post_team_name(team_id: str, name: str):
-    # if db.get_team_by_id(team_id) is None:
-    #     raise StarletteHTTPException(status_code=404, detail="Team not found")
-    # try:
-    #     db.update_team_name(team_id, name)
-    # except:
-    #     raise StarletteHTTPException(status_code=500, detail="Failed to post team name")
+    if Teams.get_team_by_id(team_id) is None:
+        raise StarletteHTTPException(status_code=404, detail="Team not found")
+    try:
+        Teams.update_team_name(team_id, name)
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to post team name")
     return API_OK()
 
 @router.post("/{team_id}/year", response_model=API_OK)
 def post_team_year(team_id: str, year: int):
-    # if db.get_team_by_id(team_id) is None:
-    #     raise StarletteHTTPException(status_code=404, detail="Team not found")
-    # try:
-    #     db.update_team_year(team_id, year)
-    # except:
-    #     raise StarletteHTTPException(status_code=500, detail="Failed to post team year")
+    if Teams.get_team_by_id(team_id) is None:
+        raise StarletteHTTPException(status_code=404, detail="Team not found")
+    try:
+        Teams.update_team_year(team_id, year)
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to post team year")
     return API_OK()
 
 @router.post("/{team_id}/description", response_model=API_OK)
 def post_team_description(team_id: str, description: str):
-    # if db.get_team_by_id(team_id) is None:
-    #     raise StarletteHTTPException(status_code=404, detail="Team not found")
-    # try:
-    #     db.update_team_description(team_id, description)
-    # except:
-    #     raise StarletteHTTPException(status_code=500, detail="Failed to post team description")
+    if Teams.get_team_by_id(team_id) is None:
+        raise StarletteHTTPException(status_code=404, detail="Team not found")
+    try:
+        Teams.update_team_description(team_id, description)
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to post team description")
     return API_OK()
 
 @router.post("/{team_id}/members", response_model=API_OK)
-def post_team_members(team_id: str, member_id: list[str]):
-    # if db.get_team_by_id(team_id) is None:
-    #     raise StarletteHTTPException(status_code=404, detail="Team not found")
-    # try:
-    #     db.add_team_members(team_id, member_id)
-    # except:
-    #     raise StarletteHTTPException(status_code=500, detail="Failed to post team members")
+def post_team_members(team_id: str, new_members: list[str]):
+    if Teams.get_team_by_id(team_id) is None:
+        raise StarletteHTTPException(status_code=404, detail="Team not found")
+    try:
+        Teams.add_team_members(team_id, new_members)
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to post team members")
     return API_OK()

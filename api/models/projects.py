@@ -454,4 +454,20 @@ class Project:
     @staticmethod
     def get_projects():
         db = firestore.client()
-        docs = db.collection("project").stream()
+        docs = db.collection("projects").stream()
+        data = [{"name":doc.name, "description":doc.description} for doc in docs]
+        return data
+
+    # get_project_by_idの実装 by Yamamoto
+    ## is_exist で存在確認済み
+    def get_project_by_id(project_id: str):
+        db = firestore.client()
+        doc = db.collection("projects").document(project_id).get()
+        return ProjectInfo(**doc.to_dict())
+
+    # delete_projectsの実装 by Yamamoto
+    ## is_exist で存在確認済み
+    @staticmethod
+    def delete_project(project_id: str):
+        db = firestore.client()
+        db.collection("projects").document(project_id).delete()

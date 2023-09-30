@@ -22,10 +22,10 @@ router = APIRouter()
 
 @router.get("/", response_model=list[ProjectSummary])
 def get_projects():
-    # try:
-    #     data = db.get_projects()
-    # except:
-    #     raise StarletteHTTPException(status_code=500, detail="Failed to get projects")
+    try:
+        data = Project.get_projects()
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to get projects")
     data = [
         ProjectSummary(
             name="Project1",
@@ -58,12 +58,12 @@ def get_projects():
 
 @router.get("/{project_id}", response_model=ProjectInfo)
 def get_project(project_id: str):
-    # if db.get_project_by_id(project_id) is None:
-    #     raise StarletteHTTPException(status_code=404, detail="Project not found")
-    # try:
-    #     data = db.get_project_by_id(project_id)
-    # except:
-    #     raise StarletteHTTPException(status_code=500, detail="Failed to get projects")
+    if Project.is_exist(project_id) is None:
+        raise StarletteHTTPException(status_code=404, detail="Project not found")
+    try:
+        data = Project.get_project_by_id(project_id)
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to get projects")
     data = ProjectInfo()
     return data
 
@@ -77,12 +77,12 @@ def post_project(req: ProjectRequest):
 
 @router.delete("/{project_id}", response_model=ProjectSimpleResponse)
 def delete_project(project_id: str):
-    # if db.get_project_by_id(project_id) is None:
-    #     raise StarletteHTTPException(status_code=404, detail="Project not found")
-    # try:
-    #     db.delete_project(project_id)
-    # except:
-    #     raise StarletteHTTPException(status_code=500, detail="Failed to delete project")
+    if Project.is_exist(project_id) is None:
+        raise StarletteHTTPException(status_code=404, detail="Project not found")
+    try:
+        Project.delete_project(project_id)
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to delete project")
     return ProjectSimpleResponse(project_id=project_id)
 
 router.include_router(project_info.router, prefix="", tags=["project_info"])
