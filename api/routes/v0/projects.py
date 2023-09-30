@@ -1,8 +1,10 @@
 from pydantic import BaseModel
 from fastapi import APIRouter
 from typing import Optional
+from fastapi import Header
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from helper.util import sha1_hash
+from helper.auth import isAuthed
 import datetime
 
 from models.requests import (
@@ -39,7 +41,9 @@ def get_project(project_id: str):
     return ProjectInfo(id=project_id, **data)
 
 @router.post("/", response_model=ProjectSimpleResponse)
-def post_project(req: ProjectRequest):
+def post_project(req: ProjectRequest, x_auth_token: Optional[str] = Header(None)):
+    if not isAuthed(x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         prj = Project.create(req.team, req.name)
     except:
@@ -47,7 +51,9 @@ def post_project(req: ProjectRequest):
     return ProjectSimpleResponse(project_id=prj.id)
 
 @router.delete("/{project_id}", response_model=ProjectSimpleResponse)
-def delete_project(project_id: str):
+def delete_project(project_id: str, x_auth_token: Optional[str] = Header(None)):
+    if not isAuthed(x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:

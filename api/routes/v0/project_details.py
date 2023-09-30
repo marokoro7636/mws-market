@@ -2,8 +2,11 @@ from fastapi import APIRouter
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from helper.util import sha1_hash
 from helper.check import check_img
+from helper.auth import isAuthed
 import datetime
 from fastapi import FastAPI, File, UploadFile
+from typing import Optional
+from fastapi import Header
 from models.requests import (
     RequiredSpec,
     Install,
@@ -27,7 +30,9 @@ def get_project_details(project_id: str):
     return ProjectDetails(**data)
 
 @router.post("/{project_id}/details/imgs", response_model=API_OK)
-def post_project_img(project_id: str, img: UploadFile):
+def post_project_img(project_id: str, img: UploadFile, x_auth_token: Optional[str] = Header(None)):
+    if not isAuthed(x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     if check_img(img) is False:
@@ -39,7 +44,9 @@ def post_project_img(project_id: str, img: UploadFile):
     return API_OK()
 
 @router.delete("/{project_id}/details/imgs/{img_id}", response_model=API_OK)
-def delete_project_img(project_id: str, img_id:str):
+def delete_project_img(project_id: str, img_id:str, x_auth_token: Optional[str] = Header(None)):
+    if not isAuthed(x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
@@ -49,7 +56,9 @@ def delete_project_img(project_id: str, img_id:str):
     return API_OK()
 
 @router.post("/{project_id}/details/required_spec", response_model=API_OK)
-def post_project_required_spec(project_id: str, required_spec: RequiredSpec):
+def post_project_required_spec(project_id: str, required_spec: RequiredSpec, x_auth_token: Optional[str] = Header(None)):
+    if not isAuthed(x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     #対象のproject_idのprojectがなければ404
     if not Project.is_exist(project_id):
          raise StarletteHTTPException(status_code=404, detail="Project not found")
@@ -71,7 +80,9 @@ def get_project_required_spec(project_id: str):
     return [SimpleSpecResponse(spec_id=key, data=value) for key, value in data.items()]
 
 @router.delete("/{project_id}/details/required_spec/{required_spec_id}", response_model=API_OK)
-def delete_project_required_spec(project_id: str, required_spec_id: str):
+def delete_project_required_spec(project_id: str, required_spec_id: str, x_auth_token: Optional[str] = Header(None)):
+    if not isAuthed(x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
@@ -81,7 +92,9 @@ def delete_project_required_spec(project_id: str, required_spec_id: str):
     return API_OK()
 
 @router.post("/{project_id}/details/install", response_model=API_OK)
-def post_project_install(project_id: str, install: Install):
+def post_project_install(project_id: str, install: Install, x_auth_token: Optional[str] = Header(None)):
+    if not isAuthed(x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     if not Project.is_exist(project_id):
          raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
@@ -91,7 +104,9 @@ def post_project_install(project_id: str, install: Install):
     return API_OK()
 
 @router.delete("/{project_id}/details/install/{install_id}", response_model=API_OK)
-def delete_project_install(project_id: str, install_id: str):
+def delete_project_install(project_id: str, install_id: str, x_auth_token: Optional[str] = Header(None)):
+    if not isAuthed(x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
@@ -101,7 +116,9 @@ def delete_project_install(project_id: str, install_id: str):
     return API_OK()
 
 @router.post("/{project_id}/details/forjob", response_model=API_OK)
-def post_project_forjob(project_id: str, forjob: str):
+def post_project_forjob(project_id: str, forjob: str, x_auth_token: Optional[str] = Header(None)):
+    if not isAuthed(x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     if not Project.is_exist(project_id):
          raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
@@ -111,7 +128,9 @@ def post_project_forjob(project_id: str, forjob: str):
     return API_OK()
 
 @router.delete("/{project_id}/details/forjob", response_model=API_OK)
-def delete_project_forjob(project_id: str):
+def delete_project_forjob(project_id: str, x_auth_token: Optional[str] = Header(None)):
+    if not isAuthed(x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
