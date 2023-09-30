@@ -142,8 +142,9 @@ class Project:
 
     def delete_icon(self):
         db = firestore.client()
-        path  = os.path.join(self.id, "icon")
-        Project.drop_img(path)
+        doc = db.collection("projects").document(self.id).get()
+        if "icon" in doc.to_dict():
+            Project.drop_img(doc.to_dict()["icon"])
         db.collection("projects").document(self.id).update(
             {
                 "icon": firestore.DELETE_FIELD,
@@ -162,8 +163,9 @@ class Project:
 
     def delete_img(self):
         db = firestore.client()
-        path  = os.path.join(self.id, "img")
-        Project.drop_img(path)
+        doc = db.collection("projects").document(self.id).get()
+        if "img" in doc.to_dict():
+            Project.drop_img(doc.to_dict()["img"])
         db.collection("projects").document(self.id).update(
             {
                 "img": firestore.DELETE_FIELD,
@@ -197,8 +199,9 @@ class Project:
 
     def delete_img_screenshot(self, img_id: str):
         db = firestore.client()
-        path  = os.path.join(self.id, "img_screenshot", img_id)
-        Project.drop_img(path)
+        doc = db.collection("projects").document(self.id).get()
+        if "details" in doc.to_dict() and "img_screenshot" in doc.to_dict()["details"]:
+            Project.drop_img(doc.to_dict()["details"]["img_screenshot"][img_id])
         db.collection("projects").document(self.id).update(
             {
                 f"details.img_screenshot.{img_id}": firestore.DELETE_FIELD,
