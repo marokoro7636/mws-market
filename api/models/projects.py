@@ -25,7 +25,8 @@ class Project:
     @staticmethod
     def create(team, name):
         # IDは適切に生成する，timestamp + team + name とか
-        id = sha1_hash(team + name)
+        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        id = sha1_hash(team + name + timestamp)
         db = firestore.client()
         db.collection("projects").document(id).set(
             {
