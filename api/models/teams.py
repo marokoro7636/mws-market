@@ -1,12 +1,6 @@
 from firebase_admin import firestore
-from helper.util import sha1_hash
-from urllib.request import urlopen
-import base64
-import shutil
-import tempfile
-import imghdr
-from fastapi import UploadFile
-import re
+from helper.util import sha1_hash, make_secret
+import datetime
 from models.requests import (
     ProjectInfo,
     ProjectRequest,
@@ -24,9 +18,10 @@ class Teams:
     @staticmethod
     def add_team(team: Team):
         # IDは適切に生成する
-        id = sha1_hash(team.name)
+        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        id = sha1_hash(team.name+timestamp)
         db = firestore.client()
-        db.collection("Teams").document(id).set(
+        db.collection("teams").document(id).set(
             {
                 "name": team.name,
                 "year": team.year,
@@ -34,53 +29,80 @@ class Teams:
                 "members": team.members,
             }
         )
-        return TeamSimpleResponse(team_id = id)
-    
+        db.collection("team_secrets").document(make_secret(20)).set(
+            {
+                "id": id
+            }
+        )
+        return Teams(id = id)
+
+    @staticmethod
+    def is_exist(team_id: str):
+        db = firestore.client()
+        doc = db.collection("teams").document(team_id).get()
+        if doc.exists:
+            return True
+        else:
+            return False
+
     @staticmethod
     def get_teams():
         db = firestore.client()
-        docs = db.collection("Teams").stream()
-        data = [Team(name = doc.get("name"),year = doc.get("year"), description = doc.get("description"), members = doc.get("members")) for doc in docs]
+        docs = db.collection("teams").stream()
+        data = [Team(**doc.to_dict()) for doc in docs]
         return data
+
     @staticmethod
-    def update_team_name(team_id: str, name: str):
+    def get_by_secret(team_secret: str):
         db = firestore.client()
-        db.collection("Teams").document(team_id).update(
+        doc = db.collection("team_secrets").document(team_secret).get()
+        id = doc.get("id")
+        data = db.collection("teams").document(id).get().to_dict()
+        data["secret"] = team_secret
+        return data
+
+    def add_member(self, team_secret: str,  member_id: str):
+        db = firestore.client()
+        doc = db.collection("team_secrets").document(team_secret).get()
+        if self.id != doc.get("id"):
+            raise
+        db.collection("teams").document(self.id).update(
+            {
+                "members": firestore.firestore.ArrayUnion([member_id])
+            }
+        )
+
+    def update_name(self, name: str):
+        db = firestore.client()
+        db.collection("teams").document(self.id).update(
             {
                 "name": name,
             }
         )
-    @staticmethod
-    def update_team_year(team_id: str, year: int):
+
+    def update_year(self, year: int):
         db = firestore.client()
-        db.collection("Teams").document(team_id).update(
+        db.collection("teams").document(self.id).update(
             {
                 "year": year,
             }
         )
-    @staticmethod
-    def update_team_description(team_id: str, description: str):
+
+    def update_description(self, description: str):
         db = firestore.client()
-        db.collection("Teams").document(team_id).update(
+        db.collection("teams").document(self.id).update(
             {
                 "description": description,
             }
         )
-    @staticmethod
-    def add_team_members(team_id: str, new_members: list[str]):
+
+    def delete_member(self, member_id: str):
         db = firestore.client()
-        print("check")
-        print(db.collection("Teams").document(team_id).get().to_dict())
-        db.collection("Teams").document(team_id).update(
+        data = db.collection("teams").document(self.id).get().to_dict()
+        if len(data["members"]) < 2:
+            raise
+        db.collection("teams").document(self.id).update(
             {
-                "members": firestore.ArrayUnion(new_members)
+                "members": firestore.firestore.ArrayRemove([member_id])
             }
         )
-    @staticmethod
-    def get_team_by_id(team_id):
-        db = firestore.client()
-        doc = db.collection("Teams").document(team_id).get()
-        if doc.exists:
-            return TeamSimpleResponse(team_id = team_id)
-        else:
-            return None

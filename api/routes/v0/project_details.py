@@ -24,7 +24,7 @@ def get_project_details(project_id: str):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        data = Project.load_by_id(project_id).get_details()
+        data = Project(project_id).get_details()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project details")
     return ProjectDetails(**data)
@@ -38,7 +38,7 @@ def post_project_img(project_id: str, img: UploadFile, x_auth_token: Optional[st
     if check_img(img) is False:
         raise StarletteHTTPException(status_code=400, detail="Invalid image")
     try:
-        Project.load_by_id(project_id).add_img_screenshot(img)
+        Project(project_id).add_img_screenshot(img)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project image")
     return API_OK()
@@ -50,7 +50,7 @@ def delete_project_img(project_id: str, img_id:str, x_auth_token: Optional[str] 
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).delete_img_screenshot(img_id)
+        Project(project_id).delete_img_screenshot(img_id)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project image")
     return API_OK()
@@ -64,7 +64,7 @@ def post_project_required_spec(project_id: str, required_spec: RequiredSpec, x_a
          raise StarletteHTTPException(status_code=404, detail="Project not found")
     #DBへ格納
     try:
-        Project.load_by_id(project_id).add_required_spec(required_spec)
+        Project(project_id).add_required_spec(required_spec)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project required spec")
     return API_OK()
@@ -74,7 +74,7 @@ def get_project_required_spec(project_id: str):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        data = Project.load_by_id(project_id).get_required_spec()
+        data = Project(project_id).get_required_spec()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to get project required spec")
     return [SimpleSpecResponse(spec_id=key, data=value) for key, value in data.items()]
@@ -86,7 +86,7 @@ def delete_project_required_spec(project_id: str, required_spec_id: str, x_auth_
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).delete_required_spec(required_spec_id)
+        Project(project_id).delete_required_spec(required_spec_id)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project required spec")
     return API_OK()
@@ -98,7 +98,7 @@ def post_project_install(project_id: str, install: Install, x_auth_token: Option
     if not Project.is_exist(project_id):
          raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).add_install(install)
+        Project(project_id).add_install(install)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project install")
     return API_OK()
@@ -110,7 +110,7 @@ def delete_project_install(project_id: str, install_id: str, x_auth_token: Optio
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).delete_install(install_id)
+        Project(project_id).delete_install(install_id)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project install")
     return API_OK()
@@ -122,7 +122,7 @@ def post_project_forjob(project_id: str, forjob: str, x_auth_token: Optional[str
     if not Project.is_exist(project_id):
          raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).set_forjob(forjob)
+        Project(project_id).set_forjob(forjob)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project forjob")
     return API_OK()
@@ -134,7 +134,7 @@ def delete_project_forjob(project_id: str, x_auth_token: Optional[str] = Header(
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).delete_forjob()
+        Project(project_id).delete_forjob()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project forjob")
     return API_OK()

@@ -18,7 +18,7 @@ def post_project_review(project_id: str, review: ProjectReview, x_auth_token: Op
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).add_review(review)
+        Project(project_id).add_review(review)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project review")
     return API_OK()
@@ -30,7 +30,7 @@ def delete_project_review(project_id: str, review_id: str, x_auth_token: Optiona
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).delete_review(review_id)
+        Project(project_id).delete_review(review_id)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project review")
     return API_OK()

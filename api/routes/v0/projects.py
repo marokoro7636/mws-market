@@ -35,7 +35,7 @@ def get_project(project_id: str):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        data = Project.load_by_id(project_id).get_info()
+        data = Project(project_id).get_info()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to get projects")
     return ProjectInfo(id=project_id, **data)
@@ -57,7 +57,7 @@ def delete_project(project_id: str, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).delete()
+        Project(project_id).delete()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project")
     return ProjectSimpleResponse(project_id=project_id)

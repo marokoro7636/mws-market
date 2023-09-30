@@ -58,7 +58,7 @@ class Team(BaseModel):
     year: int
     description: str
     members: list[str]
-    secret: str
+    secret: Optional[str] = None
 
 class TeamSimpleResponse(BaseModel):
     team_id: str
