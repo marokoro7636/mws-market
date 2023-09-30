@@ -13,19 +13,10 @@ from models.requests import (
     ProjectRequest,
     RequiredSpec,
     ProjectDetails,
-    ProjectReview,
-    Install,
     SimpleSpecResponse,
-    Team,
-    TeamSimpleResponse,
+    ProjectReview,
+    Install
 )
-
-# 許可する画像の種類
-# 参考: https://docs.python.org/ja/3/library/imghdr.html
-ALLOW_IMAGE_FORMAT = ["png", "jpeg", "bmp"]
-
-# 許可する画像の最大サイズ(byte)
-ALLOW_IMAGE_SIZE = 2 * 1024 * 1024
 
 class Project:
     def __init__(self, id):
@@ -456,7 +447,6 @@ class Project:
                 f"ProjectReview.{review_id}": firestore.DELETE_FIELD,
             }
         )
-
 
     # get_projectsの実装 by Yamamoto
     ## Projectのドキュメントを全てリストに集める
