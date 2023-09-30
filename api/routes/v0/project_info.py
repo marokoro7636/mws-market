@@ -19,7 +19,7 @@ def post_project_name(project_id: str, name: str, x_auth_token: Optional[str] = 
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).set_name(name)
+        Project(project_id).set_name(name)
     except:
         raise StarletteHTTPException(
             status_code=500, detail="Failed to post project name"
@@ -33,7 +33,7 @@ def post_project_short_description(project_id: str, short_description: str, x_au
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).set_short_description(short_description)
+        Project(project_id).set_short_description(short_description)
     except:
         raise StarletteHTTPException(
             status_code=500, detail="Failed to post project short description"
@@ -47,7 +47,7 @@ def post_project_description(project_id: str, description: str, x_auth_token: Op
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).set_description(description)
+        Project(project_id).set_description(description)
     except:
         raise StarletteHTTPException(
             status_code=500, detail="Failed to post project description"
@@ -61,7 +61,7 @@ def post_project_youtube(project_id: str, youtube: str, x_auth_token: Optional[s
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).set_youtube(youtube)
+        Project(project_id).set_youtube(youtube)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project youtube")
     return API_OK()
@@ -73,7 +73,7 @@ def delete_project_youtube(project_id: str, x_auth_token: Optional[str] = Header
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).delete_youtube()
+        Project(project_id).delete_youtube()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project youtube")
     return API_OK()
@@ -85,7 +85,7 @@ def post_project_hidden(project_id: str, hidden: bool, x_auth_token: Optional[st
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).set_hidden(hidden)
+        Project(project_id).set_hidden(hidden)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project hidden")
     return API_OK()
@@ -99,7 +99,7 @@ def post_project_icon(project_id: str, icon: UploadFile, x_auth_token: Optional[
     if check_img(icon) is False:
         raise StarletteHTTPException(status_code=400, detail="Invalid image")
     try:
-        Project.load_by_id(project_id).set_icon(icon)
+        Project(project_id).set_icon(icon)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project icon")
     return API_OK()
@@ -111,7 +111,7 @@ def delete_project_icon(project_id: str, x_auth_token: Optional[str] = Header(No
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).delete_icon()
+        Project(project_id).delete_icon()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project icon")
     return API_OK()
@@ -125,7 +125,7 @@ def post_project_img(project_id: str, img: UploadFile, x_auth_token: Optional[st
     if check_img(img) is False:
         raise StarletteHTTPException(status_code=400, detail="Invalid image")
     try:
-        Project.load_by_id(project_id).set_img(img)
+        Project(project_id).set_img(img)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project img")
     return API_OK()
@@ -137,7 +137,7 @@ def delete_project_img(project_id: str, x_auth_token: Optional[str] = Header(Non
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        Project.load_by_id(project_id).delete_img()
+        Project(project_id).delete_img()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project img")
     return API_OK()

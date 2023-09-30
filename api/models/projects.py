@@ -35,16 +35,6 @@ class Project:
         )
         return Project(id=id)
 
-
-    @staticmethod
-    def load_by_id(id: str):
-        db = firestore.client()
-        doc = db.collection("projects").document(id).get()
-        if doc.exists:
-            return Project(id=id)
-        else:
-            return None
-
     @staticmethod
     def is_exist(id: str):
         db = firestore.client()
@@ -57,8 +47,7 @@ class Project:
     # project_info
     def get_info(self):
         db = firestore.client()
-        doc = db.collection("projects").document(self.id).get()
-        data = doc.to_dict()
+        data = db.collection("projects").document(self.id).get().to_dict()
         if "icon" in data:
             data["icon"] = Project.gen_img_url(data["icon"])
         if "img" in data:
@@ -142,9 +131,9 @@ class Project:
 
     def delete_icon(self):
         db = firestore.client()
-        doc = db.collection("projects").document(self.id).get()
-        if "icon" in doc.to_dict():
-            Project.drop_img(doc.to_dict()["icon"])
+        data = db.collection("projects").document(self.id).get().to_dict()
+        if "icon" in data:
+            Project.drop_img(data["icon"])
         db.collection("projects").document(self.id).update(
             {
                 "icon": firestore.DELETE_FIELD,
@@ -163,9 +152,9 @@ class Project:
 
     def delete_img(self):
         db = firestore.client()
-        doc = db.collection("projects").document(self.id).get()
-        if "img" in doc.to_dict():
-            Project.drop_img(doc.to_dict()["img"])
+        data = db.collection("projects").document(self.id).get().to_dict()
+        if "img" in data:
+            Project.drop_img(data["img"])
         db.collection("projects").document(self.id).update(
             {
                 "img": firestore.DELETE_FIELD,
@@ -199,9 +188,9 @@ class Project:
 
     def delete_img_screenshot(self, img_id: str):
         db = firestore.client()
-        doc = db.collection("projects").document(self.id).get()
-        if "details" in doc.to_dict() and "img_screenshot" in doc.to_dict()["details"]:
-            Project.drop_img(doc.to_dict()["details"]["img_screenshot"][img_id])
+        data = db.collection("projects").document(self.id).get().to_dict()
+        if "details" in data and "img_screenshot" in data["details"]:
+            Project.drop_img(data["details"]["img_screenshot"][img_id])
         db.collection("projects").document(self.id).update(
             {
                 f"details.img_screenshot.{img_id}": firestore.DELETE_FIELD,
@@ -225,9 +214,9 @@ class Project:
 
     def get_required_spec(self):
         db = firestore.client()
-        doc = db.collection("projects").document(self.id).get()
-        if "details" in doc.to_dict() and "required_spec" in doc.to_dict()["details"]:
-            return doc.to_dict()["details"]["required_spec"]
+        data = db.collection("projects").document(self.id).get().to_dict()
+        if "details" in data and "required_spec" in data["details"]:
+            return data["details"]["required_spec"]
         else:
             return dict()
 
@@ -242,9 +231,9 @@ class Project:
     ## install
     def get_install(self):
         db = firestore.client()
-        doc = db.collection("projects").document(self.id).get()
-        if "details" in doc.to_dict() and "install" in doc.to_dict()["details"]:
-            return doc.to_dict()["details"]["install"]
+        data = db.collection("projects").document(self.id).get().to_dict()
+        if "details" in data and "install" in data["details"]:
+            return data["details"]["install"]
         else:
             return dict()
 
@@ -296,9 +285,9 @@ class Project:
     # project_review
     def get_review(self):
         db = firestore.client()
-        doc = db.collection("projects").document(self.id).get()
-        if "review" in doc.to_dict():
-            return doc.to_dict()["review"]
+        data = db.collection("projects").document(self.id).get().to_dict()
+        if "review" in data:
+            return data["review"]
         else:
             return dict()
 
