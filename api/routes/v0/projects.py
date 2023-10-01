@@ -48,10 +48,10 @@ def post_project(req: ProjectRequest, x_auth_token: Optional[str] = Header(None)
     if not isAuthed(Teams(req.team).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
-        prj = Project.create(req.team, req.name)
+        prj = Project.create(req)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project")
-    return ProjectSimpleResponse(project_id=prj.id)
+    return ProjectSimpleResponse(id=prj.id)
 
 @router.delete("/{project_id}", response_model=ProjectSimpleResponse)
 def delete_project(project_id: str, x_auth_token: Optional[str] = Header(None)):
@@ -63,7 +63,7 @@ def delete_project(project_id: str, x_auth_token: Optional[str] = Header(None)):
         Project(project_id).delete()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project")
-    return ProjectSimpleResponse(project_id=project_id)
+    return ProjectSimpleResponse(id=project_id)
 
 router.include_router(project_info.router, prefix="", tags=["project_info"])
 router.include_router(project_details.router, prefix="", tags=["project_details"])

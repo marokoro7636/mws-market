@@ -26,7 +26,7 @@ class ProjectReview(BaseModel):
     rating: int
 
 class ProjectSimpleResponse(BaseModel):
-    project_id: str
+    id: str
 
 class ProjectRequest(BaseModel):
     team: str
@@ -74,7 +74,14 @@ class TeamResponse(BaseModel):
     members: list[str]
 
 class TeamSimpleResponse(BaseModel):
-    team_id: str
+    id: str
 
 class Log(BaseModel):
     text: Optional[str] = None
+
+class User(BaseModel):
+    name: str
+    team: Optional[list[str]] = None
+
+class UserRequest(BaseModel):
+    name: str

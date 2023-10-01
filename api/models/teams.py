@@ -33,6 +33,12 @@ class Teams:
                 "id": id
             }
         )
+        for user_id in req.members:
+            db.collection("users").document(user_id).update(
+                {
+                    "teams": firestore.firestore.ArrayUnion([id])
+                }
+            )
         return Teams(id = id)
 
     @staticmethod
@@ -64,14 +70,24 @@ class Teams:
         data = db.collection("teams").document(self.id).get().to_dict()
         return data
 
-    def add_member(self, team_secret: str,  member_id: str):
+    def check_secret(self, secret: str):
         db = firestore.client()
-        doc = db.collection("team_secrets").document(team_secret).get()
-        if self.id != doc.get("id"):
-            raise
+        doc = db.collection("team_secrets").document(secret).get()
+        if self.id == doc.get("id"):
+            return True
+        else:
+            return False
+
+    def add_member(self, user_id: str):
+        db = firestore.client()
         db.collection("teams").document(self.id).update(
             {
-                "members": firestore.firestore.ArrayUnion([member_id])
+                "members": firestore.firestore.ArrayUnion([user_id])
+            }
+        )
+        db.collection("users").document(user_id).update(
+            {
+                "team": firestore.firestore.ArrayUnion([self.id])
             }
         )
 
@@ -99,14 +115,19 @@ class Teams:
             }
         )
 
-    def delete_member(self, member_id: str):
+    def delete_member(self, user_id: str):
         db = firestore.client()
         data = db.collection("teams").document(self.id).get().to_dict()
         if len(data["members"]) < 2:
             raise
         db.collection("teams").document(self.id).update(
             {
-                "members": firestore.firestore.ArrayRemove([member_id])
+                "members": firestore.firestore.ArrayRemove([user_id])
+            }
+        )
+        db.collection("users").document(user_id).update(
+            {
+                "team": firestore.firestore.ArrayRemove([self.id])
             }
         )
 
