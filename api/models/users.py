@@ -4,7 +4,6 @@ import datetime
 from models.requests import(
     User,
     UserRequest,
-    UserResponse
 )
 
 class Users:
@@ -13,10 +12,8 @@ class Users:
 
     @staticmethod
     def create(req: UserRequest):
-        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        id = sha1_hash(req.name + timestamp)
         db = firestore.client()
-        db.collection("users").document(id).set(
+        db.collection("users").document(req.id).set(
             {
                 "name": req.name,
             }

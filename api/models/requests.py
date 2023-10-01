@@ -84,4 +84,5 @@ class User(BaseModel):
     team: Optional[list[str]] = None
 
 class UserRequest(BaseModel):
+    id: str
     name: str

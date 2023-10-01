@@ -36,7 +36,7 @@ class Teams:
         for user_id in req.members:
             db.collection("users").document(user_id).update(
                 {
-                    "teams": firestore.firestore.ArrayUnion([id])
+                    "team": firestore.firestore.ArrayUnion([id])
                 }
             )
         return Teams(id = id)
