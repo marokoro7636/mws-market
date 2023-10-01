@@ -43,6 +43,8 @@ def get_project(project_id: str):
 
 @router.post("/", response_model=ProjectSimpleResponse)
 def post_project(req: ProjectRequest, x_auth_token: Optional[str] = Header(None)):
+    if not Teams.is_exist(req.team):
+        raise StarletteHTTPException(status_code=404, detail="Team not found")
     if not isAuthed(Teams(req.team).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
