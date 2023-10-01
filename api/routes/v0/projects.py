@@ -19,6 +19,7 @@ import routes.v0.project_details as project_details
 import routes.v0.project_review as project_review
 
 from models.projects import Project
+from models.teams import Teams
 
 router = APIRouter()
 
@@ -42,7 +43,9 @@ def get_project(project_id: str):
 
 @router.post("/", response_model=ProjectSimpleResponse)
 def post_project(req: ProjectRequest, x_auth_token: Optional[str] = Header(None)):
-    if not isAuthed(req.team, x_auth_token):
+    if not Teams.is_exist(req.team):
+        raise StarletteHTTPException(status_code=404, detail="Team not found")
+    if not isAuthed(Teams(req.team).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         prj = Project.create(req.team, req.name)
@@ -54,7 +57,7 @@ def post_project(req: ProjectRequest, x_auth_token: Optional[str] = Header(None)
 def delete_project(project_id: str, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Project(project_id).get_team(), x_auth_token):
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).delete()
