@@ -12,6 +12,7 @@ from models.requests import (
     TeamResponse
 )
 from models.teams import Teams
+from models.users import Users
 
 
 router = APIRouter()
@@ -28,11 +29,13 @@ def get_teams():
 def post_team(req: TeamRequest, x_auth_token: Optional[str] = Header(None)):
     if not isAuthed(req.members, x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
+    if not Users.are_exist(req.members):
+        raise StarletteHTTPException(status_code=404, detail="User not found")
     try:
         res = Teams.add_team(req)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post team")
-    return TeamSimpleResponse(team_id = res.id)
+    return TeamSimpleResponse(id = res.id)
 
 @router.get("/{team_id}", response_model=Team)
 def get_team(team_id: str, x_auth_token: Optional[str] = Header(None)):
@@ -106,12 +109,17 @@ def get_team_with_secret(team_secret: str):
 
 @router.post("/invitation/{team_secret}", response_model=API_OK)
 def post_team_members(team_secret: str, team_id: str, member_id: str, x_auth_token: Optional[str] = Header(None)):
-    if not Teams.is_exist(team_id):
-        raise StarletteHTTPException(status_code=404, detail="Team not found")
     if not isAuthed([member_id], x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
+    if not Users.is_exist(member_id):
+        raise StarletteHTTPException(status_code=404, detail="User not found")
+    if not Teams.is_exist(team_id):
+        raise StarletteHTTPException(status_code=404, detail="Team not found")
+    if not Teams(team_id).check_secret(team_secret):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
+
     try:
-        Teams(team_id).add_member(team_secret, member_id)
+        Teams(team_id).add_member(member_id)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post team members")
     return API_OK()

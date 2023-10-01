@@ -22,15 +22,15 @@ class Project:
         self.id = id
 
     @staticmethod
-    def create(team, name):
+    def create(req: ProjectRequest):
         # IDは適切に生成する，timestamp + team + name とか
         timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        id = sha1_hash(team + name + timestamp)
+        id = sha1_hash(req.team + req.name + timestamp)
         db = firestore.client()
         db.collection("projects").document(id).set(
             {
-                "team": team,
-                "name": name,
+                "team": req.team,
+                "name": req.name,
             }
         )
         return Project(id=id)
