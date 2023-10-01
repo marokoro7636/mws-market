@@ -60,6 +60,19 @@ class Team(BaseModel):
     members: list[str]
     secret: Optional[str] = None
 
+class TeamRequest(BaseModel):
+    name: str
+    year: int
+    description: str
+    members: list[str]
+
+class TeamResponse(BaseModel):
+    id: str
+    name: str
+    year: int
+    description: str
+    members: list[str]
+
 class TeamSimpleResponse(BaseModel):
     team_id: str
 

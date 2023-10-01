@@ -2,12 +2,9 @@ from firebase_admin import firestore
 from helper.util import sha1_hash, make_secret
 import datetime
 from models.requests import (
-    ProjectInfo,
-    ProjectRequest,
-    RequiredSpec,
-    SimpleSpecResponse,
     Team,
     TeamSimpleResponse,
+    TeamRequest
 )
 
 
@@ -16,20 +13,22 @@ class Teams:
         self.id = id
 
     @staticmethod
-    def add_team(team: Team):
+    def add_team(req: TeamRequest):
         # IDは適切に生成する
         timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        id = sha1_hash(team.name+timestamp)
+        id = sha1_hash(req.name+timestamp)
         db = firestore.client()
+        secret = make_secret(20)
         db.collection("teams").document(id).set(
             {
-                "name": team.name,
-                "year": team.year,
-                "description": team.description,
-                "members": team.members,
+                "name": req.name,
+                "year": req.year,
+                "description": req.description,
+                "members": req.members,
+                "secret": secret
             }
         )
-        db.collection("team_secrets").document(make_secret(20)).set(
+        db.collection("team_secrets").document(secret).set(
             {
                 "id": id
             }
@@ -49,7 +48,7 @@ class Teams:
     def get_teams():
         db = firestore.client()
         docs = db.collection("teams").stream()
-        data = [Team(**doc.to_dict()) for doc in docs]
+        data = {doc.id: doc.to_dict() for doc in docs}
         return data
 
     @staticmethod
@@ -58,7 +57,11 @@ class Teams:
         doc = db.collection("team_secrets").document(team_secret).get()
         id = doc.get("id")
         data = db.collection("teams").document(id).get().to_dict()
-        data["secret"] = team_secret
+        return data
+
+    def get(self):
+        db = firestore.client()
+        data = db.collection("teams").document(self.id).get().to_dict()
         return data
 
     def add_member(self, team_secret: str,  member_id: str):
