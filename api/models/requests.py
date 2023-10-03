@@ -55,15 +55,16 @@ class ProjectSummary(BaseModel):
 
 class Team(BaseModel):
     name: str
-    year: int
-    description: str
+    year: Optional[int] = None
+    description: Optional[str] = None
     members: list[str]
     secret: Optional[str] = None
+    previous: Optional[str] = None
 
 class TeamRequest(BaseModel):
     name: str
-    year: int
-    description: str
+    year: Optional[int] = None
+    description: Optional[str] = None
     members: list[str]
 
 class TeamResponse(BaseModel):
@@ -72,6 +73,7 @@ class TeamResponse(BaseModel):
     year: int
     description: str
     members: list[str]
+    previous: Optional[str] = None
 
 class TeamSimpleResponse(BaseModel):
     id: str

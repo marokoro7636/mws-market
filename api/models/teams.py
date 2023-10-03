@@ -25,7 +25,8 @@ class Teams:
                 "year": req.year,
                 "description": req.description,
                 "members": req.members,
-                "secret": secret
+                "secret": secret,
+                "previous": None
             }
         )
         db.collection("team_secrets").document(secret).set(
@@ -62,21 +63,12 @@ class Teams:
         db = firestore.client()
         doc = db.collection("team_secrets").document(team_secret).get()
         id = doc.get("id")
-        data = db.collection("teams").document(id).get().to_dict()
-        return data
+        return id
 
     def get(self):
         db = firestore.client()
         data = db.collection("teams").document(self.id).get().to_dict()
         return data
-
-    def check_secret(self, secret: str):
-        db = firestore.client()
-        doc = db.collection("team_secrets").document(secret).get()
-        if self.id == doc.get("id"):
-            return True
-        else:
-            return False
 
     def add_member(self, user_id: str):
         db = firestore.client()
@@ -128,6 +120,22 @@ class Teams:
         db.collection("users").document(user_id).update(
             {
                 "team": firestore.firestore.ArrayRemove([self.id])
+            }
+        )
+
+    def set_previous(self, previous: str):
+        db = firestore.client()
+        db.collection("teams").document(self.id).update(
+            {
+                "previous": previous,
+            }
+        )
+
+    def delete_previous(self):
+        db = firestore.client()
+        db.collection("teams").document(self.id).update(
+            {
+                "previous": firestore.DELETE_FIELD,
             }
         )
 
