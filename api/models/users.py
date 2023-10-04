@@ -11,16 +11,6 @@ class Users:
         self.id = id
 
     @staticmethod
-    def create(req: UserRequest):
-        db = firestore.client()
-        db.collection("users").document(req.id).set(
-            {
-                "name": req.name,
-            }
-        )
-        return Users(id = id)
-
-    @staticmethod
     def is_exist(user_id: str):
         db = firestore.client()
         doc = db.collection("users").document(user_id).get()
@@ -35,13 +25,6 @@ class Users:
 
     def get(self):
         db = firestore.client()
-        data = db.collection("users").document(self.id).get().to_dict()
-        return data
-
-    def set_name(self, name: str):
-        db = firestore.client()
-        db.collection("users").document(self.id).update(
-            {
-                "name": name,
-            }
-        )
+        name = db.collection("users").document(self.id).get().get("name")
+        team = db.collection("affiliations").document(self.id).get().get("team")
+        return {"name": name, "team": team}
