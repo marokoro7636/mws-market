@@ -12,12 +12,15 @@ import {
 } from "@mui/material";
 import {grey} from "@mui/material/colors";
 import React, {useRef, useState} from "react";
+import {MuiFileInput} from "mui-file-input";
 
 interface AppInfo {
     id: string
     name: string,
     description: string,
     youtube: string,
+    icon: File | null,
+    screenshots: File[]
 }
 
 export default function Register() {
@@ -25,31 +28,48 @@ export default function Register() {
         id: "0",
         name: "App 0",
         description: "description 0 ".repeat(50),
-        youtube: "https://youtu.be/ZaZMZ9jePKw?si=x96UEomj8VWoHw0-"
+        youtube: "https://youtu.be/ZaZMZ9jePKw?si=x96UEomj8VWoHw0-",
+        icon: null,
+        screenshots: [],
     }
 
-    const app_name = useRef<HTMLInputElement>()
-    const app_description = useRef<HTMLInputElement>()
-    const app_youtube = useRef<HTMLInputElement>()
+    const appNameRef = useRef<HTMLInputElement>()
+    const appDescriptionRef = useRef<HTMLInputElement>()
+    const appYoutubeRef = useRef<HTMLInputElement>()
+    const appIconRef = useRef<File>()
 
     const [isAppInfoEditable, setAppInfoEditable] = useState<boolean>(false)
+    const [isAppImageEditable, setAppImageEditable] = useState<boolean>(false)
     const [appInfo, setAppInfo] = useState<AppInfo>(appInfoMock)
 
     const onSaveAppInfo = () => {
-        if (app_name.current?.value != appInfo.name) {
+        if (appNameRef.current?.value != appInfo.name) {
             console.log("name changed")
             // TODO: update name by API
-            setAppInfo({...appInfo, name: (app_name.current?.value as string)})
+            setAppInfo({...appInfo, name: (appNameRef.current?.value as string)})
         }
-        if (app_description.current?.value != appInfo.description) {
+        if (appDescriptionRef.current?.value != appInfo.description) {
             console.log("description changed")
-            setAppInfo({...appInfo, description: (app_description.current?.value as string)})
+            setAppInfo({...appInfo, description: (appDescriptionRef.current?.value as string)})
         }
-        if (app_youtube.current?.value != appInfo.youtube) {
+        if (appYoutubeRef.current?.value != appInfo.youtube) {
             console.log("youtube changed")
-            setAppInfo({...appInfo, youtube: (app_youtube.current?.value as string)})
+            setAppInfo({...appInfo, youtube: (appYoutubeRef.current?.value as string)})
         }
         setAppInfoEditable(false)
+    }
+
+    const onSaveAppImage = () => {
+        // TODO: update images by API
+        setAppImageEditable(false)
+    }
+
+    const onChangeAppIcon = (iconFile: File | null) => {
+        setAppInfo({...appInfo, icon: iconFile})
+    }
+
+    const onChangeScreenshot = (screenshotFile: File[], ) => {
+        setAppInfo({...appInfo, screenshots: screenshotFile})
     }
 
     return (
@@ -63,7 +83,7 @@ export default function Register() {
                             <Grid item xs={3}>App Name :</Grid>
                             <Grid item xs={9}>
                                 {isAppInfoEditable ?
-                                    <TextField size="small" variant="standard" inputRef={app_name}
+                                    <TextField size="small" variant="standard" inputRef={appNameRef}
                                                defaultValue={appInfo.name}/> :
                                     <Typography variant="body1">{appInfo.name}</Typography>
                                 }
@@ -72,7 +92,7 @@ export default function Register() {
                             <Grid item xs={9}>
                                 {isAppInfoEditable ?
                                     <TextField fullWidth multiline size="small" variant="standard"
-                                               inputRef={app_description}
+                                               inputRef={appDescriptionRef}
                                                defaultValue={appInfo.description}/> :
                                     <Typography variant="body1">{appInfo.description}</Typography>
                                 }
@@ -80,7 +100,7 @@ export default function Register() {
                             <Grid item xs={3}>YouTube Link :</Grid>
                             <Grid item xs={9}>
                                 {isAppInfoEditable ?
-                                    <TextField size="small" variant="standard" inputRef={app_youtube}
+                                    <TextField size="small" variant="standard" inputRef={appYoutubeRef}
                                                defaultValue={appInfo.youtube} sx={{width: 500}}/> :
                                     <Typography component="a" variant="body1"
                                                 href={appInfo.youtube}>{appInfo.youtube}</Typography>
@@ -97,7 +117,49 @@ export default function Register() {
                         </Grid>
                     </CardActions>
                 </Card>
-
+                <Card sx={{minWidth: 275, mt: 3}}>
+                    <CardHeader title="App Images"/>
+                    <CardContent>
+                        <Grid container spacing={2}>
+                            <Grid item xs={3}>App Icon :</Grid>
+                            <Grid item xs={3}>
+                                {appInfo.icon ?
+                                    <img src={window.URL.createObjectURL(appInfo.icon)} width={128} /> :
+                                    <img src="icon128.png" width={128} />
+                                }
+                            </Grid>
+                            <Grid item xs={6}>
+                                {isAppImageEditable &&
+                                    <MuiFileInput value={appInfo.icon} onChange={onChangeAppIcon}/>
+                                }
+                            </Grid>
+                            <Grid item xs={3}>Screenshot :</Grid>
+                            {
+                                appInfo.screenshots.length !== 0 ?
+                                    appInfo.screenshots.map((item) => (
+                                        item &&
+                                            <Grid item xs={3}>
+                                                <img src={window.URL.createObjectURL(item)} width={128} />
+                                            </Grid>
+                                    )) :
+                                    <img src="placeholder.jpg" width={300} />
+                            }
+                        </Grid>
+                        <Grid item xs={9}>
+                            {isAppImageEditable &&
+                                <MuiFileInput multiple value={appInfo.screenshots} onChange={onChangeScreenshot}/>
+                            }
+                        </Grid>
+                    </CardContent>
+                    <CardActions>
+                        <Grid container justifyContent="flex-end">
+                            {isAppImageEditable ?
+                                <Button size="small" onClick={onSaveAppImage}>Save</Button> :
+                                <Button size="small" onClick={() => setAppImageEditable(true)}>Edit</Button>
+                            }
+                        </Grid>
+                    </CardActions>
+                </Card>
             </Container>
         </>
     )
