@@ -94,10 +94,10 @@ def delete_project_required_spec(project_id: str, required_spec_id: str, x_auth_
 
 @router.post("/{project_id}/details/install", response_model=API_OK)
 def post_project_install(project_id: str, install: Install, x_auth_token: Optional[str] = Header(None)):
-    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
-        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     if not Project.is_exist(project_id):
          raise StarletteHTTPException(status_code=404, detail="Project not found")
+    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).add_install(install)
     except:

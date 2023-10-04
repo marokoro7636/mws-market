@@ -29,13 +29,13 @@ class Teams:
                 "previous": None
             }
         )
-        db.collection("team_secrets").document(secret).set(
+        db.collection("secrets").document(secret).set(
             {
                 "id": id
             }
         )
         for user_id in req.members:
-            db.collection("users").document(user_id).update(
+            db.collection("affiliations").document(user_id).update(
                 {
                     "team": firestore.firestore.ArrayUnion([id])
                 }
@@ -59,9 +59,9 @@ class Teams:
         return data
 
     @staticmethod
-    def get_by_secret(team_secret: str):
+    def get_by_secret(secret: str):
         db = firestore.client()
-        doc = db.collection("team_secrets").document(team_secret).get()
+        doc = db.collection("secrets").document(secret).get()
         id = doc.get("id")
         return id
 
@@ -77,7 +77,7 @@ class Teams:
                 "members": firestore.firestore.ArrayUnion([user_id])
             }
         )
-        db.collection("users").document(user_id).update(
+        db.collection("affiliations").document(user_id).update(
             {
                 "team": firestore.firestore.ArrayUnion([self.id])
             }
@@ -117,7 +117,7 @@ class Teams:
                 "members": firestore.firestore.ArrayRemove([user_id])
             }
         )
-        db.collection("users").document(user_id).update(
+        db.collection("affiliations").document(user_id).update(
             {
                 "team": firestore.firestore.ArrayRemove([self.id])
             }
