@@ -358,3 +358,8 @@ class Project:
         blob = bucket.blob(path)
         if blob.exists():
             blob.delete()
+
+    def get_youtube(self):
+        db = firestore.client()
+        youtube = db.collection("projects").document(self.id).get().get("youtube")
+        return youtube
