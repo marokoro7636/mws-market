@@ -12,9 +12,9 @@ from models.requests import (
     ProjectRequest,
     RequiredSpec,
     ProjectDetails,
-    SimpleSpecResponse,
     ProjectReview,
-    Install
+    Install,
+    ProjectSummary
 )
 
 class Project:
@@ -31,12 +31,16 @@ class Project:
             {
                 "team": req.team,
                 "name": req.name,
+                "rating": {
+                    "total": 0,
+                    "count": 0
+                }
             }
         )
         return Project(id=id)
 
     @staticmethod
-    def is_exist(id: str):
+    def is_exist(id: str) -> bool:
         db = firestore.client()
         doc = db.collection("projects").document(id).get()
         if doc.exists:
@@ -45,17 +49,17 @@ class Project:
             return False
 
     # project_info
-    def get_info(self):
+    def get_info(self) -> ProjectInfo:
         db = firestore.client()
-        data = db.collection("projects").document(self.id).get().to_dict()
-        if "icon" in data:
-            data["icon"] = Project.gen_img_url(data["icon"])
-        if "img" in data:
-            data["img"] = Project.gen_img_url(data["img"])
-        if "details" in data and "img_screenshot" in data["details"]:
-            data["details"]["img_screenshot"] = {img_id: Project.gen_img_url(path) for img_id, path in data["details"]["img_screenshot"].items()}
+        doc = db.collection("projects").document(self.id).get()
+        info = ProjectInfo(id=doc.id, **doc.to_dict())
+        if info.icon is not None:
+            info.icon = Project.gen_img_url(info.icon)
+        if info.img is not None:
+            info.img = Project.gen_img_url(info.img)
+        info.details.img_screenshot = {img_id: Project.gen_img_url(path) for img_id, path in info.details.img_screenshot.items()}
 
-        return data
+        return info
 
     def set_name(self, name: str):
         db = firestore.client()
@@ -73,10 +77,10 @@ class Project:
             }
         )
 
-    def get_team(self):
+    def get_team(self) -> str:
         db = firestore.client()
-        data = db.collection("projects").document(self.id).get().to_dict()
-        return data["team"]
+        team = db.collection("projects").document(self.id).get().get("team")
+        return team
 
     def set_short_description(self, short_description: str):
         db = firestore.client()
@@ -167,16 +171,12 @@ class Project:
         )
 
     # project_details
-    def get_details(self):
+    def get_details(self) -> ProjectDetails:
         db = firestore.client()
-        doc = db.collection("projects").document(self.id).get()
-        if "details" in doc.to_dict():
-            data = doc.to_dict()["details"]
-            if "img_screenshot" in data:
-                data["img_screenshot"] = {img_id: Project.gen_img_url(path) for img_id, path in data["img_screenshot"].items()}
-            return data
-        else:
-            return dict()
+        data = db.collection("projects").document(self.id).get().to_dict().get("details", {})
+        details = ProjectDetails(**data)
+        details.img_screenshot = {img_id: Project.gen_img_url(path) for img_id, path in details.img_screenshot.items()}
+        return details
 
     def add_img_screenshot(self, img):
         timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -217,13 +217,10 @@ class Project:
             }
         )
 
-    def get_required_spec(self):
+    def get_required_spec(self) -> {str: RequiredSpec}:
         db = firestore.client()
-        data = db.collection("projects").document(self.id).get().to_dict()
-        if "details" in data and "required_spec" in data["details"]:
-            return data["details"]["required_spec"]
-        else:
-            return dict()
+        required_spec = db.collection("projects").document(self.id).get().to_dict().get("details", {}).get("required_spec", {})
+        return {key: RequiredSpec(**value) for key, value in required_spec.items()}
 
     def delete_required_spec(self, spec_id: str):
         db = firestore.client()
@@ -234,13 +231,10 @@ class Project:
         )
 
     ## install
-    def get_install(self):
+    def get_install(self) -> {str, Install}:
         db = firestore.client()
-        data = db.collection("projects").document(self.id).get().to_dict()
-        if "details" in data and "install" in data["details"]:
-            return data["details"]["install"]
-        else:
-            return dict()
+        install = db.collection("projects").document(self.id).get().to_dict().get("details", {}).get("install", {})
+        return {key: Install(**value) for key, value in install.items()}
 
     def add_install(self, install: Install):
         db = firestore.client()
@@ -288,13 +282,10 @@ class Project:
         )
 
     # project_review
-    def get_review(self):
+    def get_review(self) -> {str: ProjectReview}:
         db = firestore.client()
-        data = db.collection("projects").document(self.id).get().to_dict()
-        if "review" in data:
-            return data["review"]
-        else:
-            return dict()
+        review = db.collection("projects").document(self.id).get().to_dict().get("review", {})
+        return {key: ProjectReview(**value) for key, value in review.items()}
 
     def add_review(self, review: ProjectReview):
         db = firestore.client()
@@ -304,18 +295,25 @@ class Project:
         db.collection("projects").document(self.id).update(
             {
                 f"review.{review_id}": {
+                    "user": review.user,
                     "title": review.title,
                     "content": review.content,
                     "rating": review.rating
-                }
+                },
+                "rating.total": firestore.Increment(review.rating),
+                "rating.count": firestore.Increment(1)
             }
         )
 
+
     def delete_review(self, review_id: str):
         db = firestore.client()
+        review = self.get_review().get(review_id)
         db.collection("projects").document(self.id).update(
             {
                 f"review.{review_id}": firestore.DELETE_FIELD,
+                "rating.total": firestore.firestore.Increment(-review.rating),
+                "rating.count": firestore.firestore.Increment(-1)
             }
         )
 
@@ -325,7 +323,7 @@ class Project:
     @staticmethod
     def get_project():
         db = firestore.client()
-        docs = db.collection("projects").stream()
+        docs = db.collection("projects").select(ProjectSummary.__annotations__.keys()).stream()
         return {doc.id: doc.to_dict() for doc in docs}
 
     # delete_projectsの実装 by Yamamoto
@@ -361,5 +359,5 @@ class Project:
 
     def get_youtube(self):
         db = firestore.client()
-        youtube = db.collection("projects").document(self.id).get().get("youtube")
-        return youtube
+        data = db.collection("projects").document(self.id).get().to_dict()
+        return data.get("youtube")
