@@ -16,7 +16,7 @@ router = APIRouter()
 def post_project_review(project_id: str, review: ProjectReview, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
+    if not isAuthed([review.user], x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).add_review(review)
@@ -28,7 +28,10 @@ def post_project_review(project_id: str, review: ProjectReview, x_auth_token: Op
 def delete_project_review(project_id: str, review_id: str, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
+    review = Project(project_id).get_review().get(review_id)
+    if review is None:
+        raise StarletteHTTPException(status_code=404, detail="Review not found")
+    if not isAuthed([review.user], x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).delete_review(review_id)

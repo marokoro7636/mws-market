@@ -25,10 +25,10 @@ def get_project_details(project_id: str):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        data = Project(project_id).get_details()
+        details = Project(project_id).get_details()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project details")
-    return ProjectDetails(**data)
+    return details
 
 @router.post("/{project_id}/details/imgs", response_model=API_OK)
 def post_project_img(project_id: str, img: UploadFile, x_auth_token: Optional[str] = Header(None)):
@@ -75,10 +75,10 @@ def get_project_required_spec(project_id: str):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        data = Project(project_id).get_required_spec()
+        required_spec = Project(project_id).get_required_spec()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to get project required spec")
-    return [SimpleSpecResponse(spec_id=key, data=value) for key, value in data.items()]
+    return [SimpleSpecResponse(spec_id = key, data=value) for key, value in required_spec.items()]
 
 @router.delete("/{project_id}/details/required_spec/{required_spec_id}", response_model=API_OK)
 def delete_project_required_spec(project_id: str, required_spec_id: str, x_auth_token: Optional[str] = Header(None)):

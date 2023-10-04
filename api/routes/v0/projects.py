@@ -27,20 +27,20 @@ router = APIRouter()
 @router.get("/", response_model=list[ProjectSummary])
 def get_projects():
     try:
-        data = Project.get_project()
+        summary = Project.get_project()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to get projects")
-    return [ProjectSummary(id = key, **value) for key, value in data.items()]
+    return [ProjectSummary(id = key, **value) for key, value in summary.items()]
 
 @router.get("/{project_id}", response_model=ProjectInfo)
 def get_project(project_id: str):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
-        data = Project(project_id).get_info()
+        info = Project(project_id).get_info()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to get projects")
-    return ProjectInfo(id=project_id, **data)
+    return info
 
 @router.post("/", response_model=ProjectSimpleResponse)
 def post_project(req: ProjectRequest, x_auth_token: Optional[str] = Header(None)):
