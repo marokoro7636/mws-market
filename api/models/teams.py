@@ -35,11 +35,11 @@ class Teams:
             }
         )
         for user_id in req.members:
-            db.collection("affiliations").document(user_id).update(
+            db.collection("affiliations").document(user_id).set(
                 {
                     "team": firestore.firestore.ArrayUnion([id])
                 }
-            )
+            , merge=True)
         return Teams(id = id)
 
     @staticmethod
@@ -77,11 +77,11 @@ class Teams:
                 "members": firestore.firestore.ArrayUnion([user_id])
             }
         )
-        db.collection("affiliations").document(user_id).update(
+        db.collection("affiliations").document(user_id).set(
             {
                 "team": firestore.firestore.ArrayUnion([self.id])
             }
-        )
+        , merge=True)
 
     def update_name(self, name: str):
         db = firestore.client()
