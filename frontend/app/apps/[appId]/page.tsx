@@ -72,17 +72,17 @@ export default function Page({params}: { params: { appId: string } }) {
     const onDropIcon = useCallback((acceptedFiles: File[]) => {
         setAppIcon(acceptedFiles[0])
         setAppInfo({...appInfo, icon: window.URL.createObjectURL(acceptedFiles[0])})
-    }, [])
+    }, [appIcon, appInfo])
 
     const onDropSs = useCallback((acceptedFiles: File[]) => {
         setAppScreenshot([...appScreenshot, acceptedFiles[0]])
         const newScreenshotUrl = [...appInfo.details.imgScreenshot, window.URL.createObjectURL(acceptedFiles[0])]
         const newDetails = {...appInfo.details, imgScreenshot: newScreenshotUrl}
         setAppInfo({...appInfo, details: newDetails})
-    }, [])
+    }, [appScreenshot, appInfo])
 
     const {getRootProps: getRootPropsIcon, getInputProps: getInputPropsIcon} = useDropzone({onDrop: onDropIcon})
-    const {getRootProps: getRootPropsSs, getInputProps: getInputPropsSs} = useDropzone({onDrop: onDropSs, noDrag: true, noClick: appInfo.details.imgScreenshot.length > 5})
+    const {getRootProps: getRootPropsSs, getInputProps: getInputPropsSs, open} = useDropzone({onDrop: onDropSs, noDrag: true, noClick: true})
 
     const onSaveAppInfo = () => {
         if (appNameRef.current?.value != appInfo.name) {
@@ -181,7 +181,7 @@ export default function Page({params}: { params: { appId: string } }) {
                     {isEditable &&
                         <div {...getRootPropsSs()}>
                             <input {...getInputPropsSs()}/>
-                            <IconButton size="large" sx={{height: 50}} disabled={appInfo.details.imgScreenshot.length > 5}>
+                            <IconButton size="large" onClick={open} sx={{height: 50}} disabled={appInfo.details.imgScreenshot.length >= 5}>
                                 <AddCircleOutlineIcon/>
                             </IconButton>
                         </div>
