@@ -19,7 +19,6 @@ const ScreenshotCarousel = ({imgList, editable, onDelete}: ScreenshotCarouselPro
         <AliceCarousel
             mouseTracking
             autoWidth
-            infinite={!editable}
             disableButtonsControls
             items={
                 imgList.map((item, i) => (

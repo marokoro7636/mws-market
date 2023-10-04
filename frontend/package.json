@@ -26,6 +26,7 @@
     "react": "18.2.0",
     "react-alice-carousel": "^2.7.1",
     "react-dom": "18.2.0",
+    "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.46.2",
     "react-material-ui-carousel": "^3.4.2",
     "tailwindcss": "3.3.3",
