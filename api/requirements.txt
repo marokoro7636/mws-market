@@ -13,3 +13,8 @@ google-cloud-storage
 # Lint
 flake8
 black
+
+# OpenAI
+openai
+langchain
+youtube-transcript-api
