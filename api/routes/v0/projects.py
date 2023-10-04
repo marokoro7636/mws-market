@@ -17,6 +17,7 @@ from models.requests import (
 import routes.v0.project_info as project_info
 import routes.v0.project_details as project_details
 import routes.v0.project_review as project_review
+import routes.v0.project_option as project_option
 
 from models.projects import Project
 from models.teams import Teams
@@ -68,3 +69,4 @@ def delete_project(project_id: str, x_auth_token: Optional[str] = Header(None)):
 router.include_router(project_info.router, prefix="", tags=["project_info"])
 router.include_router(project_details.router, prefix="", tags=["project_details"])
 router.include_router(project_review.router, prefix="", tags=["project_review"])
+router.include_router(project_option.router, prefix="", tags=["project_option"])
