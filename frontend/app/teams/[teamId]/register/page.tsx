@@ -102,7 +102,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
         }
         try {
             // プロジェクトID取得
-            const res: { id: string } = await (await fetch("/api/v0/projects", {
+            const res: { id: string } = await (await fetch("/api/v0/projects/", {
                 method: "post",
                 headers: {
                     "x-auth-token": session.access_token as string,
@@ -141,7 +141,9 @@ export default function Page({ params }: { params: { teamId : string } }) {
                 await fetch(`/api/v0/projects/${projectId}/details/install`, {
                     method: "post",
                     headers: {
-                        "x-auth-token": session.access_token as string
+                        "x-auth-token": session.access_token as string,
+                        "Content-Type": "application/json"
+
                     },
                     body: JSON.stringify({
                         method: appInstallMethodRef.current?.value,
@@ -157,7 +159,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
                 await fetch(`/api/v0/projects/${projectId}/img`, {
                     method: "post",
                     headers: {
-                        "x-auth-token": session.access_token as string
+                        "x-auth-token": session.access_token as string,
                     },
                     body: sendIcon
                 })
@@ -170,7 +172,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
                     await fetch(`/api/v0/projects/${projectId}/details/imgs`, {
                         method: "post",
                         headers: {
-                            "x-auth-token": session.access_token as string
+                            "x-auth-token": session.access_token as string,
                         },
                         body: sendScreenshot
                     })
@@ -208,7 +210,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
                             <Box sx={{ position: "relative" }}>
                                 {appIcon ?
                                     <img src={appIcon.url} alt="icon"
-                                      style={{width: iconConfig.width, height: iconConfig.height}}/> :
+                                         style={{width: iconConfig.width, height: iconConfig.height}}/> :
                                     <Box sx={{width: iconConfig.width, height: iconConfig.height}}></Box>
                                 }
                                 <Box sx={{ bgcolor: "#cccccc", opacity: 0.7, width: iconConfig.width, height: iconConfig.height, position: "absolute", top: 0, display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -267,11 +269,10 @@ export default function Page({ params }: { params: { teamId : string } }) {
                     </div>
                     <ScreenshotCarousel imgList={appScreenshot.map((item) => item.url)} editable={true}
                                         onDelete={onDeleteScreenshot} />
-
                 </Stack>
                 <Stack spacing={2} mt={5}>
                     <Typography variant="h4">紹介動画 (YouTube URL)</Typography>
-                        <TextField variant="outlined" inputRef={appYoutubeRef} sx={{ width: 500 }} />
+                    <TextField variant="outlined" inputRef={appYoutubeRef} sx={{ width: 500 }} />
                 </Stack>
             </Container>
         </>
