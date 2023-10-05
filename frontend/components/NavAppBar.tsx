@@ -17,7 +17,7 @@ function NavAppBar() {
     const appBarStyle = {
         color: "#003893",
         backgroundColor: "#0055df10",
-        "backdrop-filter": "blur(8px)"
+        backdropFilter: "blur(8px)"
     }
     return (
         <AppBar

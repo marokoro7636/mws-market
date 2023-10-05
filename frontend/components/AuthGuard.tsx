@@ -18,8 +18,6 @@ const AuthGuard = ({ enabled }: AuthGuardProps) => {
     if (status === "loading") {
         return <p>Loading...</p>
     }
-    console.log(session)
-
 
     if (status === "authenticated") {
         return (

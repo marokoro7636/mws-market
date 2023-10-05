@@ -6,8 +6,19 @@ import { grey, pink, teal } from '@mui/material/colors';
 
 import LogoutIcon from '@mui/icons-material/Logout';
 
+import createTheme from '@mui/material/styles/createTheme';
+import { ThemeProvider } from '@mui/material/styles';
+
 // TODO: あとでコンポーネントに分ける
 import TeamInfoEditor from "@/components/TeamInfoEditor"
+
+const theme = createTheme({
+    palette: {
+        primary: {
+            main: "#003893",
+        }
+    },
+});
 
 interface TeamInternalInfo {
     id: string,
@@ -70,27 +81,33 @@ export default function Page({ params }: { params: { teamId: string } }) {
 
     const editModeButton = (isEditable: boolean) => {
         if (isEditable) {
-            return <Button size="small" onClick={() => {
-                if (input_name.current?.value != teamInternalInfo.name) {
-                    console.log("name changed")
-                    // TODO: update name by API
-                    setTeamInternalInfo({ ...teamInternalInfo, name: (input_name.current?.value as string) })
-                }
-                if (input_year.current?.value != teamInternalInfo.year) {
-                    console.log("year changed")
-                    setTeamInternalInfo({ ...teamInternalInfo, year: (input_year.current?.value as string) })
-                }
-                if (input_description.current?.value != teamInternalInfo.description) {
-                    console.log("description changed")
-                    setTeamInternalInfo({ ...teamInternalInfo, description: (input_description.current?.value as string) })
-                }
-                // TODO: 問題があればエラーを表示して編集状態を維持する
-                setEditable(false)
-            }}>Save</Button>
+            return <Button size="small"
+                color="primary" variant="contained" disableElevation={true}
+                onClick={() => {
+                    if (input_name.current?.value != teamInternalInfo.name) {
+                        console.log("name changed")
+                        // TODO: update name by API
+                        setTeamInternalInfo({ ...teamInternalInfo, name: (input_name.current?.value as string) })
+                    }
+                    if (input_year.current?.value != teamInternalInfo.year) {
+                        console.log("year changed")
+                        setTeamInternalInfo({ ...teamInternalInfo, year: (input_year.current?.value as string) })
+                    }
+                    if (input_description.current?.value != teamInternalInfo.description) {
+                        console.log("description changed")
+                        setTeamInternalInfo({ ...teamInternalInfo, description: (input_description.current?.value as string) })
+                    }
+                    // TODO: 問題があればエラーを表示して編集状態を維持する
+                    setEditable(false)
+                }}>Save</Button>
         }
-        return <Button size="small" onClick={() => {
-            setEditable(true)
-        }}>Edit</Button>
+        return <Button
+            size="small"
+            color="primary" variant="contained" disableElevation={true}
+            onClick={() => {
+                setEditable(true)
+            }}>Edit
+        </Button>
     }
 
     // TODO: フロントで生成すべきではないが、とりあえず
@@ -101,152 +118,155 @@ export default function Page({ params }: { params: { teamId: string } }) {
     }
 
     return (
-        <div>
-            {/* TODO: 背景に薄く色づける */}
-            <Container sx={{ mt: 3, bgcolor: grey[100] }}>
-                <Grid container alignItems="center">
-                    <Grid item xs={6}>
-                        <Box>
-                            <Typography variant="subtitle1">{teamInternalInfo.year}</Typography>
-                            <Typography variant="h3">{teamInternalInfo.name}</Typography>
-                        </Box>
+        <Container sx={{ p: 3 }}>
+
+            <Typography variant="subtitle1">{teamInternalInfo.year}</Typography>
+            <Typography variant="h3">{teamInternalInfo.name}</Typography>
+
+            <Card sx={{ mt: 5, p: 3, "border": "1px solid #0055df50", }} elevation={0}>
+                <CardHeader
+                    title="Team Info"
+                />
+                <CardContent>
+                    <Grid container spacing={2} columns={{ xs: 3, sm: 8, md: 12 }}>
+                        <Grid item xs={3} md={3}>
+                            Team Name :
+                        </Grid>
+                        <Grid item xs={3} md={9}>
+                            {editableField(input_name, teamInternalInfo.name, isEditable)}
+                        </Grid>
+                        <Grid item xs={3} md={3}>
+                            Year:
+                        </Grid>
+                        <Grid item xs={3} md={9}>
+                            {/* Year must be fixed after linked  */}
+                            {editableField(input_year, teamInternalInfo.year, isEditable)}
+                        </Grid>
+                        <Grid item xs={3} md={3}>
+                            Description:
+                        </Grid>
+                        <Grid item xs={3} md={9}>
+                            {editableArea(input_description, teamInternalInfo.description, isEditable)}
+                        </Grid>
+                        <Grid item xs={3} md={3}>
+                            Team Secret:
+                        </Grid>
+                        <Grid item md={9}>
+                            {/* 変更しないので最初のInterfaceでOK */}
+                            <Typography fontFamily='Ubuntu Mono'
+                                bgcolor={grey[300]} color={pink[500]}
+                                sx={{
+                                    padding: '8px', borderRadius: '10px',
+                                    wordBreak: "break-all"
+                                }}
+                            >
+                                {teamInternalInfoMock.team_secret}
+                            </Typography>
+
+                        </Grid>
                     </Grid>
-                </Grid>
-                <Card sx={{ minWidth: 275 }}>
-                    <CardHeader
-                        title="Team Info"
-                    />
-                    <CardContent>
-                        <Grid container spacing={2}>
-                            <Grid item xs={3}>
-                                Team Name :
-                            </Grid>
-                            <Grid item xs={9}>
-                                {editableField(input_name, teamInternalInfo.name, isEditable)}
-                            </Grid>
-                            <Grid item xs={3}>
-                                Year:
-                            </Grid>
-                            <Grid item xs={9}>
-                                {/* Year must be fixed after linked  */}
-                                {editableField(input_year, teamInternalInfo.year, isEditable)}
-                            </Grid>
-                            <Grid item xs={3}>
-                                Description:
-                            </Grid>
-                            <Grid item xs={9}>
-                                {editableArea(input_description, teamInternalInfo.description, isEditable)}
-                            </Grid>
-                            <Grid item xs={3}>
-                                Team Secret:
-                            </Grid>
-                            <Grid item xs={9}>
-                                {/* 変更しないので最初のInterfaceでOK */}
-                                <Typography component="span" fontFamily='Ubuntu Mono' bgcolor={grey[300]} color={pink[500]} sx={{ padding: '8px', borderRadius: '10px' }}>
-                                    {teamInternalInfoMock.team_secret}
-                                </Typography>
-
-                            </Grid>
-                        </Grid>
-                    </CardContent>
-                    <CardActions>
-                        <Grid container justifyContent="flex-end">
+                </CardContent>
+                <CardActions>
+                    <Grid container justifyContent="flex-end">
+                        <ThemeProvider theme={theme}>
                             {editModeButton(isEditable)}
+                        </ThemeProvider>
+                    </Grid>
+                </CardActions>
+            </Card>
+            <Card sx={{ mt: 5, p: 3, "border": "1px solid #0055df50", }} elevation={0}>
+                <CardHeader
+                    title="Members"
+                />
+                <CardContent>
+                    <List >
+                        <ListItem
+                            secondaryAction={
+                                <IconButton edge="end" aria-label="delete">
+                                    <LogoutIcon />
+                                </IconButton>
+                            }
+                        >
+                            <ListItemAvatar>
+                                <Avatar
+                                // src="/public/placeholder.jpg"
+                                />
+                            </ListItemAvatar>
+                            <ListItemText
+                                primary="Name1"
+                            />
+                        </ListItem>
+                        <ListItem
+                            secondaryAction={
+                                <IconButton edge="end" aria-label="delete">
+                                    <LogoutIcon />
+                                </IconButton>
+                            }
+                        >
+                            <ListItemAvatar>
+                                <Avatar
+                                // src="/public/placeholder.jpg"
+                                />
+                            </ListItemAvatar>
+                            <ListItemText
+                                primary="Name2"
+                            />
+                        </ListItem>
+                        <ListItem
+                            secondaryAction={
+                                <IconButton edge="end" aria-label="delete">
+                                    <LogoutIcon />
+                                </IconButton>
+                            }
+                        >
+                            <ListItemAvatar>
+                                <Avatar
+                                // src="/public/placeholder.jpg"
+                                />
+                            </ListItemAvatar>
+                            <ListItemText
+                                primary="Name3"
+                            />
+                        </ListItem>
+                    </List>
+                    <Typography sx={{ pb: 2 }}>
+                        メンバーに以下のリンクを共有し，招待してください．
+                    </Typography>
+                    <Typography fontFamily='Ubuntu Mono' bgcolor={grey[300]} color={teal[500]} sx={{ padding: '8px', borderRadius: '10px' }}>
+                        {generateInviteLinkMock()}
+                    </Typography>
+                </CardContent>
+            </Card>
+            <Card sx={{ mt: 5, p: 3, "border": "1px solid #0055df50", }} elevation={0}>
+                <CardHeader
+                    title="History"
+                />
+                <CardContent>
+                    <Typography sx={{ pb: 4 }}>
+                        過去のチームのsecretを設定することで，継承されたチームであることを表現できます(仮文)
+                    </Typography>
+                    <Grid container spacing={2} alignItems="center">
+                        <Grid item md={6}>
+                            <Typography align="center" variant="h5" >
+                                リンク済み： Team {parseInt(teamInternalInfoMock.id) - 1}
+                            </Typography>
                         </Grid>
-                    </CardActions>
-                </Card>
-                <Card sx={{ mt: 5 }}>
-                    <CardHeader
-                        title="Members"
-                    />
-                    <CardContent>
-                        <List >
-                            <ListItem
-                                secondaryAction={
-                                    <IconButton edge="end" aria-label="delete">
-                                        <LogoutIcon />
-                                    </IconButton>
-                                }
-                            >
-                                <ListItemAvatar>
-                                    <Avatar
-                                    // src="/public/placeholder.jpg"
-                                    />
-                                </ListItemAvatar>
-                                <ListItemText
-                                    primary="Name1"
-                                />
-                            </ListItem>
-                            <ListItem
-                                secondaryAction={
-                                    <IconButton edge="end" aria-label="delete">
-                                        <LogoutIcon />
-                                    </IconButton>
-                                }
-                            >
-                                <ListItemAvatar>
-                                    <Avatar
-                                    // src="/public/placeholder.jpg"
-                                    />
-                                </ListItemAvatar>
-                                <ListItemText
-                                    primary="Name2"
-                                />
-                            </ListItem>
-                            <ListItem
-                                secondaryAction={
-                                    <IconButton edge="end" aria-label="delete">
-                                        <LogoutIcon />
-                                    </IconButton>
-                                }
-                            >
-                                <ListItemAvatar>
-                                    <Avatar
-                                    // src="/public/placeholder.jpg"
-                                    />
-                                </ListItemAvatar>
-                                <ListItemText
-                                    primary="Name3"
-                                />
-                            </ListItem>
-                        </List>
-                        <Typography sx={{ pb: 2 }}>
-                            メンバーに以下のリンクを共有し，招待してください．
-                        </Typography>
-                        <Typography fontFamily='Ubuntu Mono' bgcolor={grey[300]} color={teal[500]} sx={{ padding: '8px', borderRadius: '10px' }}>
-                            {generateInviteLinkMock()}
-                        </Typography>
-                    </CardContent>
-                </Card>
-                <Card sx={{ mt: 5 }}>
-                    <CardHeader
-                        title="History"
-                    />
-                    <CardContent>
-                        <Typography sx={{ pb: 4 }}>
-                            過去のチームのsecretを設定することで，継承されたチームであることを表現できます(仮文)
-                        </Typography>
-                        <Grid container spacing={2} alignItems="center">
-                            <Grid item xs={6}>
-                                <Typography align="center" variant="h5" >
-                                    リンク済み： Team {parseInt(teamInternalInfoMock.id) - 1}
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={5}>
-                                <TextField
-                                    fullWidth
-                                    disabled
-                                    defaultValue="cHZmydlYzXN2YdOPmFWf"
-                                />
-                            </Grid>
-                            <Grid item xs={1}>
+                        <Grid item md={5}>
+                            <TextField
+                                fullWidth
+                                disabled
+                                defaultValue="cHZmydlYzXN2YdOPmFWf"
+                            />
+                        </Grid>
+                        <Grid item md={1}>
+                            <ThemeProvider theme={theme}>
                                 <Button disabled variant="contained">設定</Button>
-                            </Grid>
+                            </ThemeProvider>
                         </Grid>
+                    </Grid>
 
-                    </CardContent>
-                </Card>
-            </Container>
-        </div>
+                </CardContent>
+            </Card>
+        </Container>
     );
 }
