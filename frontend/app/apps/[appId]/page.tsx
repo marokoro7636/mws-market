@@ -244,12 +244,17 @@ export default function Page({params}: { params: { appId: string } }) {
                     {isEditable ?
                         <TextField size="small" variant="outlined" inputRef={appYoutubeRef}
                                    defaultValue={appInfo.youtube} sx={{width: 500}}/> :
-                        <Box className="video">
-                            <iframe width="560" height="315" src={convertYoutubeLink(appInfo.youtube)}
-                                    title="YouTube video player" frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                    allowFullScreen></iframe>
+                        <Box sx={{display: "flex", justifyContent: "center"}}>
+                            <Box sx={{width: 0.7}}>
+                                <Box className="video">
+                                    <iframe width="560" height="315" src={convertYoutubeLink(appInfo.youtube)}
+                                            title="YouTube video player" frameBorder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                            allowFullScreen></iframe>
+                                </Box>
+                            </Box>
                         </Box>
+
                     }
                 </Stack>
             </Container>
