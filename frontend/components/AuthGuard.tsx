@@ -19,28 +19,15 @@ const AuthGuard = ({ enabled }: AuthGuardProps) => {
         return <p>Loading...</p>
     }
     console.log(session)
-    const router = useRouter();
+
 
     if (status === "authenticated") {
         return (
             <div />
         );
     } else {
-        signIn("slack", { callbackUrl: usePathname() })
+        signIn("slack")
     }
 };
 
 export default AuthGuard;
-
-export const getAccessToken = (): string | undefined => {
-    const { data: session, status } = useSession()
-    if (status === "loading") {
-        return undefined
-    }
-
-    if (status === "authenticated") {
-        return session.access_token
-    } else {
-        return undefined
-    }
-}
