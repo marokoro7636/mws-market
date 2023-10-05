@@ -26,6 +26,7 @@ const ScreenshotCarousel = ({imgList, editable, onDelete}: ScreenshotCarouselPro
             <AliceCarousel
                 mouseTracking
                 autoWidth
+                disableButtonsControls
                 items={items}
             />)
     }
