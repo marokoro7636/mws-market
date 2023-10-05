@@ -36,6 +36,8 @@ export const MypageButton = () => {
     )
 
     if (status === "authenticated") {
+        // for debug
+        console.log(session)
         return LoginedAvator
     } else {
         return LoginAvator
