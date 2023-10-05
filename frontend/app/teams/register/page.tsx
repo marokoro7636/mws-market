@@ -56,7 +56,7 @@ export default function Page() {
             return null
         }
         const year = parseFloat(data.year)
-        if (!year || !(2015 < year && year < 2030)) {
+        if (!year || !(2015 <= year && year <= 2030)) {
             enqueueSnackbar("Year should be between 2015 and 2030", { variant: "error" })
             return null
         }

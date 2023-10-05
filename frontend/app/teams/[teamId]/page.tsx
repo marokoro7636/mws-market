@@ -1,8 +1,13 @@
 "use client"
 
-import React, { Suspense, useState, useRef, MutableRefObject } from 'react'
+import React, { Suspense, useState, useRef, MutableRefObject, useEffect } from 'react'
 import { Box, Button, Container, Grid, List, ListItem, ListItemAvatar, ListItemText, Avatar, IconButton, Typography, Card, CardContent, CardActions, CardHeader, TextField, Chip } from "@mui/material";
 import { grey, pink, teal } from '@mui/material/colors';
+
+import { Session } from "next-auth"
+import { useSession } from "next-auth/react"
+
+import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 
 import LogoutIcon from '@mui/icons-material/Logout';
 
@@ -11,6 +16,8 @@ import { ThemeProvider } from '@mui/material/styles';
 
 // TODO: あとでコンポーネントに分ける
 import TeamInfoEditor from "@/components/TeamInfoEditor"
+
+import AuthGuard from "@/components/AuthGuard";
 
 const theme = createTheme({
     palette: {
@@ -21,32 +28,48 @@ const theme = createTheme({
 });
 
 interface TeamInternalInfo {
-    id: string,
     name: string,
     year: string,
     description: string,
-    team_secret: string,
-    app_id: string,
+    members: string[],
+    secret: string,
+    previous: string,
 }
 
 export default function Page({ params }: { params: { teamId: string } }) {
-    const teamId = params.teamId
+    const { data: _session, status } = useSession()
 
-    const teamInternalInfoMock: TeamInternalInfo = {
-        id: teamId,
-        name: `Team ${teamId}`,
-        year: `2023`,
-        description: `description ${teamId} `.repeat(50),
-        team_secret: "5vxZLlInRMrR0CM5G8qG",
-        app_id: "0",
-    }
+    const teamId = params.teamId
 
     const input_name = useRef<HTMLInputElement>()
     const input_description = useRef<HTMLInputElement>()
     const input_year = useRef<HTMLInputElement>()
 
     const [isEditable, setEditable] = useState<boolean>(false)
-    const [teamInternalInfo, setTeamInternalInfo] = useState<TeamInternalInfo>(teamInternalInfoMock)
+    const [teamInternalInfo, setTeamInternalInfo] = useState<TeamInternalInfo>({} as TeamInternalInfo)
+
+    useEffect(() => {
+        if (status !== "authenticated") {
+            return
+        }
+        const session = _session as Session
+        fetch(`/api/v0/teams/${teamId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "X-AUTH-TOKEN": session?.access_token as string,
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                setTeamInternalInfo(data)
+            })
+    }, [status])
+
+    if (status !== "authenticated") {
+        return <AuthGuard enabled={true} />
+    }
+    const session = _session as Session
 
     const editableField = (inputRef: MutableRefObject<HTMLInputElement | undefined>, defaultValue: string, isEditable: boolean) => {
         if (isEditable) {
@@ -79,25 +102,124 @@ export default function Page({ params }: { params: { teamId: string } }) {
         return <Typography variant="body1">{defaultValue}</Typography>
     }
 
+    const submitName = (name: string) => {
+        if (name === "") {
+            enqueueSnackbar("Team name is required", { variant: "error" })
+            return
+        }
+        return fetch(`/api/v0/teams/${teamId}/name`, {
+            method: 'POST',
+            headers: {
+                "content-type": "application/json",
+                "X-AUTH-TOKEN": session.access_token as string,
+            },
+            body: JSON.stringify({
+                "team_id": teamId,
+                "name": name,
+            }),
+        }).then((response) => {
+            if (response.status === 200) {
+                enqueueSnackbar("Name updated successfully", { variant: "success" })
+                return response.json()
+            } else {
+                enqueueSnackbar("Failed to update name", { variant: "error" })
+                return response.json()
+            }
+        }).then((e) => {
+            console.log(e)
+            return e.status === "ok"
+        })
+    }
+
+    const submitYear = (year: string) => {
+        if (year === "") {
+            enqueueSnackbar("Year is required", { variant: "error" })
+            return
+        }
+        const parsed = parseFloat(year)
+        if (!parsed || !(2015 <= parsed && parsed <= 2030)) {
+            enqueueSnackbar("Year should be between 2015 and 2030", { variant: "error" })
+            return null
+        }
+        return fetch(`/api/v0/teams/${teamId}/year`, {
+            method: 'POST',
+            headers: {
+                "content-type": "application/json",
+                "X-AUTH-TOKEN": session.access_token as string,
+            },
+            body: JSON.stringify({
+                "team_id": teamId,
+                "year": year,
+            }),
+        }).then((response) => {
+            if (response.status === 200) {
+                enqueueSnackbar("Year updated successfully", { variant: "success" })
+                return response.json()
+            } else {
+                enqueueSnackbar("Failed to update year", { variant: "error" })
+                return response.json()
+            }
+        }).then((e) => {
+            console.log(e)
+            return e.status === "ok"
+        })
+    }
+
+    const submitDescription = (description: string) => {
+        if (description === "") {
+            enqueueSnackbar("Description is required", { variant: "error" })
+            return
+        }
+        return fetch(`/api/v0/teams/${teamId}/description`, {
+            method: 'POST',
+            headers: {
+                "content-type": "application/json",
+                "X-AUTH-TOKEN": session.access_token as string,
+            },
+            body: JSON.stringify({
+                "team_id": teamId,
+                "description": description,
+            }),
+        }).then((response) => {
+            if (response.status === 200) {
+                enqueueSnackbar("Description updated successfully", { variant: "success" })
+                return response.json()
+            } else {
+                enqueueSnackbar("Failed to update description", { variant: "error" })
+                return response.json()
+            }
+        }).then((e) => {
+            console.log(e)
+            return e.status === "ok"
+        })
+    }
+
     const editModeButton = (isEditable: boolean) => {
         if (isEditable) {
             return <Button size="small"
                 color="primary" variant="contained" disableElevation={true}
-                onClick={() => {
+                onClick={async () => {
                     if (input_name.current?.value != teamInternalInfo.name) {
                         console.log("name changed")
-                        // TODO: update name by API
-                        setTeamInternalInfo({ ...teamInternalInfo, name: (input_name.current?.value as string) })
+                        const res = await submitName(input_name.current?.value as string)
+                        if (res) {
+                            setTeamInternalInfo({ ...teamInternalInfo, name: (input_name.current?.value as string) })
+                        }
                     }
                     if (input_year.current?.value != teamInternalInfo.year) {
                         console.log("year changed")
-                        setTeamInternalInfo({ ...teamInternalInfo, year: (input_year.current?.value as string) })
+                        const res = await submitYear(input_year.current?.value as string)
+                        if (res) {
+                            setTeamInternalInfo({ ...teamInternalInfo, year: (input_year.current?.value as string) })
+                        }
                     }
                     if (input_description.current?.value != teamInternalInfo.description) {
                         console.log("description changed")
-                        setTeamInternalInfo({ ...teamInternalInfo, description: (input_description.current?.value as string) })
+                        const res = await submitDescription(input_description.current?.value as string)
+                        if (res) {
+                            setTeamInternalInfo({ ...teamInternalInfo, description: (input_description.current?.value as string) })
+                        }
                     }
-                    // TODO: 問題があればエラーを表示して編集状態を維持する
                     setEditable(false)
                 }}>Save</Button>
         }
@@ -110,11 +232,8 @@ export default function Page({ params }: { params: { teamId: string } }) {
         </Button>
     }
 
-    // TODO: フロントで生成すべきではないが、とりあえず
     const generateInviteLinkMock = () => {
-        const seed = teamInternalInfo.team_secret + teamInternalInfo.app_id
-        const hash = seed // HASH書くのがだるかった
-        return `https://mws2023.pfpf.dev/teams/invitation?token=${hash}`
+        return `https://mws2023.pfpf.dev/teams/invitation?secret=${teamInternalInfo.secret}`
     }
 
     return (
@@ -160,7 +279,7 @@ export default function Page({ params }: { params: { teamId: string } }) {
                                     wordBreak: "break-all"
                                 }}
                             >
-                                {teamInternalInfoMock.team_secret}
+                                {teamInternalInfo.secret}
                             </Typography>
 
                         </Grid>
@@ -248,7 +367,7 @@ export default function Page({ params }: { params: { teamId: string } }) {
                     <Grid container spacing={2} alignItems="center">
                         <Grid item md={6}>
                             <Typography align="center" variant="h5" >
-                                リンク済み： Team {parseInt(teamInternalInfoMock.id) - 1}
+                                リンク済み： {teamInternalInfo.previous}
                             </Typography>
                         </Grid>
                         <Grid item md={5}>

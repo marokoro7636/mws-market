@@ -19,6 +19,7 @@ import { ThemeProvider } from '@mui/material/styles';
 
 import AddIcon from '@mui/icons-material/Add';
 import { useRouter } from 'next/navigation';
+import { CardActions } from '@mui/material';
 
 const theme = createTheme({
     palette: {
@@ -110,7 +111,12 @@ export default function Home() {
                     </CardHeader>
                     <CardContent sx={{ px: 5, pb: 5, bgcolor: grey[200] }}>
                         {myTeams.map((e) => (
-                            <Card sx={{ m: 2, p: 1 }} key={e.id}>
+                            <Card sx={{
+                                m: 2, p: 1,
+                                ':hover': {
+                                    boxShadow: 20, // theme.shadows[20]
+                                },
+                            }} key={e.id}>
                                 <CardHeader
                                     title={
                                         <>
@@ -125,9 +131,12 @@ export default function Home() {
                                 />
                                 <CardContent>
                                     <Typography sx={{ p: 1 }}>
-
+                                        {e.description}
                                     </Typography>
                                 </CardContent>
+                                <CardActions onClick={() => { 
+                                    router.push(`/teams/${e.id}`)
+                                }} />
                             </Card>
                         ))}
                     </CardContent>
