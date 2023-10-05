@@ -5,29 +5,50 @@ from fastapi import Header
 
 from helper.auth import isAuthed
 from helper.response import API_OK
-from models.requests import Team, TeamSimpleResponse
+from models.requests import (
+    Team,
+    TeamSimpleResponse,
+    TeamRequest,
+    TeamResponse
+)
 from models.teams import Teams
+from models.users import Users
 
 
 router = APIRouter()
 
-@router.get("/", response_model=list[Team])
+@router.get("/", response_model=list[TeamResponse])
 def get_teams():
     try:
         data = Teams.get_teams()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to get teams")
-    return data
+    return [TeamResponse(id=key, **value) for key, value in data.items()]
 
 @router.post("/", response_model=TeamSimpleResponse)
-def post_team(team: Team, x_auth_token: Optional[str] = Header(None)):
-    if not isAuthed(team.members, x_auth_token):
+def post_team(req: TeamRequest, x_auth_token: Optional[str] = Header(None)):
+    if not isAuthed(req.members, x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
+    if not Users.are_exist(req.members):
+        raise StarletteHTTPException(status_code=404, detail="User not found")
     try:
-        res = Teams.add_team(team)
+        res = Teams.add_team(req)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post team")
-    return TeamSimpleResponse(team_id = res.id)
+    return TeamSimpleResponse(id = res.id)
+
+@router.get("/{team_id}", response_model=Team)
+def get_team(team_id: str, x_auth_token: Optional[str] = Header(None)):
+    if not Teams.is_exist(team_id):
+        raise StarletteHTTPException(status_code=404, detail="Team not found")
+    if not isAuthed(Teams(team_id).get_members(), x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
+
+    try:
+        data = Teams(team_id).get()
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to get teams")
+    return Team(**data)
 
 @router.post("/{team_id}/name", response_model=API_OK)
 def post_team_name(team_id: str, name: str, x_auth_token: Optional[str] = Header(None)):
@@ -78,22 +99,58 @@ def delete_team_members(team_id: str, member_id: str, x_auth_token: Optional[str
         raise StarletteHTTPException(status_code=500, detail="Failed to delete team members")
     return API_OK()
 
+@router.post("/{team_id}/previous", response_model=API_OK)
+def post_team_previous(team_id: str, previous_secret: str, x_auth_token: Optional[str] = Header(None)):
+    if not Teams.is_exist(team_id):
+        raise StarletteHTTPException(status_code=404, detail="Team not found")
+    if not isAuthed(Teams(team_id).get_members(), x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
+
+    previous =  Teams.get_by_secret(previous_secret)
+    if previous is None:
+        raise StarletteHTTPException(status_code=404, detail="Team not found")
+    try:
+        Teams(team_id).set_previous(previous)
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to post team previous")
+    return API_OK()
+
+@router.delete("/{team_id}/previous", response_model=API_OK)
+def delete_team_previous(team_id: str, x_auth_token: Optional[str] = Header(None)):
+    if not Teams.is_exist(team_id):
+        raise StarletteHTTPException(status_code=404, detail="Team not found")
+    if not isAuthed(Teams(team_id).get_members(), x_auth_token):
+        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
+    try:
+        Teams(team_id).delete_previous()
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Failed to delete team previous")
+    return API_OK()
+
 @router.get("/invitation/{team_secret}", response_model=Team)
 def get_team_with_secret(team_secret: str):
+    id =  Teams.get_by_secret(team_secret)
+    if id is None:
+        raise StarletteHTTPException(status_code=404, detail="Team not found")
     try:
-        data = Teams.get_by_secret(team_secret)
+        data = Teams(id).get()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to get teams")
     return Team(**data)
 
 @router.post("/invitation/{team_secret}", response_model=API_OK)
-def post_team_members(team_secret: str, team_id: str, member_id: str, x_auth_token: Optional[str] = Header(None)):
-    if not Teams.is_exist(team_id):
-        raise StarletteHTTPException(status_code=404, detail="Team not found")
+def post_team_members(team_secret: str, member_id: str, x_auth_token: Optional[str] = Header(None)):
     if not isAuthed([member_id], x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
+    if not Users.is_exist(member_id):
+        raise StarletteHTTPException(status_code=404, detail="User not found")
+
+    id =  Teams.get_by_secret(team_secret)
+    if id is None:
+        raise StarletteHTTPException(status_code=404, detail="Team not found")
+
     try:
-        Teams(team_id).add_member(team_secret, member_id)
+        Teams(id).add_member(member_id)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post team members")
     return API_OK()

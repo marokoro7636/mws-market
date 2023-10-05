@@ -1,7 +1,7 @@
 # Firebase AuthのidTokenから認証に関する情報を取得する
 from firebase_admin import auth
 from typing import Optional
-from models.teams import Teams
+from firebase_admin import firestore
 
 class AuthedUser:
     id: str
@@ -9,14 +9,14 @@ class AuthedUser:
     role: str
     pass
 
-def isAuthed(member: list[str], idToken: Optional[str]):
+def isAuthed(members: list[str], idToken: Optional[str]):
     if idToken is None:
         return True
         # return False
     try:
-        decoded_token = auth.verify_id_token(idToken)
-        user_id = decoded_token['user_id']
-        if user_id in  member:
+        db = firestore.client()
+        doc = db.collection("session2uid").document(idToken).get()
+        if doc.exists and doc.get("uid") in members:
             return True
         else:
             return False

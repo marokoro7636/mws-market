@@ -12,7 +12,8 @@ services:
       - "18181:18181"
     volumes:
       - "./api:/app"
-      - "./creds/:/app/creds"
+      - "./creds/.env.backend:/app/creds/.env"
+      - "./creds/firebase.json:/app/creds/firebase.json"
       # - "./public:/app/public"
     environment:
       - "DOT_ENV=/app/creds/.env"
@@ -31,6 +32,9 @@ services:
     image: mws-market-frontend:latest
     ports:
       - "18182:3000"
+    volumes:
+      - "./creds/.env.frontend:/app/.env"
+      - "./creds/firebase.json:/app/firebase.json"
     command: sh -c 'npm run build && npm run start'
   frontend-dev:
     profiles: ["dev"]
@@ -42,6 +46,8 @@ services:
       - "18182:3000"
     volumes:
       - "./frontend:/app"
+      - "./creds/.env.frontend:/app/.env"
+      - "./creds/firebase.json:/app/firebase.json"
     command: npm run dev
 
   rev-proxy:

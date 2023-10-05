@@ -2,12 +2,9 @@ from firebase_admin import firestore
 from helper.util import sha1_hash, make_secret
 import datetime
 from models.requests import (
-    ProjectInfo,
-    ProjectRequest,
-    RequiredSpec,
-    SimpleSpecResponse,
     Team,
     TeamSimpleResponse,
+    TeamRequest
 )
 
 
@@ -16,24 +13,33 @@ class Teams:
         self.id = id
 
     @staticmethod
-    def add_team(team: Team):
+    def add_team(req: TeamRequest):
         # IDは適切に生成する
         timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        id = sha1_hash(team.name+timestamp)
+        id = sha1_hash(req.name+timestamp)
         db = firestore.client()
+        secret = make_secret(20)
         db.collection("teams").document(id).set(
             {
-                "name": team.name,
-                "year": team.year,
-                "description": team.description,
-                "members": team.members,
+                "name": req.name,
+                "year": req.year,
+                "description": req.description,
+                "members": req.members,
+                "secret": secret,
+                "previous": None
             }
         )
-        db.collection("team_secrets").document(make_secret(20)).set(
+        db.collection("secrets").document(secret).set(
             {
                 "id": id
             }
         )
+        for user_id in req.members:
+            db.collection("affiliations").document(user_id).set(
+                {
+                    "team": firestore.firestore.ArrayUnion([id])
+                }
+            , merge=True)
         return Teams(id = id)
 
     @staticmethod
@@ -49,28 +55,33 @@ class Teams:
     def get_teams():
         db = firestore.client()
         docs = db.collection("teams").stream()
-        data = [Team(**doc.to_dict()) for doc in docs]
+        data = {doc.id: doc.to_dict() for doc in docs}
         return data
 
     @staticmethod
-    def get_by_secret(team_secret: str):
+    def get_by_secret(secret: str):
         db = firestore.client()
-        doc = db.collection("team_secrets").document(team_secret).get()
+        doc = db.collection("secrets").document(secret).get()
         id = doc.get("id")
-        data = db.collection("teams").document(id).get().to_dict()
-        data["secret"] = team_secret
+        return id
+
+    def get(self):
+        db = firestore.client()
+        data = db.collection("teams").document(self.id).get().to_dict()
         return data
 
-    def add_member(self, team_secret: str,  member_id: str):
+    def add_member(self, user_id: str):
         db = firestore.client()
-        doc = db.collection("team_secrets").document(team_secret).get()
-        if self.id != doc.get("id"):
-            raise
         db.collection("teams").document(self.id).update(
             {
-                "members": firestore.firestore.ArrayUnion([member_id])
+                "members": firestore.firestore.ArrayUnion([user_id])
             }
         )
+        db.collection("affiliations").document(user_id).set(
+            {
+                "team": firestore.firestore.ArrayUnion([self.id])
+            }
+        , merge=True)
 
     def update_name(self, name: str):
         db = firestore.client()
@@ -96,14 +107,35 @@ class Teams:
             }
         )
 
-    def delete_member(self, member_id: str):
+    def delete_member(self, user_id: str):
         db = firestore.client()
         data = db.collection("teams").document(self.id).get().to_dict()
         if len(data["members"]) < 2:
             raise
         db.collection("teams").document(self.id).update(
             {
-                "members": firestore.firestore.ArrayRemove([member_id])
+                "members": firestore.firestore.ArrayRemove([user_id])
+            }
+        )
+        db.collection("affiliations").document(user_id).update(
+            {
+                "team": firestore.firestore.ArrayRemove([self.id])
+            }
+        )
+
+    def set_previous(self, previous: str):
+        db = firestore.client()
+        db.collection("teams").document(self.id).update(
+            {
+                "previous": previous,
+            }
+        )
+
+    def delete_previous(self):
+        db = firestore.client()
+        db.collection("teams").document(self.id).update(
+            {
+                "previous": firestore.DELETE_FIELD,
             }
         )
 
