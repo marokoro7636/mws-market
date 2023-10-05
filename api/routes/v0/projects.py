@@ -25,9 +25,15 @@ from models.teams import Teams
 router = APIRouter()
 
 @router.get("/", response_model=list[ProjectSummary])
-def get_projects():
+def get_projects(limit: int = 10, page: int = 1, order: Optional[str] = None):
+    if limit < 1 and limit > 100:
+        raise StarletteHTTPException(status_code=400, detail="Incorrect limit")
+    if page < 1:
+        raise StarletteHTTPException(status_code=400, detail="Incorrect page")
+    if not Project.allow_order(order):
+        raise StarletteHTTPException(status_code=400, detail="Incorrect order")
     try:
-        summary = Project.get_project()
+        summary = Project.get_project(limit, page, order)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to get projects")
     return [ProjectSummary(id = key, **value) for key, value in summary.items()]

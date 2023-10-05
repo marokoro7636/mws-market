@@ -70,6 +70,11 @@ class Teams:
         data = db.collection("teams").document(self.id).get().to_dict()
         return data
 
+    def get_name(self):
+        db = firestore.client()
+        name = db.collection("teams").document(self.id).get().get("name")
+        return name
+
     def add_member(self, user_id: str):
         db = firestore.client()
         db.collection("teams").document(self.id).update(
