@@ -1,6 +1,6 @@
 from firebase_admin import firestore
 from helper.util import sha1_hash
-from helper.sanitize import sanitizing_by_id, sanitizing_by_html, sanitizing_by_len
+from helper.sanitize import sanitizing_id, sanitizing_by_html, sanitizing_str
 import shutil
 import tempfile
 import os
@@ -25,7 +25,7 @@ class Project:
     @staticmethod
     def create(req: ProjectRequest):
         req.name = sanitizing_by_html(req.name)
-        if sanitizing_by_len(req.name, 20):
+        if sanitizing_str(req.name, 20):
             # IDは適切に生成する，timestamp + team + name とか
             timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             id = sha1_hash(req.team + req.name + timestamp)
@@ -46,7 +46,7 @@ class Project:
 
     @staticmethod
     def is_exist(id: str) -> bool:
-        if sanitizing_by_id(id):
+        if sanitizing_id(id):
             db = firestore.client()
             doc = db.collection("projects").document(id).get()
             if doc.exists:
@@ -71,7 +71,7 @@ class Project:
 
     def set_name(self, name: str):
         name = sanitizing_by_html(name)
-        if sanitizing_by_len(name, 20):
+        if sanitizing_str(name, 20):
             db = firestore.client()
             db.collection("projects").document(self.id).update(
                 {
@@ -83,7 +83,7 @@ class Project:
 
     def set_team(self, team: str):
         team = sanitizing_by_html(team)
-        if sanitizing_by_len(team, 20):
+        if sanitizing_str(team, 20):
             db = firestore.client()
             db.collection("projects").document(self.id).update(
                 {
@@ -100,7 +100,7 @@ class Project:
 
     def set_short_description(self, short_description: str):
         short_description = sanitizing_by_html(short_description)
-        if sanitizing_by_len(short_description, 20):
+        if sanitizing_str(short_description, 20):
             db = firestore.client()
             db.collection("projects").document(self.id).set(
                 {
@@ -112,7 +112,7 @@ class Project:
 
     def set_description(self, description: str):
         description = sanitizing_by_html(description)
-        if sanitizing_by_len(description, 20):
+        if sanitizing_str(description, 20):
             db = firestore.client()
             db.collection("projects").document(self.id).set(
                 {
@@ -230,7 +230,7 @@ class Project:
     def add_required_spec(self, required_spec: RequiredSpec):
         required_spec.item = sanitizing_by_html(required_spec.item)
         required_spec.required = sanitizing_by_html(required_spec.required)
-        if sanitizing_by_len(required_spec.item, 20) and sanitizing_by_len(required_spec.required, 20):
+        if sanitizing_str(required_spec.item, 20) and sanitizing_str(required_spec.required, 20):
             db = firestore.client()
             timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             spec_id = sha1_hash(f"{self.id}{required_spec}{timestamp}")
@@ -268,7 +268,7 @@ class Project:
     def add_install(self, install: Install):
         install.method = sanitizing_by_html(install.method)
         install.info = sanitizing_by_html(install.info)
-        if sanitizing_by_len(install.method, 20) and sanitizing_by_len(install.info, 20):
+        if sanitizing_str(install.method, 20) and sanitizing_str(install.info, 20):
             db = firestore.client()
             timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             install_id = sha1_hash(f"{self.id}{install}{timestamp}")
@@ -283,7 +283,7 @@ class Project:
             )
             if install.additional is not None:
                 install.additional = sanitizing_by_html(install.additional)
-                if sanitizing_by_len(install.additional, 20):
+                if sanitizing_str(install.additional, 20):
                     db.collection("projects").document(self.id).update(
                         {
                             f"details.install.{install_id}.additional": install.additional
@@ -305,7 +305,7 @@ class Project:
     ## forjob
     def set_forjob(self, forjob: str):
         forjob = sanitizing_by_html(forjob)
-        if sanitizing_by_len(forjob, 20):
+        if sanitizing_str(forjob, 20):
             db = firestore.client()
             db.collection("projects").document(self.id).update(
                 {
@@ -333,7 +333,7 @@ class Project:
         review.user = sanitizing_by_html(review.user)
         review.title = sanitizing_by_html(review.title)
         review.content = sanitizing_by_html(review.content)
-        if sanitizing_by_len(review.user, 20) and sanitizing_by_len(review.title, 20) and sanitizing_by_len(review.content, 20): 
+        if sanitizing_str(review.user, 20) and sanitizing_str(review.title, 20) and sanitizing_str(review.content, 20): 
             db = firestore.client()
             timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             review_id = sha1_hash(f"{self.id}{review}{timestamp}")

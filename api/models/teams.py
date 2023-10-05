@@ -1,6 +1,6 @@
 from firebase_admin import firestore
 from helper.util import sha1_hash, make_secret
-from helper.sanitize import sanitizing_by_id, sanitizing_by_html, sanitizing_by_len
+from helper.sanitize import sanitizing_id, sanitizing_by_html, sanitizing_str
 import datetime
 from models.requests import (
     Team,
@@ -16,7 +16,11 @@ class Teams:
     @staticmethod
     def add_team(req: TeamRequest):
         req.name = sanitizing_by_html(req.name) # とりあえずこれだけ
-        if sanitizing_by_len(req.name, 20):
+        if req.description is not None:
+            req.description = sanitizing_by_html(req.description)
+            if not sanitizing_str(req.description, 20):
+                raise
+        if sanitizing_str(req.name, 20):
             # IDは適切に生成する
             timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             id = sha1_hash(req.name+timestamp)
@@ -49,7 +53,7 @@ class Teams:
 
     @staticmethod
     def is_exist(team_id: str):
-        if sanitizing_by_id(team_id):
+        if sanitizing_id(team_id):
             db = firestore.client()
             doc = db.collection("teams").document(team_id).get()
             if doc.exists:
@@ -92,7 +96,7 @@ class Teams:
 
     def update_name(self, name: str):
         name = sanitizing_by_html(name)
-        if sanitizing_by_len(name, 20):
+        if sanitizing_str(name, 20):
             db = firestore.client()
             db.collection("teams").document(self.id).update(
                 {
@@ -112,7 +116,7 @@ class Teams:
 
     def update_description(self, description: str):
         description = sanitizing_by_html(description)
-        if sanitizing_by_len(description, 20):
+        if sanitizing_str(description, 20):
             db = firestore.client()
             db.collection("teams").document(self.id).update(
                 {
@@ -140,7 +144,7 @@ class Teams:
 
     def set_previous(self, previous: str):
         previous = sanitizing_by_html(previous)
-        if sanitizing_by_len(previous, 20):
+        if sanitizing_str(previous, 20):
             db = firestore.client()
             db.collection("teams").document(self.id).update(
                 {
