@@ -7,13 +7,11 @@ import { useDropzone } from "react-dropzone";
 import { set } from 'react-hook-form';
 
 interface AppInfo {
-interface AppInfo {
     id: string,
     name: string,
     team: string,
     description: string,
     youtube: string,
-    icon: string,
     icon: string,
     details: {
         imgScreenshot: string[],
@@ -75,7 +73,7 @@ const NullAppData = {
     }
 }
 
-export default function Page({params}: { params: { appId: string } }) {
+export default function Page({ params }: { params: { appId: string } }) {
     const appId = params.appId
 
     const [data, setData] = useState<AppInfoData | null>(null)
@@ -226,118 +224,6 @@ export default function Page({params}: { params: { appId: string } }) {
 
     if (data === null) {
         return <div>loading...</div>
-    }
-
-    const iconConfig = {width: 180, height: 180}
-    const screenshotConfig = {width: 800, height: 450}
-
-    const appNameRef = useRef<HTMLInputElement>()
-    const appDescriptionRef = useRef<HTMLInputElement>()
-    const appYoutubeRef = useRef<HTMLInputElement>()
-
-    const [isEditable, setEditable] = useState<boolean>(false)
-    const [appInfo, setAppInfo] = useState<AppInfo>(appInfoMock)
-    const [prevAppInfo, setPrevAppInfo] = useState<AppInfo>(appInfoMock)
-    const [appIcon, setAppIcon] = useState<File>()
-    const [appScreenshot, setAppScreenshot] = useState<File[]>([])
-
-    const imageSize = async (url: string): Promise<{width: number, height: number}> => {
-        return new Promise((resolve, reject) => {
-            const img = new Image()
-
-            img.onload = () => {
-                const size = {
-                    width: img.naturalWidth,
-                    height: img.naturalHeight,
-                }
-
-                resolve(size)
-            }
-
-            img.onerror = (error) => {
-                reject(error)
-            }
-
-            img.src = url
-        })
-    }
-
-    const onDropIcon = useCallback(async (acceptedFiles: File[]) => {
-        if (acceptedFiles[0].type !== "image/png" && acceptedFiles[0].type !== "image/jpeg") {
-            alert("pngファイルまたはjpegファイルを選択してください")
-            return
-        }
-
-        const url = window.URL.createObjectURL(acceptedFiles[0])
-        const {width, height} = await imageSize(url)
-        if (!(width === iconConfig.width && height === iconConfig.height)) {
-            alert(`"スクリーンショットのサイズは${iconConfig.width}x${iconConfig.height}にしてください`)
-            return
-        }
-
-        setAppIcon(acceptedFiles[0])
-        setAppInfo({...appInfo, icon: url})
-    }, [appIcon, appInfo])
-
-    const onDropSs = useCallback(async (acceptedFiles: File[]) => {
-        if (acceptedFiles[0].type !== "image/png" && acceptedFiles[0].type !== "image/jpeg") {
-            alert("pngファイルまたはjpegファイルを選択してください")
-            return
-        }
-
-        const url = window.URL.createObjectURL(acceptedFiles[0])
-        const {width, height} = await imageSize(url)
-        if (!(width === screenshotConfig.width && height === screenshotConfig.height)) {
-            alert(`画像サイズは${screenshotConfig.width}x${screenshotConfig.height}にしてください`)
-            return
-        }
-
-        setAppScreenshot([...appScreenshot, acceptedFiles[0]])
-        const newScreenshotUrl = [...appInfo.details.imgScreenshot, url]
-        console.log(newScreenshotUrl)
-        const newDetails = {...appInfo.details, imgScreenshot: newScreenshotUrl}
-        setAppInfo({...appInfo, details: newDetails})
-    }, [appScreenshot, appInfo])
-
-    const {getRootProps: getRootPropsIcon, getInputProps: getInputPropsIcon} = useDropzone({onDrop: onDropIcon})
-    const {getRootProps: getRootPropsSs, getInputProps: getInputPropsSs, open} = useDropzone({onDrop: onDropSs, noDrag: true, noClick: true})
-
-    const onSaveAppInfo = () => {
-        if (appNameRef.current?.value != appInfo.name) {
-            console.log("name changed")
-            // TODO: update name by API
-            setAppInfo({...appInfo, name: (appNameRef.current?.value as string)})
-        }
-        if (appDescriptionRef.current?.value != appInfo.description) {
-            console.log("description changed")
-            setAppInfo({...appInfo, description: (appDescriptionRef.current?.value as string)})
-        }
-        if (appYoutubeRef.current?.value != appInfo.youtube && appYoutubeRef.current?.value.startsWith("https://youtu.be/")) {
-            console.log("youtube changed")
-            setAppInfo({...appInfo, youtube: (appYoutubeRef.current?.value as string)})
-        }
-        setEditable(false)
-    }
-
-    const onEditAppInfo = () => {
-        setPrevAppInfo(appInfo)
-        setEditable(true)
-    }
-
-    const onCancelEdit = () => {
-        setAppInfo(prevAppInfo)
-        setEditable(false)
-    }
-
-    const onDeleteScreenshot = (url: string) => {
-        const newScreenshot = appInfo.details.imgScreenshot.filter((item) => item !== url)
-        const newDetails = {...appInfo.details, imgScreenshot: newScreenshot}
-        setAppInfo({...appInfo, details: newDetails})
-    }
-
-    const convertYoutubeLink = (link: string): string => {
-        const youtubeId = link.split("/").slice(-1)[0]
-        return `https://www.youtube.com/embed/${youtubeId}`
     }
 
     return (
