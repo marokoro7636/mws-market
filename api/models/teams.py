@@ -49,7 +49,7 @@ class Teams:
 
     @staticmethod
     def is_exist(team_id: str):
-        if sanitizing_by_id(team_id): # 追加
+        if sanitizing_by_id(team_id):
             db = firestore.client()
             doc = db.collection("teams").document(team_id).get()
             if doc.exists:

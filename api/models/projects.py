@@ -91,7 +91,7 @@ class Project:
                 }
             )
         else:
-            raise # 追加 エラー発生
+            raise
 
     def get_team(self) -> str:
         db = firestore.client()

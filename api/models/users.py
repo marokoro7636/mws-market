@@ -13,7 +13,7 @@ class Users:
 
     @staticmethod
     def is_exist(user_id: str):
-        if sanitizing_by_id(user_id): # 追加
+        if sanitizing_by_id(user_id):
             db = firestore.client()
             doc = db.collection("users").document(user_id).get()
             if doc.exists:
