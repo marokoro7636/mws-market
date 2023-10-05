@@ -4,9 +4,8 @@ import { FirestoreAdapter } from "@auth/firebase-adapter"
 
 import { adminAuth } from "@/firebase-admin.config"
 import { adminDB } from "@/firebase-admin.config"
-import { auth } from '@/firebase.config'
 
-const sha1 = (text: string) => {
+const sha1 = (text: string): string => {
     const crypto = require('crypto');
     const shasum = crypto.createHash('sha1');
     shasum.update(text);
@@ -46,7 +45,7 @@ const handler = NextAuth({
         },
         session: async ({ session, token, user }) => {
             // console.log({ token, session, user })
-            if (token && token.access_token) {
+            if (token && token.access_token === 'string') {
                 session.access_token = token.access_token
             }
             return session
