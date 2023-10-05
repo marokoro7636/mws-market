@@ -4,7 +4,6 @@ import { Box, Button, Container, Grid, IconButton, Rating, Stack, TextField, Typ
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import ScreenshotCarousel from "@/components/ScreenshotCarousel";
 import { useDropzone } from "react-dropzone";
-import { set } from 'react-hook-form';
 
 interface AppInfo {
     id: string,
@@ -245,8 +244,8 @@ export default function Page({ params }: { params: { appId: string } }) {
                             <div {...getRootPropsIcon()}>
                                 <input {...getInputPropsIcon()} />
                                 <Box sx={{ position: "relative" }}>
-                                    <img src={appInfo.icon} alt="icon" style={{ width: 180, height: 180 }} />
-                                    <Box sx={{ backgroundColor: "white", opacity: 0.7, width: 180, height: 180, position: "absolute", top: 0, display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    <img src={appInfo.icon} alt="icon" style={{ width: iconConfig.width, height: iconConfig.height }} />
+                                    <Box sx={{ backgroundColor: "white", opacity: 0.7, width: iconConfig.width, height: iconConfig.height, position: "absolute", top: 0, display: "flex", justifyContent: "center", alignItems: "center" }}>
                                         <Box sx={{ textAlign: "center" }}>ここに画像を<br />ドロップ<br />{`(${iconConfig.width}x${iconConfig.height})`}</Box>
                                     </Box>
                                 </Box>

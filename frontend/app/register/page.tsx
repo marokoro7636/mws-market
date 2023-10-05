@@ -1,6 +1,6 @@
 "use client"
 import React, { useCallback, useRef, useState } from 'react'
-import { Box, Button, Container, Grid, Stack, TextField, Typography } from "@mui/material";
+import {Box, Button, Container, Grid, MenuItem, Select, Stack, TextField, Typography} from "@mui/material";
 import ScreenshotCarousel from "@/components/ScreenshotCarousel";
 import { useDropzone } from "react-dropzone";
 
@@ -81,6 +81,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
     const appNameRef = useRef<HTMLInputElement>()
     const appDescriptionRef = useRef<HTMLInputElement>()
     const appYoutubeRef = useRef<HTMLInputElement>()
+    const appDownloadLink = useRef<HTMLInputElement>()
 
     const [appInfo, setAppInfo] = useState<AppInfo>(NullAppData)
     const [appIcon, setAppIcon] = useState<File>()
@@ -169,33 +170,63 @@ export default function Page({ params }: { params: { teamId : string } }) {
         setAppInfo({ ...appInfo, details: newDetails })
     }
 
+    const installMethods = ["Chrome拡張機能", "実行ファイル", "Webアプリ"]
+
     return (
         <>
             <Container sx={{ mt: 3 }}>
-                <Box sx={{ textAlign: "right" }}>
-                    <Button variant="contained" color="secondary" onClick={onSaveAppInfo}
-                            sx={{ mr: 1 }}>Save</Button>
-                </Box>
                 <Grid container alignItems="center" sx={{ mt: 3 }}>
                     <Grid item xs={3}>
                         <div {...getRootPropsIcon()}>
                             <input {...getInputPropsIcon()} />
-                            <Box sx={{ border: "solid", width: 180, height: 180, display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                <Box sx={{ textAlign: "center" }}>アプリアイコン画像を<br />ドロップ<br />{`(${iconConfig.width}x${iconConfig.height})`}</Box>
+                            <Box sx={{ position: "relative" }}>
+                                {appInfo.icon ?
+                                    <img src={appInfo.icon} alt="icon"
+                                      style={{width: iconConfig.width, height: iconConfig.height}}/> :
+                                    <Box sx={{width: iconConfig.width, height: iconConfig.height}}></Box>
+                                }
+                                <Box sx={{ bgcolor: "#cccccc", opacity: 0.7, width: iconConfig.width, height: iconConfig.height, position: "absolute", top: 0, display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    <Box sx={{ textAlign: "center" }}>アプリアイコン画像を<br />ドロップ<br />{`(${iconConfig.width}x${iconConfig.height})`}</Box>
+                                </Box>
                             </Box>
                         </div>
                     </Grid>
                     <Grid item xs={6}>
                         <Typography variant="h4">アプリ名</Typography>
-                        <TextField size="small" variant="outlined" inputRef={appNameRef}
+                        <TextField variant="outlined" inputRef={appNameRef}
                                    inputProps={{ style: { fontSize: 48 } }} sx={{ width: 500, mt: 2 }} />
+                    </Grid>
+                    <Grid item xs={3}>
+                        <Button variant="contained" color="primary" onClick={onSaveAppInfo}
+                                sx={{ width: 2 / 3, height: 50 }}>Save</Button>
                     </Grid>
                 </Grid>
                 <Stack spacing={2} mt={5}>
                     <Typography variant="h4">アプリの説明</Typography>
-                        <TextField fullWidth multiline rows={5} size="small" variant="outlined"
-                                   inputRef={appDescriptionRef} />
+                    <TextField fullWidth multiline rows={5} variant="outlined"
+                               inputRef={appDescriptionRef} />
                 </Stack>
+                <Grid container>
+                    <Grid item xs={4}>
+                        <Stack spacing={2} mt={5}>
+                            <Typography variant="h4">アプリの種類</Typography>
+                            <Select
+                                defaultValue=""
+                                sx={{width: 300}}
+                            >
+                                {
+                                    installMethods.map((item, i) => <MenuItem value={i} key={i}>{item}</MenuItem>)
+                                }
+                            </Select>
+                        </Stack>
+                    </Grid>
+                    <Grid item xs={8}>
+                        <Stack spacing={2} mt={5}>
+                            <Typography variant="h4">アプリのダウンロードリンク</Typography>
+                            <TextField variant="outlined" inputRef={appDownloadLink} />
+                        </Stack>
+                    </Grid>
+                </Grid>
                 <Stack spacing={2} mt={5}>
                     <Typography variant="h4">スクリーンショット({`${screenshotConfig.width}x${screenshotConfig.height}`})</Typography>
                     <div {...getRootPropsSs()}>
@@ -210,7 +241,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
                 </Stack>
                 <Stack spacing={2} mt={5}>
                     <Typography variant="h4">紹介動画 (YouTube URL)</Typography>
-                        <TextField size="small" variant="outlined" inputRef={appYoutubeRef} sx={{ width: 500 }} />
+                        <TextField variant="outlined" inputRef={appYoutubeRef} sx={{ width: 500 }} />
                 </Stack>
             </Container>
         </>
