@@ -45,11 +45,11 @@ const handler = NextAuth({
             return token
         },
         session: async ({ session, token, user }) => {
-            // console.log({ token, session, user })
-            if (token && token.access_token === 'string') {
-                session.access_token = token.access_token
+            if (token && token.access_token && token.uid) {
+                session.access_token = token.access_token as string
                 session.uid = token.uid as string
             }
+            // console.log({ token, session, user })
             return session
         }
     },

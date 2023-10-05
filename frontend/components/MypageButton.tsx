@@ -5,6 +5,7 @@ import Avatar from '@mui/material/Avatar';
 import { useRouter } from 'next/navigation'
 import { useSession } from "next-auth/react"
 import { CircularProgress } from '@mui/material';
+import { signOut } from 'next-auth/react';
 
 
 // ログインボタン
@@ -38,6 +39,10 @@ export const MypageButton = () => {
     if (status === "authenticated") {
         // for debug
         console.log(session)
+
+        if (!session?.access_token || !session?.uid) {
+            signOut()
+        }
         return LoginedAvator
     } else {
         return LoginAvator

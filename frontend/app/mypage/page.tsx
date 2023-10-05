@@ -70,6 +70,8 @@ export default function Home() {
         }
     })
 
+    const myTeams = data.filter((e) => e.members.includes(session.uid as string))
+
     return (
         <div>
             <Container sx={{ mt: 3 }}>
@@ -107,7 +109,7 @@ export default function Home() {
                     >
                     </CardHeader>
                     <CardContent sx={{ px: 5, pb: 5, bgcolor: grey[200] }}>
-                        {data.map((e) => (
+                        {myTeams.map((e) => (
                             <Card sx={{ m: 2, p: 1 }} key={e.id}>
                                 <CardHeader
                                     title={
