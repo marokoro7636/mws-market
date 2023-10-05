@@ -2,11 +2,11 @@ import re
 import html
 
 
-def sanitizing_by_html(text: str):
+def sanitizing_by_html(text: str) -> str:
     # 記号をエスケープ( "&", "<", ">", "'", '"' )
     return html.escape(text)
 
-def sanitizing_by_len(text: str, num: int):
+def sanitizing_by_len(text: str, num: int) -> bool:
     # 文字数制限
     # 半角英数字か判定（正規表現）
     alnum = re.compile(r"^[a-zA-Z0-9]+$")
@@ -21,7 +21,7 @@ def sanitizing_by_len(text: str, num: int):
         else:
             return False
         
-def sanitizing_by_id(id: str):
+def sanitizing_by_id(id: str) -> bool:
     # IDが sha1 であることの検証
     sha1 = re.compile(r"^[a-fA-F0-9]{40}$")
     if sha1.match(id):

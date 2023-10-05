@@ -1,5 +1,6 @@
 from firebase_admin import firestore
 from helper.util import sha1_hash, make_secret
+from helper.sanitize import sanitizing_by_id, sanitizing_by_html, sanitizing_by_len
 import datetime
 from models.requests import (
     Team,
@@ -14,42 +15,48 @@ class Teams:
 
     @staticmethod
     def add_team(req: TeamRequest):
-        # IDは適切に生成する
-        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        id = sha1_hash(req.name+timestamp)
-        db = firestore.client()
-        secret = make_secret(20)
-        db.collection("teams").document(id).set(
-            {
-                "name": req.name,
-                "year": req.year,
-                "description": req.description,
-                "members": req.members,
-                "secret": secret,
-                "previous": None
-            }
-        )
-        db.collection("secrets").document(secret).set(
-            {
-                "id": id
-            }
-        )
-        for user_id in req.members:
-            db.collection("affiliations").document(user_id).set(
+        req.name = sanitizing_by_html(req.name) # とりあえずこれだけ
+        if sanitizing_by_len(req.name, 20):
+            # IDは適切に生成する
+            timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            id = sha1_hash(req.name+timestamp)
+            db = firestore.client()
+            secret = make_secret(20)
+            db.collection("teams").document(id).set(
                 {
-                    "team": firestore.firestore.ArrayUnion([id])
+                    "name": req.name,
+                    "year": req.year, # int 型
+                    "description": req.description, # None?
+                    "members": req.members, # 処理済み(member_id)
+                    "secret": secret, # 関数内で生成
+                    "previous": None
                 }
-            , merge=True)
-        return Teams(id = id)
+            )
+            db.collection("secrets").document(secret).set(
+                {
+                    "id": id
+                }
+            )
+            for user_id in req.members:
+                db.collection("affiliations").document(user_id).set(
+                    {
+                        "team": firestore.firestore.ArrayUnion([id])
+                    }
+                , merge=True)
+            return Teams(id = id)
+        else:
+            raise
 
     @staticmethod
     def is_exist(team_id: str):
-        db = firestore.client()
-        doc = db.collection("teams").document(team_id).get()
-        if doc.exists:
-            return True
-        else:
-            return False
+        if sanitizing_by_id(team_id): # 追加
+            db = firestore.client()
+            doc = db.collection("teams").document(team_id).get()
+            if doc.exists:
+                return True
+            else:
+                return False
+        return False
 
     @staticmethod
     def get_teams():
@@ -84,14 +91,18 @@ class Teams:
         , merge=True)
 
     def update_name(self, name: str):
-        db = firestore.client()
-        db.collection("teams").document(self.id).update(
-            {
-                "name": name,
-            }
-        )
+        name = sanitizing_by_html(name)
+        if sanitizing_by_len(name, 20):
+            db = firestore.client()
+            db.collection("teams").document(self.id).update(
+                {
+                    "name": name,
+                }
+            )
+        else:
+            raise
 
-    def update_year(self, year: int):
+    def update_year(self, year: int): # int 型
         db = firestore.client()
         db.collection("teams").document(self.id).update(
             {
@@ -100,12 +111,16 @@ class Teams:
         )
 
     def update_description(self, description: str):
-        db = firestore.client()
-        db.collection("teams").document(self.id).update(
-            {
-                "description": description,
-            }
-        )
+        description = sanitizing_by_html(description)
+        if sanitizing_by_len(description, 20):
+            db = firestore.client()
+            db.collection("teams").document(self.id).update(
+                {
+                    "description": description,
+                }
+            )
+        else:
+            raise
 
     def delete_member(self, user_id: str):
         db = firestore.client()
@@ -124,12 +139,16 @@ class Teams:
         )
 
     def set_previous(self, previous: str):
-        db = firestore.client()
-        db.collection("teams").document(self.id).update(
-            {
-                "previous": previous,
-            }
-        )
+        previous = sanitizing_by_html(previous)
+        if sanitizing_by_len(previous, 20):
+            db = firestore.client()
+            db.collection("teams").document(self.id).update(
+                {
+                    "previous": previous,
+                }
+            )
+        else:
+            raise
 
     def delete_previous(self):
         db = firestore.client()

@@ -1,5 +1,6 @@
 from firebase_admin import firestore
 from helper.util import sha1_hash
+from helper.sanitize import sanitizing_by_id, sanitizing_by_html, sanitizing_by_len
 import shutil
 import tempfile
 import os
@@ -23,28 +24,35 @@ class Project:
 
     @staticmethod
     def create(req: ProjectRequest):
-        # IDは適切に生成する，timestamp + team + name とか
-        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        id = sha1_hash(req.team + req.name + timestamp)
-        db = firestore.client()
-        db.collection("projects").document(id).set(
-            {
-                "team": req.team,
-                "name": req.name,
-                "rating": {
-                    "total": 0,
-                    "count": 0
+        req.name = sanitizing_by_html(req.name)
+        if sanitizing_by_len(req.name, 20):
+            # IDは適切に生成する，timestamp + team + name とか
+            timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            id = sha1_hash(req.team + req.name + timestamp)
+            db = firestore.client()
+            db.collection("projects").document(id).set(
+                {
+                    "team": req.team, # 処理済み(team_id)
+                    "name": req.name,
+                    "rating": {
+                        "total": 0,
+                        "count": 0
+                    }
                 }
-            }
-        )
-        return Project(id=id)
+            )
+            return Project(id=id)
+        else:
+            raise
 
     @staticmethod
     def is_exist(id: str) -> bool:
-        db = firestore.client()
-        doc = db.collection("projects").document(id).get()
-        if doc.exists:
-            return True
+        if sanitizing_by_id(id):
+            db = firestore.client()
+            doc = db.collection("projects").document(id).get()
+            if doc.exists:
+                return True
+            else:
+                return False
         else:
             return False
 
@@ -62,20 +70,28 @@ class Project:
         return info
 
     def set_name(self, name: str):
-        db = firestore.client()
-        db.collection("projects").document(self.id).update(
-            {
-                "name": name,
-            }
-        )
+        name = sanitizing_by_html(name)
+        if sanitizing_by_len(name, 20):
+            db = firestore.client()
+            db.collection("projects").document(self.id).update(
+                {
+                    "name": name,
+                }
+            )
+        else:
+            raise
 
     def set_team(self, team: str):
-        db = firestore.client()
-        db.collection("projects").document(self.id).update(
-            {
-                "team": team,
-            }
-        )
+        team = sanitizing_by_html(team)
+        if sanitizing_by_len(team, 20):
+            db = firestore.client()
+            db.collection("projects").document(self.id).update(
+                {
+                    "team": team,
+                }
+            )
+        else:
+            raise # 追加 エラー発生
 
     def get_team(self) -> str:
         db = firestore.client()
@@ -83,20 +99,28 @@ class Project:
         return team
 
     def set_short_description(self, short_description: str):
-        db = firestore.client()
-        db.collection("projects").document(self.id).set(
-            {
-                "short_description": short_description,
-            }
-        , merge=True)
+        short_description = sanitizing_by_html(short_description)
+        if sanitizing_by_len(short_description, 20):
+            db = firestore.client()
+            db.collection("projects").document(self.id).set(
+                {
+                    "short_description": short_description,
+                }
+            , merge=True)
+        else:
+            raise
 
     def set_description(self, description: str):
-        db = firestore.client()
-        db.collection("projects").document(self.id).set(
-            {
-                "description": description,
-            }
-        , merge=True)
+        description = sanitizing_by_html(description)
+        if sanitizing_by_len(description, 20):
+            db = firestore.client()
+            db.collection("projects").document(self.id).set(
+                {
+                    "description": description,
+                }
+            , merge=True)
+        else:
+            raise
 
     def set_youtube(self, youtube: str):
         # YoutubeのURLか
@@ -204,18 +228,23 @@ class Project:
 
     ## required_spec
     def add_required_spec(self, required_spec: RequiredSpec):
-        db = firestore.client()
-        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        spec_id = sha1_hash(f"{self.id}{required_spec}{timestamp}")
+        required_spec.item = sanitizing_by_html(required_spec.item)
+        required_spec.required = sanitizing_by_html(required_spec.required)
+        if sanitizing_by_len(required_spec.item, 20) and sanitizing_by_len(required_spec.required, 20):
+            db = firestore.client()
+            timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            spec_id = sha1_hash(f"{self.id}{required_spec}{timestamp}")
 
-        db.collection("projects").document(self.id).update(
-            {
-                f"details.required_spec.{spec_id}": {
-                    "item" : required_spec.item,
-                    "required" : required_spec.required
+            db.collection("projects").document(self.id).update(
+                {
+                    f"details.required_spec.{spec_id}": {
+                        "item" : required_spec.item,
+                        "required" : required_spec.required
+                    }
                 }
-            }
-        )
+            )
+        else:
+            raise
 
     def get_required_spec(self) -> {str: RequiredSpec}:
         db = firestore.client()
@@ -237,24 +266,33 @@ class Project:
         return {key: Install(**value) for key, value in install.items()}
 
     def add_install(self, install: Install):
-        db = firestore.client()
-        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        install_id = sha1_hash(f"{self.id}{install}{timestamp}")
+        install.method = sanitizing_by_html(install.method)
+        install.info = sanitizing_by_html(install.info)
+        if sanitizing_by_len(install.method, 20) and sanitizing_by_len(install.info, 20):
+            db = firestore.client()
+            timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            install_id = sha1_hash(f"{self.id}{install}{timestamp}")
 
-        db.collection("projects").document(self.id).update(
-            {
-                f"details.install.{install_id}": {
-                    "method" : install.method,
-                    "info" : install.info,
-                }
-            }
-        )
-        if install.additional is not None:
             db.collection("projects").document(self.id).update(
                 {
-                    f"details.install.{install_id}.additional": install.additional
+                    f"details.install.{install_id}": {
+                        "method" : install.method,
+                        "info" : install.info,
+                    }
                 }
             )
+            if install.additional is not None:
+                install.additional = sanitizing_by_html(install.additional)
+                if sanitizing_by_len(install.additional, 20):
+                    db.collection("projects").document(self.id).update(
+                        {
+                            f"details.install.{install_id}.additional": install.additional
+                        }
+                    )
+                else:
+                    raise
+        else:
+            raise
 
     def delete_install(self, install_id: str):
         db = firestore.client()
@@ -266,12 +304,16 @@ class Project:
 
     ## forjob
     def set_forjob(self, forjob: str):
-        db = firestore.client()
-        db.collection("projects").document(self.id).update(
-            {
-                "details.forjob": forjob,
-            }
-        )
+        forjob = sanitizing_by_html(forjob)
+        if sanitizing_by_len(forjob, 20):
+            db = firestore.client()
+            db.collection("projects").document(self.id).update(
+                {
+                    "details.forjob": forjob,
+                }
+            )
+        else:
+            raise
 
     def delete_forjob(self):
         db = firestore.client()
@@ -288,22 +330,28 @@ class Project:
         return {key: ProjectReview(**value) for key, value in review.items()}
 
     def add_review(self, review: ProjectReview):
-        db = firestore.client()
-        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        review_id = sha1_hash(f"{self.id}{review}{timestamp}")
+        review.user = sanitizing_by_html(review.user)
+        review.title = sanitizing_by_html(review.title)
+        review.content = sanitizing_by_html(review.content)
+        if sanitizing_by_len(review.user, 20) and sanitizing_by_len(review.title, 20) and sanitizing_by_len(review.content, 20): 
+            db = firestore.client()
+            timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            review_id = sha1_hash(f"{self.id}{review}{timestamp}")
 
-        db.collection("projects").document(self.id).update(
-            {
-                f"review.{review_id}": {
-                    "user": review.user,
-                    "title": review.title,
-                    "content": review.content,
-                    "rating": review.rating
-                },
-                "rating.total": firestore.Increment(review.rating),
-                "rating.count": firestore.Increment(1)
-            }
-        )
+            db.collection("projects").document(self.id).update(
+                {
+                    f"review.{review_id}": {
+                        "user": review.user,
+                        "title": review.title,
+                        "content": review.content,
+                        "rating": review.rating # int 型
+                    },
+                    "rating.total": firestore.Increment(review.rating),
+                    "rating.count": firestore.Increment(1)
+                }
+            )
+        else:
+            raise
 
 
     def delete_review(self, review_id: str):
@@ -317,17 +365,12 @@ class Project:
             }
         )
 
-    # get_projectsの実装 by Yamamoto
-    ## Projectのドキュメントを全てリストに集める
-    ## 要求データは存在すると仮定
     @staticmethod
     def get_project():
         db = firestore.client()
         docs = db.collection("projects").select(ProjectSummary.__annotations__.keys()).stream()
         return {doc.id: doc.to_dict() for doc in docs}
 
-    # delete_projectsの実装 by Yamamoto
-    ## is_exist で存在確認済み
     def delete(self):
         db = firestore.client()
         db.collection("projects").document(self.id).delete()
