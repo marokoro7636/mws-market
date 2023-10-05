@@ -19,7 +19,7 @@ import { ThemeProvider } from '@mui/material/styles';
 
 import AddIcon from '@mui/icons-material/Add';
 import { useRouter } from 'next/navigation';
-import { CardActions } from '@mui/material';
+import { CardActionArea } from '@mui/material';
 
 const theme = createTheme({
     palette: {
@@ -117,26 +117,27 @@ export default function Home() {
                                     boxShadow: 20, // theme.shadows[20]
                                 },
                             }} key={e.id}>
-                                <CardHeader
-                                    title={
-                                        <>
-                                            <Typography variant="body1" display="inline" sx={{ mr: 3 }}>
-                                                {e.year}
-                                            </Typography>
-                                            <Typography variant="h5" display="inline" >
-                                                {e.name}
-                                            </Typography>
-                                        </>
-                                    }
-                                />
-                                <CardContent>
-                                    <Typography sx={{ p: 1 }}>
-                                        {e.description}
-                                    </Typography>
-                                </CardContent>
-                                <CardActions onClick={() => { 
+                                <CardActionArea onClick={() => {
                                     router.push(`/teams/${e.id}`)
-                                }} />
+                                }} >
+                                    <CardHeader
+                                        title={
+                                            <>
+                                                <Typography variant="body1" display="inline" sx={{ mr: 3 }}>
+                                                    {e.year}
+                                                </Typography>
+                                                <Typography variant="h5" display="inline" >
+                                                    {e.name}
+                                                </Typography>
+                                            </>
+                                        }
+                                    />
+                                    <CardContent>
+                                        <Typography sx={{ p: 1 }}>
+                                            {e.description}
+                                        </Typography>
+                                    </CardContent>
+                                </CardActionArea>
                             </Card>
                         ))}
                     </CardContent>

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { Suspense, useState, useRef, MutableRefObject, useEffect } from 'react'
-import { Box, Button, Container, Grid, List, ListItem, ListItemAvatar, ListItemText, Avatar, IconButton, Typography, Card, CardContent, CardActions, CardHeader, TextField, Chip } from "@mui/material";
+import { Box, Fab, Modal, Button, Container, Grid, List, ListItem, ListItemAvatar, ListItemText, Avatar, IconButton, Typography, Card, CardContent, CardActions, CardHeader, TextField, Chip } from "@mui/material";
 import { grey, pink, teal } from '@mui/material/colors';
 
 import { Session } from "next-auth"
@@ -16,6 +16,8 @@ import { ThemeProvider } from '@mui/material/styles';
 
 // TODO: あとでコンポーネントに分ける
 import TeamInfoEditor from "@/components/TeamInfoEditor"
+
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 import AuthGuard from "@/components/AuthGuard";
 
@@ -47,6 +49,8 @@ export default function Page({ params }: { params: { teamId: string } }) {
 
     const [isEditable, setEditable] = useState<boolean>(false)
     const [teamInternalInfo, setTeamInternalInfo] = useState<TeamInternalInfo>({} as TeamInternalInfo)
+
+    const [modalOpen, setModalOpen] = React.useState(false)
 
     useEffect(() => {
         if (status !== "authenticated") {
@@ -107,16 +111,12 @@ export default function Page({ params }: { params: { teamId: string } }) {
             enqueueSnackbar("Team name is required", { variant: "error" })
             return
         }
-        return fetch(`/api/v0/teams/${teamId}/name`, {
+        const query = encodeURI(name)
+        return fetch(`/api/v0/teams/${teamId}/name?name=${query}`, {
             method: 'POST',
             headers: {
-                "content-type": "application/json",
                 "X-AUTH-TOKEN": session.access_token as string,
             },
-            body: JSON.stringify({
-                "team_id": teamId,
-                "name": name,
-            }),
         }).then((response) => {
             if (response.status === 200) {
                 enqueueSnackbar("Name updated successfully", { variant: "success" })
@@ -141,16 +141,12 @@ export default function Page({ params }: { params: { teamId: string } }) {
             enqueueSnackbar("Year should be between 2015 and 2030", { variant: "error" })
             return null
         }
-        return fetch(`/api/v0/teams/${teamId}/year`, {
+        const query = encodeURI(year)
+        return fetch(`/api/v0/teams/${teamId}/year?year=${query}`, {
             method: 'POST',
             headers: {
-                "content-type": "application/json",
                 "X-AUTH-TOKEN": session.access_token as string,
             },
-            body: JSON.stringify({
-                "team_id": teamId,
-                "year": year,
-            }),
         }).then((response) => {
             if (response.status === 200) {
                 enqueueSnackbar("Year updated successfully", { variant: "success" })
@@ -170,22 +166,38 @@ export default function Page({ params }: { params: { teamId: string } }) {
             enqueueSnackbar("Description is required", { variant: "error" })
             return
         }
-        return fetch(`/api/v0/teams/${teamId}/description`, {
+        const query = encodeURI(description)
+        return fetch(`/api/v0/teams/${teamId}/description?description=${query}`, {
             method: 'POST',
             headers: {
-                "content-type": "application/json",
                 "X-AUTH-TOKEN": session.access_token as string,
             },
-            body: JSON.stringify({
-                "team_id": teamId,
-                "description": description,
-            }),
         }).then((response) => {
             if (response.status === 200) {
                 enqueueSnackbar("Description updated successfully", { variant: "success" })
                 return response.json()
             } else {
                 enqueueSnackbar("Failed to update description", { variant: "error" })
+                return response.json()
+            }
+        }).then((e) => {
+            console.log(e)
+            return e.status === "ok"
+        })
+    }
+
+    const deleteTeam = () =>{
+        return fetch(`/api/v0/teams/${teamId}`, {
+            method: 'DELETE',
+            headers: {
+                "X-AUTH-TOKEN": session.access_token as string,
+            },
+        }).then((response) => {
+            if (response.status === 200) {
+                enqueueSnackbar("Team deleted successfully", { variant: "success" })
+                return response.json()
+            } else {
+                enqueueSnackbar("Failed to delete team", { variant: "error" })
                 return response.json()
             }
         }).then((e) => {
@@ -236,9 +248,70 @@ export default function Page({ params }: { params: { teamId: string } }) {
         return `https://mws2023.pfpf.dev/teams/invitation?secret=${teamInternalInfo.secret}`
     }
 
+    const handleModalOpen = () => setModalOpen(true);
+    const handleModalClose = () => setModalOpen(false);
+
+    const modalStyle = {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 400,
+        bgcolor: 'background.paper',
+        border: '2px solid #000',
+        boxShadow: 24,
+        p: 4,
+    };
+
     return (
         <Container sx={{ p: 3 }}>
 
+            <SnackbarProvider />
+
+            <Modal
+                open={modalOpen}
+                onClose={handleModalClose}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                {/* TODO: モーダルが汚い */}
+                <Box sx={modalStyle}>
+                    <Typography
+                        variant='h6'
+                        color={"#94200F"}
+                    >
+                        Delete Team
+                    </Typography>
+                    <Typography>Are you sure to delete this team?</Typography>
+
+                    <Grid container spacing={2} columns={{ xs: 3, sm: 8, md: 12 }} justifyItems="flex-end" display="flex" sx={{
+                        pt: 4, pl: 8
+                    }}>
+                        <Grid md={6} justifyContent="flex-end">
+                            <Button sx={{ color: "#94200F" }} onClick={async () => {
+                                // const res = await deleteTeam()
+                                // if (res) {
+                                //     router.push("/mypage")
+                                // }
+                            }}
+                            >Delete</Button>
+                        </Grid>
+                        <Grid md={6} justifyContent="flex-end" >
+                            <Button sx={{ color: "#555" }} onClick={() => {
+                                handleModalClose()
+                            }}>Calcel</Button>
+                        </Grid>
+                    </Grid>
+                </Box>
+            </Modal>
+
+            {/* <Fab sx={{ float: 'right', boxShadow: 'none', color: "#94200F", bgcolor: "#fff0", border: "solid 1px #94200F" }}
+                onClick={() => {
+                    handleModalOpen()
+                }}
+            >
+                <DeleteForeverIcon />
+            </Fab> */}
             <Typography variant="subtitle1">{teamInternalInfo.year}</Typography>
             <Typography variant="h3">{teamInternalInfo.name}</Typography>
 
