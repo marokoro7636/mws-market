@@ -3,6 +3,9 @@ import React, { useCallback, useRef, useState } from 'react'
 import {Box, Button, Container, Grid, MenuItem, Select, Stack, TextField, Typography} from "@mui/material";
 import ScreenshotCarousel from "@/components/ScreenshotCarousel";
 import { useDropzone } from "react-dropzone";
+import {useSession} from "next-auth/react";
+import AuthGuard from "@/components/AuthGuard";
+import {Session} from "next-auth";
 
 type Img = {
     url: string,
@@ -11,15 +14,33 @@ type Img = {
 
 export default function Page({ params }: { params: { teamId : string } }) {
     const teamId = params.teamId
+    const { data: _session, status } = useSession()
+
+    if (status !== "authenticated") {
+        return <AuthGuard enabled={true} />
+    }
+
+    const session = _session as Session
 
     const iconConfig = { width: 180, height: 180 }
     const screenshotConfig = { width: 800, height: 450 }
 
     const appNameRef = useRef<HTMLInputElement>()
+    const [appNameError, setAppNameError] = useState<boolean>(false)
+    const appNameChange = () => {
+        if (appNameRef.current) {
+            if (appNameRef.current?.value === "") {
+                setAppNameError(true)
+            } else {
+                setAppNameError(false)
+            }
+        }
+    }
+
     const appDescriptionRef = useRef<HTMLInputElement>()
     const appYoutubeRef = useRef<HTMLInputElement>()
-    const appDownloadLink = useRef<HTMLInputElement>()
-    const appInstallMethod = useRef<HTMLInputElement>()
+    const appDownloadLinkRef = useRef<HTMLInputElement>()
+    const appInstallMethodRef = useRef<HTMLInputElement>()
 
     const [appIcon, setAppIcon] = useState<Img>()
     const [appScreenshot, setAppScreenshot] = useState<Img[]>([])
@@ -80,13 +101,89 @@ export default function Page({ params }: { params: { teamId : string } }) {
     const { getRootProps: getRootPropsIcon, getInputProps: getInputPropsIcon } = useDropzone({ onDrop: onDropIcon })
     const { getRootProps: getRootPropsSs, getInputProps: getInputPropsSs, open } = useDropzone({ onDrop: onDropSs, noDrag: true, noClick: true })
 
-    const onSaveAppInfo = () => {
-        console.log("name changed")
-        // TODO: update name by API
-        console.log("description changed")
-        console.log("youtube changed")
-        console.log(appInstallMethod.current?.value)
-        console.log(appScreenshot)
+    const onSaveAppInfo = async () => {
+        if (appNameRef.current?.value === "") {
+            return
+        }
+        try {
+            // プロジェクトID取得
+            const res: { id: string } = await (await fetch("/api/v0/projects", {
+                method: "post",
+                headers: {
+                    "x-auth-token": session.access_token as string,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ team: teamId, name: appNameRef.current?.value })
+            })).json()
+            const projectId = res.id
+            // App name
+            await fetch(`/api/v0/projects/${projectId}/name?name=${appNameRef.current?.value}`, {
+                method: "post",
+                headers: {
+                    "x-auth-token": session.access_token as string
+                }
+            })
+            // App description
+            if (appDescriptionRef.current?.value !== "") {
+                await fetch(`/api/v0/projects/${projectId}/description?description=${appDescriptionRef.current?.value}`, {
+                    method: "post",
+                    headers: {
+                        "x-auth-token": session.access_token as string
+                    }
+                })
+            }
+            // YouTube
+            if (appYoutubeRef.current?.value !== "") {
+                await fetch(`/api/v0/projects/${projectId}/youtube?youtube=${appYoutubeRef.current?.value}`, {
+                    method: "post",
+                    headers: {
+                        "x-auth-token": session.access_token as string
+                    }
+                })
+            }
+            // Install
+            if (appInstallMethodRef.current?.value !== "" || appDownloadLinkRef.current?.value !== "") {
+                await fetch(`/api/v0/projects/${projectId}/details/install`, {
+                    method: "post",
+                    headers: {
+                        "x-auth-token": session.access_token as string
+                    },
+                    body: JSON.stringify({
+                        method: appInstallMethodRef.current?.value,
+                        info: appDownloadLinkRef.current?.value,
+                        additional: ""
+                    })
+                })
+            }
+            // App icon
+            if (appIcon) {
+                const sendIcon = new FormData()
+                sendIcon.append("img", appIcon.img)
+                await fetch(`/api/v0/projects/${projectId}/img`, {
+                    method: "post",
+                    headers: {
+                        "x-auth-token": session.access_token as string
+                    },
+                    body: sendIcon
+                })
+            }
+            // Screenshot
+            if (appScreenshot.length >= 1) {
+                for (let item of appScreenshot) {
+                    const sendScreenshot = new FormData()
+                    sendScreenshot.append("img", item.img)
+                    await fetch(`/api/v0/projects/${projectId}/details/imgs`, {
+                        method: "post",
+                        headers: {
+                            "x-auth-token": session.access_token as string
+                        },
+                        body: sendScreenshot
+                    })
+                }
+            }
+        } catch (e) {
+            alert("通信に失敗しました")
+        }
     }
 
     const onDeleteScreenshot = (url: string) => {
@@ -124,7 +221,10 @@ export default function Page({ params }: { params: { teamId : string } }) {
                     <Grid item xs={6}>
                         <Typography variant="h4">アプリ名</Typography>
                         <TextField variant="outlined" inputRef={appNameRef}
-                                   inputProps={{ style: { fontSize: 48 } }} sx={{ width: 500, mt: 2 }} />
+                                   inputProps={{ style: { fontSize: 48 } }} sx={{ width: 500, mt: 2 }}
+                                   onChange={appNameChange} error={appNameError}
+                                   helperText={appNameError && "アプリ名を入力してください"}
+                        />
                     </Grid>
                     <Grid item xs={3}>
                         <Button variant="contained" color="primary" onClick={onSaveAppInfo}
@@ -143,10 +243,10 @@ export default function Page({ params }: { params: { teamId : string } }) {
                             <Select
                                 defaultValue=""
                                 sx={{width: 300}}
-                                inputRef={appInstallMethod}
+                                inputRef={appInstallMethodRef}
                             >
                                 {
-                                    installMethods.map((item, i) => <MenuItem value={i} key={i}>{item}</MenuItem>)
+                                    installMethods.map((item, i) => <MenuItem value={item} key={i}>{item}</MenuItem>)
                                 }
                             </Select>
                         </Stack>
@@ -154,7 +254,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
                     <Grid item xs={8}>
                         <Stack spacing={2} mt={5}>
                             <Typography variant="h4">アプリのダウンロードリンク</Typography>
-                            <TextField variant="outlined" inputRef={appDownloadLink} />
+                            <TextField variant="outlined" inputRef={appDownloadLinkRef} />
                         </Stack>
                     </Grid>
                 </Grid>
