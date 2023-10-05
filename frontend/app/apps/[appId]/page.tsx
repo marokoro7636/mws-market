@@ -1,9 +1,10 @@
 "use client"
-import React, {useCallback, useRef, useState} from 'react'
-import {Box, Button, Container, Grid, IconButton, Rating, Stack, TextField, Typography} from "@mui/material";
+import React, { useCallback, useRef, useState, useEffect } from 'react'
+import { Box, Button, Container, Grid, IconButton, Rating, Stack, TextField, Typography } from "@mui/material";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import ScreenshotCarousel from "@/components/ScreenshotCarousel";
-import {useDropzone} from "react-dropzone";
+import { useDropzone } from "react-dropzone";
+import { set } from 'react-hook-form';
 
 interface AppInfo {
     id: string,
@@ -27,52 +28,102 @@ interface AppInfo {
     }
 }
 
-// TODO 状態管理方法 ←Zustandが良さそう
+type AppInfoData = {
+    id: string,
+    name: string,
+    team: string,
+    short_description: string,
+    description: string,
+    youtube: string,
+    details: {
+        img_screenshot: string[],
+        required_spec: {
+            item: string,
+            required: string
+        }[],
+        install: {
+            method: string,
+            info: string,
+            additional: string
+        }[],
+        forJob: string
+    },
+    review: {
+        // TODO
+    }
+    rating: {
+        // TODO
+    }
+    icon: string,
+    img: string
+}
 
-export default function Page({params}: { params: { appId: string } }) {
+const NullAppData = {
+    id: "",
+    name: "",
+    team: "",
+    description: "",
+    youtube: "",
+    icon: "",
+    details: {
+        imgScreenshot: [],
+        requiredSpec: [],
+        install: [],
+        forJob: ""
+    }
+}
+
+export default function Page({ params }: { params: { appId: string } }) {
     const appId = params.appId
-    // TODO /api/mock/projects/[appId]から情報を取ってくる
 
-    const appInfoMock: AppInfo = {
-        id: appId,
-        name: `App ${appId}`,
-        team: `team ${appId}`,
-        description: `description ${appId} `.repeat(50),
-        youtube: "https://youtu.be/ZaZMZ9jePKw?si=x96UEomj8VWoHw0-",
-        icon: "/icon128.png",
-        details: {
-            imgScreenshot: ["https://dummyimage.com/800x16:9/000/fff.png", "https://dummyimage.com/640x16:9/09f/fff.png", "https://dummyimage.com/400x16:9/cccccc/000000.png"],
-            requiredSpec: [
-                {
-                    item: "",
-                    required: ""
-                }
-            ],
-            install: [
-                {
-                    method: "",
-                    info: "",
-                    additional: ""
-                }
-            ],
-            forJob: ""
+    const [data, setData] = useState<AppInfoData | null>(null)
+
+    const initAppInfo = (data: AppInfoData | null): AppInfo => {
+        console.log("called")
+        if (data === null) {
+            return NullAppData
+        }
+        return {
+            id: data.id,
+            name: data.name,
+            team: data.team,
+            description: data.short_description || "説明はまだ追加されていません",
+            youtube: data.youtube,
+            icon: data.icon,
+            details: {
+                imgScreenshot: data.details.img_screenshot,
+                requiredSpec: data.details.required_spec,
+                install: data.details.install,
+                forJob: data.details.forJob
+            },
         }
     }
 
-    const iconConfig = {width: 180, height: 180}
-    const screenshotConfig = {width: 800, height: 450}
+    const iconConfig = { width: 180, height: 180 }
+    const screenshotConfig = { width: 800, height: 450 }
 
     const appNameRef = useRef<HTMLInputElement>()
     const appDescriptionRef = useRef<HTMLInputElement>()
     const appYoutubeRef = useRef<HTMLInputElement>()
 
     const [isEditable, setEditable] = useState<boolean>(false)
-    const [appInfo, setAppInfo] = useState<AppInfo>(appInfoMock)
-    const [prevAppInfo, setPrevAppInfo] = useState<AppInfo>(appInfoMock)
+    const [appInfo, setAppInfo] = useState<AppInfo>(NullAppData)
+    const [prevAppInfo, setPrevAppInfo] = useState<AppInfo>(appInfo)
     const [appIcon, setAppIcon] = useState<File>()
     const [appScreenshot, setAppScreenshot] = useState<File[]>([])
 
-    const imageSize = async (url: string): Promise<{width: number, height: number}> => {
+    useEffect(() => {
+        fetch(`/api/v0/projects/${appId}`)
+            .then((response) => response.json())
+            .then((data) => {
+                setData(data)
+                setAppInfo(initAppInfo(data))
+            })
+    }, [])
+
+    console.log(appInfo)
+
+    const imageSize = async (url: string): Promise<{ width: number, height: number }> => {
         return new Promise((resolve, reject) => {
             const img = new Image()
 
@@ -100,14 +151,14 @@ export default function Page({params}: { params: { appId: string } }) {
         }
 
         const url = window.URL.createObjectURL(acceptedFiles[0])
-        const {width, height} = await imageSize(url)
+        const { width, height } = await imageSize(url)
         if (!(width === iconConfig.width && height === iconConfig.height)) {
             alert(`"スクリーンショットのサイズは${iconConfig.width}x${iconConfig.height}にしてください`)
             return
         }
 
         setAppIcon(acceptedFiles[0])
-        setAppInfo({...appInfo, icon: url})
+        setAppInfo({ ...appInfo, icon: url })
     }, [appIcon, appInfo])
 
     const onDropSs = useCallback(async (acceptedFiles: File[]) => {
@@ -117,7 +168,7 @@ export default function Page({params}: { params: { appId: string } }) {
         }
 
         const url = window.URL.createObjectURL(acceptedFiles[0])
-        const {width, height} = await imageSize(url)
+        const { width, height } = await imageSize(url)
         if (!(width === screenshotConfig.width && height === screenshotConfig.height)) {
             alert(`画像サイズは${screenshotConfig.width}x${screenshotConfig.height}にしてください`)
             return
@@ -126,26 +177,26 @@ export default function Page({params}: { params: { appId: string } }) {
         setAppScreenshot([...appScreenshot, acceptedFiles[0]])
         const newScreenshotUrl = [...appInfo.details.imgScreenshot, url]
         console.log(newScreenshotUrl)
-        const newDetails = {...appInfo.details, imgScreenshot: newScreenshotUrl}
-        setAppInfo({...appInfo, details: newDetails})
+        const newDetails = { ...appInfo.details, imgScreenshot: newScreenshotUrl }
+        setAppInfo({ ...appInfo, details: newDetails })
     }, [appScreenshot, appInfo])
 
-    const {getRootProps: getRootPropsIcon, getInputProps: getInputPropsIcon} = useDropzone({onDrop: onDropIcon})
-    const {getRootProps: getRootPropsSs, getInputProps: getInputPropsSs, open} = useDropzone({onDrop: onDropSs, noDrag: true, noClick: true})
+    const { getRootProps: getRootPropsIcon, getInputProps: getInputPropsIcon } = useDropzone({ onDrop: onDropIcon })
+    const { getRootProps: getRootPropsSs, getInputProps: getInputPropsSs, open } = useDropzone({ onDrop: onDropSs, noDrag: true, noClick: true })
 
     const onSaveAppInfo = () => {
         if (appNameRef.current?.value != appInfo.name) {
             console.log("name changed")
             // TODO: update name by API
-            setAppInfo({...appInfo, name: (appNameRef.current?.value as string)})
+            setAppInfo({ ...appInfo, name: (appNameRef.current?.value as string) })
         }
         if (appDescriptionRef.current?.value != appInfo.description) {
             console.log("description changed")
-            setAppInfo({...appInfo, description: (appDescriptionRef.current?.value as string)})
+            setAppInfo({ ...appInfo, description: (appDescriptionRef.current?.value as string) })
         }
         if (appYoutubeRef.current?.value != appInfo.youtube && appYoutubeRef.current?.value.startsWith("https://youtu.be/")) {
             console.log("youtube changed")
-            setAppInfo({...appInfo, youtube: (appYoutubeRef.current?.value as string)})
+            setAppInfo({ ...appInfo, youtube: (appYoutubeRef.current?.value as string) })
         }
         setEditable(false)
     }
@@ -162,8 +213,8 @@ export default function Page({params}: { params: { appId: string } }) {
 
     const onDeleteScreenshot = (url: string) => {
         const newScreenshot = appInfo.details.imgScreenshot.filter((item) => item !== url)
-        const newDetails = {...appInfo.details, imgScreenshot: newScreenshot}
-        setAppInfo({...appInfo, details: newDetails})
+        const newDetails = { ...appInfo.details, imgScreenshot: newScreenshot }
+        setAppInfo({ ...appInfo, details: newDetails })
     }
 
     const convertYoutubeLink = (link: string): string => {
@@ -171,86 +222,90 @@ export default function Page({params}: { params: { appId: string } }) {
         return `https://www.youtube.com/embed/${youtubeId}`
     }
 
+    if (data === null) {
+        return <div>loading...</div>
+    }
+
     return (
         <>
-            <Container sx={{mt: 3}}>
-                <Box sx={{textAlign: "right"}}>
+            <Container sx={{ mt: 3 }}>
+                <Box sx={{ textAlign: "right" }}>
                     {isEditable ?
                         <>
                             <Button variant="contained" color="secondary" onClick={onSaveAppInfo}
-                                    sx={{mr: 1}}>Save</Button>
+                                sx={{ mr: 1 }}>Save</Button>
                             <Button variant="contained" color="error" onClick={onCancelEdit}>Cancel</Button>
                         </> :
                         <Button variant="contained" color="secondary" onClick={onEditAppInfo}>Edit</Button>
                     }
                 </Box>
 
-                <Grid container alignItems="center" sx={{mt: 3}}>
+                <Grid container alignItems="center" sx={{ mt: 3 }}>
                     <Grid item xs={3}>
                         {isEditable ?
                             <div {...getRootPropsIcon()}>
-                                <input {...getInputPropsIcon()}/>
-                                    <Box sx={{position: "relative"}}>
-                                        <img src={appInfo.icon} alt="icon" style={{width: 180, height: 180}}/>
-                                        <Box sx={{backgroundColor: "white", opacity: 0.7, width: 180, height: 180, position: "absolute", top: 0, display: "flex", justifyContent: "center", alignItems: "center"}}>
-                                            <Box sx={{textAlign: "center"}}>ここに画像を<br/>ドロップ<br/>{`(${iconConfig.width}x${iconConfig.height})`}</Box>
-                                        </Box>
+                                <input {...getInputPropsIcon()} />
+                                <Box sx={{ position: "relative" }}>
+                                    <img src={appInfo.icon} alt="icon" style={{ width: 180, height: 180 }} />
+                                    <Box sx={{ backgroundColor: "white", opacity: 0.7, width: 180, height: 180, position: "absolute", top: 0, display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                        <Box sx={{ textAlign: "center" }}>ここに画像を<br />ドロップ<br />{`(${iconConfig.width}x${iconConfig.height})`}</Box>
                                     </Box>
+                                </Box>
                             </div> :
-                            <img src={appInfo.icon} alt="icon" style={{width: 180, height: 180}}/>
+                            <img src={appInfo.icon} alt="icon" style={{ width: 180, height: 180 }} />
                         }
                     </Grid>
                     <Grid item xs={6}>
                         {isEditable ?
                             <TextField size="small" variant="outlined" inputRef={appNameRef}
-                                       inputProps={{style: {fontSize: 48}}} sx={{width: 500}}
-                                       defaultValue={appInfo.name}/> :
+                                inputProps={{ style: { fontSize: 48 } }} sx={{ width: 500 }}
+                                defaultValue={appInfo.name} /> :
                             <Typography variant="h3">{appInfo.name}</Typography>
                         }
                         <Typography variant="subtitle1">{appInfo.team}</Typography>
-                        <Rating name="read-only" value={3} size="small" sx={{mt: 2}}/>
+                        <Rating name="read-only" value={3} size="small" sx={{ mt: 2 }} />
                     </Grid>
                     <Grid item xs={3}>
-                        <Button variant="contained" sx={{width: 2 / 3, height: 50}}
-                                disabled={isEditable}>インストール</Button>
+                        <Button variant="contained" sx={{ width: 2 / 3, height: 50 }}
+                            disabled={isEditable}>インストール</Button>
                     </Grid>
                 </Grid>
                 <Stack spacing={2} mt={5}>
                     <Typography variant="h4">このアプリについて</Typography>
                     {isEditable ?
                         <TextField fullWidth multiline size="small" variant="outlined"
-                                   inputRef={appDescriptionRef}
-                                   defaultValue={appInfo.description}/> :
+                            inputRef={appDescriptionRef}
+                            defaultValue={appInfo.description} /> :
                         <Typography component="div">{appInfo.description}</Typography>
                     }
                 </Stack>
-                <Stack sx={{mt: 5}} direction="row" alignItems="center">
+                <Stack sx={{ mt: 5 }} direction="row" alignItems="center">
                     <ScreenshotCarousel imgList={appInfo.details.imgScreenshot} editable={isEditable}
-                                        onDelete={onDeleteScreenshot}/>
+                        onDelete={onDeleteScreenshot} />
                     {isEditable &&
                         <div {...getRootPropsSs()}>
-                            <input {...getInputPropsSs()}/>
-                            <IconButton size="large" onClick={open} sx={{height: 50}} disabled={appInfo.details.imgScreenshot.length >= 5}>
-                                <AddCircleOutlineIcon/>
+                            <input {...getInputPropsSs()} />
+                            <IconButton size="large" onClick={open} sx={{ height: 50 }} disabled={appInfo.details.imgScreenshot.length >= 5}>
+                                <AddCircleOutlineIcon />
                             </IconButton>
                         </div>
                     }
                 </Stack>
                 {isEditable &&
-                    <Box sx={{textAlign: "center"}}>スクリーンショットのサイズは{`${screenshotConfig.width}x${screenshotConfig.height}`}にしてください</Box>
+                    <Box sx={{ textAlign: "center" }}>スクリーンショットのサイズは{`${screenshotConfig.width}x${screenshotConfig.height}`}にしてください</Box>
                 }
                 <Stack spacing={2} mt={5}>
                     <Typography variant="h4">紹介動画</Typography>
                     {isEditable ?
                         <TextField size="small" variant="outlined" inputRef={appYoutubeRef}
-                                   defaultValue={appInfo.youtube} sx={{width: 500}}/> :
-                        <Box sx={{display: "flex", justifyContent: "center"}}>
-                            <Box sx={{width: 0.7}}>
+                            defaultValue={appInfo.youtube} sx={{ width: 500 }} /> :
+                        <Box sx={{ display: "flex", justifyContent: "center" }}>
+                            <Box sx={{ width: 0.7 }}>
                                 <Box className="video">
                                     <iframe width="560" height="315" src={convertYoutubeLink(appInfo.youtube)}
-                                            title="YouTube video player" frameBorder="0"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                            allowFullScreen></iframe>
+                                        title="YouTube video player" frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                        allowFullScreen></iframe>
                                 </Box>
                             </Box>
                         </Box>
