@@ -4,9 +4,12 @@ body {
 
 .video {
     position: relative;
-    width:100%; /* 横幅は100%で固定 */
-    height:0; /* 高さは0にしておく(padding-topで高さを指定するため) */
-    padding-top: 56.25%; /* 高さを指定(16:9) */
+    width: 100%;
+    /* 横幅は100%で固定 */
+    height: 0;
+    /* 高さは0にしておく(padding-topで高さを指定するため) */
+    padding-top: 56.25%;
+    /* 高さを指定(16:9) */
 }
 
 /* YouTube埋め込み用のiframe */
@@ -16,4 +19,13 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
+}
+
+/* カルーセルのセンタリング */
+.alice-carousel__stage {
+    position: relative;
+    width: 100%;
+    margin: auto;
+    direction: ltr;
+    text-align: center;
 }
