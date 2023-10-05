@@ -76,6 +76,7 @@ export default function Page() {
         fetch('/api/v0/teams/', {
             method: 'POST',
             headers: {
+                "content-type": "application/json",
                 "X-AUTH-TOKEN": session.access_token as string,
             },
             body: JSON.stringify(data),
@@ -85,9 +86,13 @@ export default function Page() {
                 return response.json()
             } else {
                 enqueueSnackbar("Failed to create team", { variant: "error" })
+                return response.json()
             }
         }).then((e) => {
-            router.push(`/teams/${e.id}`)
+            if (e.id) {
+                router.push(`/teams/${e.id}`)
+            }
+            console.log(e)
         })
     }
 
