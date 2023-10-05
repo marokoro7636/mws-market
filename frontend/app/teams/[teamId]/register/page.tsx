@@ -4,76 +4,13 @@ import {Box, Button, Container, Grid, MenuItem, Select, Stack, TextField, Typogr
 import ScreenshotCarousel from "@/components/ScreenshotCarousel";
 import { useDropzone } from "react-dropzone";
 
-interface AppInfo {
-    id: string,
-    name: string,
-    team: string,
-    description: string,
-    youtube: string,
-    icon: string,
-    details: {
-        imgScreenshot: string[],
-        requiredSpec: {
-            item: string,
-            required: string
-        }[],
-        install: {
-            method: string,
-            info: string,
-            additional: string
-        }[],
-        forJob: string
-    }
-}
-
-type AppInfoData = {
-    id: string,
-    name: string,
-    team: string,
-    short_description: string,
-    description: string,
-    youtube: string,
-    details: {
-        img_screenshot: string[],
-        required_spec: {
-            item: string,
-            required: string
-        }[],
-        install: {
-            method: string,
-            info: string,
-            additional: string
-        }[],
-        forJob: string
-    },
-    review: {
-        // TODO
-    }
-    rating: {
-        // TODO
-    }
-    icon: string,
-    img: string
-}
-
-const NullAppData = {
-    id: "",
-    name: "",
-    team: "",
-    description: "",
-    youtube: "",
-    icon: "",
-    details: {
-        imgScreenshot: [],
-        requiredSpec: [],
-        install: [],
-        forJob: ""
-    }
+type Img = {
+    url: string,
+    img: File
 }
 
 export default function Page({ params }: { params: { teamId : string } }) {
     const teamId = params.teamId
-    const [data, setData] = useState<AppInfoData | null>(null)
 
     const iconConfig = { width: 180, height: 180 }
     const screenshotConfig = { width: 800, height: 450 }
@@ -82,10 +19,10 @@ export default function Page({ params }: { params: { teamId : string } }) {
     const appDescriptionRef = useRef<HTMLInputElement>()
     const appYoutubeRef = useRef<HTMLInputElement>()
     const appDownloadLink = useRef<HTMLInputElement>()
+    const appInstallMethod = useRef<HTMLInputElement>()
 
-    const [appInfo, setAppInfo] = useState<AppInfo>(NullAppData)
-    const [appIcon, setAppIcon] = useState<File>()
-    const [appScreenshot, setAppScreenshot] = useState<File[]>([])
+    const [appIcon, setAppIcon] = useState<Img>()
+    const [appScreenshot, setAppScreenshot] = useState<Img[]>([])
 
     const imageSize = async (url: string): Promise<{ width: number, height: number }> => {
         return new Promise((resolve, reject) => {
@@ -121,9 +58,8 @@ export default function Page({ params }: { params: { teamId : string } }) {
             return
         }
 
-        setAppIcon(acceptedFiles[0])
-        setAppInfo({ ...appInfo, icon: url })
-    }, [appIcon, appInfo])
+        setAppIcon({ url: url, img: acceptedFiles[0] })
+    }, [appIcon])
 
     const onDropSs = useCallback(async (acceptedFiles: File[]) => {
         if (acceptedFiles[0].type !== "image/png" && acceptedFiles[0].type !== "image/jpeg") {
@@ -138,36 +74,30 @@ export default function Page({ params }: { params: { teamId : string } }) {
             return
         }
 
-        setAppScreenshot([...appScreenshot, acceptedFiles[0]])
-        const newScreenshotUrl = [...appInfo.details.imgScreenshot, url]
-        console.log(newScreenshotUrl)
-        const newDetails = { ...appInfo.details, imgScreenshot: newScreenshotUrl }
-        setAppInfo({ ...appInfo, details: newDetails })
-    }, [appScreenshot, appInfo])
+        setAppScreenshot([...appScreenshot, { url: url, img: acceptedFiles[0] }])
+    }, [appScreenshot])
 
     const { getRootProps: getRootPropsIcon, getInputProps: getInputPropsIcon } = useDropzone({ onDrop: onDropIcon })
     const { getRootProps: getRootPropsSs, getInputProps: getInputPropsSs, open } = useDropzone({ onDrop: onDropSs, noDrag: true, noClick: true })
 
     const onSaveAppInfo = () => {
-        if (appNameRef.current?.value != appInfo.name) {
-            console.log("name changed")
-            // TODO: update name by API
-            setAppInfo({ ...appInfo, name: (appNameRef.current?.value as string) })
-        }
-        if (appDescriptionRef.current?.value != appInfo.description) {
-            console.log("description changed")
-            setAppInfo({ ...appInfo, description: (appDescriptionRef.current?.value as string) })
-        }
-        if (appYoutubeRef.current?.value != appInfo.youtube && appYoutubeRef.current?.value.startsWith("https://youtu.be/")) {
-            console.log("youtube changed")
-            setAppInfo({ ...appInfo, youtube: (appYoutubeRef.current?.value as string) })
-        }
+        console.log("name changed")
+        // TODO: update name by API
+        console.log("description changed")
+        console.log("youtube changed")
+        console.log(appInstallMethod.current?.value)
+        console.log(appScreenshot)
     }
 
     const onDeleteScreenshot = (url: string) => {
-        const newScreenshot = appInfo.details.imgScreenshot.filter((item) => item !== url)
-        const newDetails = { ...appInfo.details, imgScreenshot: newScreenshot }
-        setAppInfo({ ...appInfo, details: newDetails })
+        const newScreenshot = appScreenshot.filter((item) => {
+            if (item.url === url) {
+                window.URL.revokeObjectURL(url)
+                return false
+            }
+            return true
+        })
+        setAppScreenshot(newScreenshot)
     }
 
     const installMethods = ["Chrome拡張機能", "実行ファイル", "Webアプリ"]
@@ -180,8 +110,8 @@ export default function Page({ params }: { params: { teamId : string } }) {
                         <div {...getRootPropsIcon()}>
                             <input {...getInputPropsIcon()} />
                             <Box sx={{ position: "relative" }}>
-                                {appInfo.icon ?
-                                    <img src={appInfo.icon} alt="icon"
+                                {appIcon ?
+                                    <img src={appIcon.url} alt="icon"
                                       style={{width: iconConfig.width, height: iconConfig.height}}/> :
                                     <Box sx={{width: iconConfig.width, height: iconConfig.height}}></Box>
                                 }
@@ -213,6 +143,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
                             <Select
                                 defaultValue=""
                                 sx={{width: 300}}
+                                inputRef={appInstallMethod}
                             >
                                 {
                                     installMethods.map((item, i) => <MenuItem value={i} key={i}>{item}</MenuItem>)
@@ -231,11 +162,11 @@ export default function Page({ params }: { params: { teamId : string } }) {
                     <Typography variant="h4">スクリーンショット({`${screenshotConfig.width}x${screenshotConfig.height}`})</Typography>
                     <div {...getRootPropsSs()}>
                         <input {...getInputPropsSs()} />
-                        <Button size="large" onClick={open} variant="contained" disabled={appInfo.details.imgScreenshot.length >= 5}>
+                        <Button size="large" onClick={open} variant="contained" disabled={appScreenshot.length >= 5}>
                             追加
                         </Button>
                     </div>
-                    <ScreenshotCarousel imgList={appInfo.details.imgScreenshot} editable={true}
+                    <ScreenshotCarousel imgList={appScreenshot.map((item) => item.url)} editable={true}
                                         onDelete={onDeleteScreenshot} />
 
                 </Stack>

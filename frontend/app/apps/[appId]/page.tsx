@@ -119,8 +119,6 @@ export default function Page({ params }: { params: { appId: string } }) {
             })
     }, [])
 
-    console.log(appInfo)
-
     const imageSize = async (url: string): Promise<{ width: number, height: number }> => {
         return new Promise((resolve, reject) => {
             const img = new Image()
@@ -174,7 +172,6 @@ export default function Page({ params }: { params: { appId: string } }) {
 
         setAppScreenshot([...appScreenshot, acceptedFiles[0]])
         const newScreenshotUrl = [...appInfo.details.imgScreenshot, url]
-        console.log(newScreenshotUrl)
         const newDetails = { ...appInfo.details, imgScreenshot: newScreenshotUrl }
         setAppInfo({ ...appInfo, details: newDetails })
     }, [appScreenshot, appInfo])
