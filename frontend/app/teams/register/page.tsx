@@ -31,6 +31,7 @@ type FormDataValidated = {
     name: string,
     year: string,
     description: string,
+    members: string[]
 }
 
 export default function Page() {
@@ -60,13 +61,14 @@ export default function Page() {
             return null
         }
         let description = "None"
-        if(data.description && data.description !== "") {
+        if (data.description && data.description !== "") {
             description = data.description
         }
         return {
             name: data.name,
             year: data.year,
             description: description,
+            members: [session.uid as string]
         }
     }
 
@@ -75,7 +77,8 @@ export default function Page() {
             method: 'POST',
             headers: {
                 "X-AUTH-TOKEN": session.access_token as string,
-            }
+            },
+            body: JSON.stringify(data),
         }).then((response) => {
             if (response.status === 200) {
                 enqueueSnackbar("Team created successfully", { variant: "success" })
@@ -138,12 +141,10 @@ export default function Page() {
                     <Grid container justifyContent="flex-end">
                         <ThemeProvider theme={theme}>
                             <Button color="primary" variant="contained" disableElevation={true} onClick={() => {
-                                console.log(data)
                                 const validated = validate(data)
-                                if(validated === null) {
+                                if (validated === null) {
                                     return
                                 }
-                                console.log(validated)
                                 submit(validated)
                             }}>Create Team</Button>
                         </ThemeProvider>
