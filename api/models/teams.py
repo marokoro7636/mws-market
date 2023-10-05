@@ -1,6 +1,6 @@
 from firebase_admin import firestore
 from helper.util import sha1_hash, make_secret
-from helper.sanitize import sanitizing_id, sanitizing_by_html, sanitizing_str
+from helper.sanitize import sanitizing_id, sanitizing_by_html, sanitizing_str, sanitizing_int
 import datetime
 from models.requests import (
     Team,
@@ -15,12 +15,12 @@ class Teams:
 
     @staticmethod
     def add_team(req: TeamRequest):
-        req.name = sanitizing_by_html(req.name) # とりあえずこれだけ
-        if req.description is not None:
+        req.name = sanitizing_by_html(req.name) 
+        if req.description is not None: # 不安箇所
             req.description = sanitizing_by_html(req.description)
             if not sanitizing_str(req.description, 20):
                 raise
-        if sanitizing_str(req.name, 20):
+        if sanitizing_str(req.name, 20) and sanitizing_int(req.year, 4): 
             # IDは適切に生成する
             timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             id = sha1_hash(req.name+timestamp)
@@ -107,12 +107,15 @@ class Teams:
             raise
 
     def update_year(self, year: int): # int 型
-        db = firestore.client()
-        db.collection("teams").document(self.id).update(
-            {
-                "year": year,
-            }
-        )
+        if sanitizing_int(year, 4):
+            db = firestore.client()
+            db.collection("teams").document(self.id).update(
+                {
+                    "year": year,
+                }
+            )
+        else:
+            raise
 
     def update_description(self, description: str):
         description = sanitizing_by_html(description)

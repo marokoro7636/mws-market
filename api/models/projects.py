@@ -1,6 +1,6 @@
 from firebase_admin import firestore
 from helper.util import sha1_hash
-from helper.sanitize import sanitizing_id, sanitizing_by_html, sanitizing_str
+from helper.sanitize import sanitizing_id, sanitizing_by_html, sanitizing_str, sanitizing_int
 import shutil
 import tempfile
 import os
@@ -333,7 +333,8 @@ class Project:
         review.user = sanitizing_by_html(review.user)
         review.title = sanitizing_by_html(review.title)
         review.content = sanitizing_by_html(review.content)
-        if sanitizing_str(review.user, 20) and sanitizing_str(review.title, 20) and sanitizing_str(review.content, 20): 
+        master = [review.user, review.title, review.content] # if 判定用のリスト
+        if all([sanitizing_str(rev, 20) for rev in master]) and sanitizing_int(review.rating, 5): # 不安箇所
             db = firestore.client()
             timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             review_id = sha1_hash(f"{self.id}{review}{timestamp}")
