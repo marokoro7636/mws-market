@@ -18,6 +18,7 @@ import createTheme from '@mui/material/styles/createTheme';
 import { ThemeProvider } from '@mui/material/styles';
 
 import AddIcon from '@mui/icons-material/Add';
+import { useRouter } from 'next/navigation';
 
 const theme = createTheme({
     palette: {
@@ -38,20 +39,20 @@ interface Team {
 
 export default function Home() {
     const { data: _session, status } = useSession()
-
-    if (status !== "authenticated") {
-        return <AuthGuard enabled={true} />
-    }
-
-    const session = _session as Session
-
     const [data, setData] = useState<Team[] | null>(null)
+    const router = useRouter()
 
     useEffect(() => {
         fetch('/api/v0/teams/')
             .then((response) => response.json())
             .then((data) => setData(data))
     }, [])
+
+    if (status !== "authenticated") {
+        return <AuthGuard enabled={true} />
+    }
+
+    const session = _session as Session
 
     console.log(data)
 
@@ -107,7 +108,7 @@ export default function Home() {
                     </CardHeader>
                     <CardContent sx={{ px: 5, pb: 5, bgcolor: grey[200] }}>
                         {data.map((e) => (
-                            <Card sx={{ m: 2, p: 1 }}>
+                            <Card sx={{ m: 2, p: 1 }} key={e.id}>
                                 <CardHeader
                                     title={
                                         <>
@@ -139,6 +140,9 @@ export default function Home() {
                         position: 'fixed',
                         bottom: 16,
                         right: 16,
+                    }}
+                    onClick={() => {
+                        router.push("/teams/register")
                     }}
                 >
                     <AddIcon />
