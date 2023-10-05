@@ -15,11 +15,6 @@ type Img = {
 export default function Page({ params }: { params: { teamId : string } }) {
     const teamId = params.teamId
     const { data: _session, status } = useSession()
-
-    if (status !== "authenticated") {
-        return <AuthGuard enabled={true} />
-    }
-
     const session = _session as Session
 
     const iconConfig = { width: 180, height: 180 }
@@ -198,6 +193,10 @@ export default function Page({ params }: { params: { teamId : string } }) {
     }
 
     const installMethods = ["Chrome拡張機能", "実行ファイル", "Webアプリ"]
+
+    if (status !== "authenticated") {
+        return <AuthGuard enabled={true} />
+    }
 
     return (
         <>
