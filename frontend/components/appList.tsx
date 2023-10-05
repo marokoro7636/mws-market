@@ -31,7 +31,7 @@ const AppList = () => {
     const [data, setData] = useState<AppSummaryData[] | null>(null)
 
     useEffect(() => {
-        fetch('/api/v0/projects')
+        fetch('/api/v0/projects/')
             .then((response) => response.json())
             .then((data) => setData(data))
     }, [])

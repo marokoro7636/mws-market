@@ -79,7 +79,6 @@ export default function Page({ params }: { params: { appId: string } }) {
     const [data, setData] = useState<AppInfoData | null>(null)
 
     const initAppInfo = (data: AppInfoData | null): AppInfo => {
-        console.log("called")
         if (data === null) {
             return NullAppData
         }
