@@ -59,6 +59,9 @@ export default function Page({params}: { params: { appId: string } }) {
         }
     }
 
+    const iconConfig = {width: 180, height: 180}
+    const screenshotConfig = {width: 800, height: 450}
+
     const appNameRef = useRef<HTMLInputElement>()
     const appDescriptionRef = useRef<HTMLInputElement>()
     const appYoutubeRef = useRef<HTMLInputElement>()
@@ -69,14 +72,60 @@ export default function Page({params}: { params: { appId: string } }) {
     const [appIcon, setAppIcon] = useState<File>()
     const [appScreenshot, setAppScreenshot] = useState<File[]>([])
 
-    const onDropIcon = useCallback((acceptedFiles: File[]) => {
+    const imageSize = async (url: string): Promise<{width: number, height: number}> => {
+        return new Promise((resolve, reject) => {
+            const img = new Image()
+
+            img.onload = () => {
+                const size = {
+                    width: img.naturalWidth,
+                    height: img.naturalHeight,
+                }
+
+                resolve(size)
+            }
+
+            img.onerror = (error) => {
+                reject(error)
+            }
+
+            img.src = url
+        })
+    }
+
+    const onDropIcon = useCallback(async (acceptedFiles: File[]) => {
+        if (acceptedFiles[0].type !== "image/png" && acceptedFiles[0].type !== "image/jpeg") {
+            alert("pngファイルまたはjpegファイルを選択してください")
+            return
+        }
+
+        const url = window.URL.createObjectURL(acceptedFiles[0])
+        const {width, height} = await imageSize(url)
+        if (!(width === iconConfig.width && height === iconConfig.height)) {
+            alert(`"スクリーンショットのサイズは${iconConfig.width}x${iconConfig.height}にしてください`)
+            return
+        }
+
         setAppIcon(acceptedFiles[0])
-        setAppInfo({...appInfo, icon: window.URL.createObjectURL(acceptedFiles[0])})
+        setAppInfo({...appInfo, icon: url})
     }, [appIcon, appInfo])
 
-    const onDropSs = useCallback((acceptedFiles: File[]) => {
+    const onDropSs = useCallback(async (acceptedFiles: File[]) => {
+        if (acceptedFiles[0].type !== "image/png" && acceptedFiles[0].type !== "image/jpeg") {
+            alert("pngファイルまたはjpegファイルを選択してください")
+            return
+        }
+
+        const url = window.URL.createObjectURL(acceptedFiles[0])
+        const {width, height} = await imageSize(url)
+        if (!(width === screenshotConfig.width && height === screenshotConfig.height)) {
+            alert(`画像サイズは${screenshotConfig.width}x${screenshotConfig.height}にしてください`)
+            return
+        }
+
         setAppScreenshot([...appScreenshot, acceptedFiles[0]])
-        const newScreenshotUrl = [...appInfo.details.imgScreenshot, window.URL.createObjectURL(acceptedFiles[0])]
+        const newScreenshotUrl = [...appInfo.details.imgScreenshot, url]
+        console.log(newScreenshotUrl)
         const newDetails = {...appInfo.details, imgScreenshot: newScreenshotUrl}
         setAppInfo({...appInfo, details: newDetails})
     }, [appScreenshot, appInfo])
@@ -144,7 +193,7 @@ export default function Page({params}: { params: { appId: string } }) {
                                     <Box sx={{position: "relative"}}>
                                         <img src={appInfo.icon} alt="icon" style={{width: 180, height: 180}}/>
                                         <Box sx={{backgroundColor: "white", opacity: 0.7, width: 180, height: 180, position: "absolute", top: 0, display: "flex", justifyContent: "center", alignItems: "center"}}>
-                                            <Box sx={{textAlign: "center"}}>ここに画像を<br/>ドロップ</Box>
+                                            <Box sx={{textAlign: "center"}}>ここに画像を<br/>ドロップ<br/>{`(${iconConfig.width}x${iconConfig.height})`}</Box>
                                         </Box>
                                     </Box>
                             </div> :
@@ -187,6 +236,9 @@ export default function Page({params}: { params: { appId: string } }) {
                         </div>
                     }
                 </Stack>
+                {isEditable &&
+                    <Box sx={{textAlign: "center"}}>スクリーンショットのサイズは{`${screenshotConfig.width}x${screenshotConfig.height}`}にしてください</Box>
+                }
                 <Stack spacing={2} mt={5}>
                     <Typography variant="h4">紹介動画</Typography>
                     {isEditable ?
