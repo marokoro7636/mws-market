@@ -21,6 +21,8 @@ import AddIcon from '@mui/icons-material/Add';
 import { useRouter } from 'next/navigation';
 import { CardActionArea } from '@mui/material';
 
+import { CircularProgress } from '@mui/material';
+
 const theme = createTheme({
     palette: {
         primary: {
@@ -29,12 +31,18 @@ const theme = createTheme({
     },
 });
 
+interface Member {
+    id: string,
+    name: string,
+    image: string,
+}
+
 interface Team {
     id: string,
     name: string,
     year: string,
     description: string | null,
-    members: string[]
+    members: Member[],
     previous: string | null
 }
 
@@ -58,7 +66,9 @@ export default function Home() {
     console.log(data)
 
     if (data === null) {
-        return <div>loading...</div>
+        return <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <CircularProgress  />
+        </div>
     }
 
     data.sort((a, b) => {
@@ -71,7 +81,14 @@ export default function Home() {
         }
     })
 
-    const myTeams = data.filter((e) => e.members.includes(session.uid as string))
+    const myTeams = data.filter((e) => {
+        return e.members.some((m) => {
+            if (m.id === session.uid as string) {
+                return true
+            }
+            return false
+        })
+    })
 
     return (
         <div>

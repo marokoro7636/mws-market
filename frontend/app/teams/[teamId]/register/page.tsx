@@ -6,6 +6,8 @@ import { useDropzone } from "react-dropzone";
 import {useSession} from "next-auth/react";
 import AuthGuard from "@/components/AuthGuard";
 import {Session} from "next-auth";
+import {useRouter} from "next/navigation";
+import {enqueueSnackbar, SnackbarProvider} from "notistack";
 
 type Img = {
     url: string,
@@ -20,6 +22,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
     const iconConfig = { width: 180, height: 180 }
     const screenshotConfig = { width: 800, height: 450 }
 
+    const router = useRouter()
     const appNameRef = useRef<HTMLInputElement>()
     const [appNameError, setAppNameError] = useState<boolean>(false)
     const appNameChange = () => {
@@ -63,14 +66,14 @@ export default function Page({ params }: { params: { teamId : string } }) {
 
     const onDropIcon = useCallback(async (acceptedFiles: File[]) => {
         if (acceptedFiles[0].type !== "image/png" && acceptedFiles[0].type !== "image/jpeg") {
-            alert("pngファイルまたはjpegファイルを選択してください")
+            enqueueSnackbar("pngファイルまたはjpegファイルを選択してください", { variant: "error" })
             return
         }
 
         const url = window.URL.createObjectURL(acceptedFiles[0])
         const { width, height } = await imageSize(url)
         if (!(width === iconConfig.width && height === iconConfig.height)) {
-            alert(`"スクリーンショットのサイズは${iconConfig.width}x${iconConfig.height}にしてください`)
+            enqueueSnackbar(`"スクリーンショットのサイズは${iconConfig.width}x${iconConfig.height}にしてください`, { variant: "error" })
             return
         }
 
@@ -79,14 +82,14 @@ export default function Page({ params }: { params: { teamId : string } }) {
 
     const onDropSs = useCallback(async (acceptedFiles: File[]) => {
         if (acceptedFiles[0].type !== "image/png" && acceptedFiles[0].type !== "image/jpeg") {
-            alert("pngファイルまたはjpegファイルを選択してください")
+            enqueueSnackbar("pngファイルまたはjpegファイルを選択してください", { variant: "error" })
             return
         }
 
         const url = window.URL.createObjectURL(acceptedFiles[0])
         const { width, height } = await imageSize(url)
         if (!(width === screenshotConfig.width && height === screenshotConfig.height)) {
-            alert(`画像サイズは${screenshotConfig.width}x${screenshotConfig.height}にしてください`)
+            enqueueSnackbar(`画像サイズは${screenshotConfig.width}x${screenshotConfig.height}にしてください`, { variant: "error" })
             return
         }
 
@@ -102,7 +105,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
         }
         try {
             // プロジェクトID取得
-            const res: { id: string } = await (await fetch("/api/v0/projects", {
+            const res: { id: string } = await (await fetch("/api/v0/projects/", {
                 method: "post",
                 headers: {
                     "x-auth-token": session.access_token as string,
@@ -141,7 +144,9 @@ export default function Page({ params }: { params: { teamId : string } }) {
                 await fetch(`/api/v0/projects/${projectId}/details/install`, {
                     method: "post",
                     headers: {
-                        "x-auth-token": session.access_token as string
+                        "x-auth-token": session.access_token as string,
+                        "Content-Type": "application/json"
+
                     },
                     body: JSON.stringify({
                         method: appInstallMethodRef.current?.value,
@@ -157,7 +162,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
                 await fetch(`/api/v0/projects/${projectId}/img`, {
                     method: "post",
                     headers: {
-                        "x-auth-token": session.access_token as string
+                        "x-auth-token": session.access_token as string,
                     },
                     body: sendIcon
                 })
@@ -170,14 +175,15 @@ export default function Page({ params }: { params: { teamId : string } }) {
                     await fetch(`/api/v0/projects/${projectId}/details/imgs`, {
                         method: "post",
                         headers: {
-                            "x-auth-token": session.access_token as string
+                            "x-auth-token": session.access_token as string,
                         },
                         body: sendScreenshot
                     })
                 }
             }
+            router.push(`/apps/${projectId}`)
         } catch (e) {
-            alert("通信に失敗しました")
+            enqueueSnackbar("通信に失敗しました", { variant: "error" })
         }
     }
 
@@ -192,7 +198,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
         setAppScreenshot(newScreenshot)
     }
 
-    const installMethods = ["Chrome拡張機能", "実行ファイル", "Webアプリ"]
+    const installMethods = ["Chrome拡張機能", "実行ファイル", "Webアプリ", "データセット", "その他"]
 
     if (status !== "authenticated") {
         return <AuthGuard enabled={true} />
@@ -201,6 +207,8 @@ export default function Page({ params }: { params: { teamId : string } }) {
     return (
         <>
             <Container sx={{ mt: 3 }}>
+                <SnackbarProvider />
+
                 <Grid container alignItems="center" sx={{ mt: 3 }}>
                     <Grid item xs={3}>
                         <div {...getRootPropsIcon()}>
@@ -208,7 +216,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
                             <Box sx={{ position: "relative" }}>
                                 {appIcon ?
                                     <img src={appIcon.url} alt="icon"
-                                      style={{width: iconConfig.width, height: iconConfig.height}}/> :
+                                         style={{width: iconConfig.width, height: iconConfig.height}}/> :
                                     <Box sx={{width: iconConfig.width, height: iconConfig.height}}></Box>
                                 }
                                 <Box sx={{ bgcolor: "#cccccc", opacity: 0.7, width: iconConfig.width, height: iconConfig.height, position: "absolute", top: 0, display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -267,11 +275,10 @@ export default function Page({ params }: { params: { teamId : string } }) {
                     </div>
                     <ScreenshotCarousel imgList={appScreenshot.map((item) => item.url)} editable={true}
                                         onDelete={onDeleteScreenshot} />
-
                 </Stack>
                 <Stack spacing={2} mt={5}>
                     <Typography variant="h4">紹介動画 (YouTube URL)</Typography>
-                        <TextField variant="outlined" inputRef={appYoutubeRef} sx={{ width: 500 }} />
+                    <TextField variant="outlined" inputRef={appYoutubeRef} sx={{ width: 500 }} />
                 </Stack>
             </Container>
         </>

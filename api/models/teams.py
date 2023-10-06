@@ -5,7 +5,8 @@ import datetime
 from models.requests import (
     Team,
     TeamSimpleResponse,
-    TeamRequest
+    TeamRequest,
+    TeamResponse
 )
 
 
@@ -41,14 +42,23 @@ class Teams:
             db.collection("teams").document(id).set(
                 {
                     "name": req.name,
-                    "year": req.year, # int 型 None?
-                    "description": req.description, # None?
-                    "members": members, # 関数内で生成
-                    "secret": secret, # 関数内で生成
+                    "year": req.year,
+                    "description": req.description,
+                    "members": members,
+                    "secret": secret,
+                    "relations": [
+                        id,
+                    ],
                     "previous": None
                 }
             )
             db.collection("secrets").document(secret).set(
+                {
+                    "id": id
+                }
+            )
+            for user_id in req.members:
+                db.collection("affiliations").document(user_id).set(
                 {
                     "id": id
                 }
@@ -78,8 +88,8 @@ class Teams:
     def get_teams():
         db = firestore.client()
         docs = db.collection("teams").stream()
-        data = {doc.id: doc.to_dict() for doc in docs}
-        return data
+        teams = [TeamResponse(id=doc.id, **doc.to_dict()) for doc in docs]
+        return teams
 
     @staticmethod
     def get_by_secret(secret: str):
@@ -92,6 +102,11 @@ class Teams:
         db = firestore.client()
         data = db.collection("teams").document(self.id).get().to_dict()
         return data
+
+    def get_name(self):
+        db = firestore.client()
+        name = db.collection("teams").document(self.id).get().get("name")
+        return name
 
     def add_member(self, user_id: str):
         db = firestore.client()
@@ -156,13 +171,10 @@ class Teams:
         if len(data["members"]) < 2:
             print("members is less than 2")
             raise
-        del_data = list(filter(lambda x: x["id"] == user_id, data["members"]))
-        if len(del_data) == 0:
-            print("user not found in teams")
-            raise
+        updated_data = list(filter(lambda x: x["id"] != user_id, data["members"]))
         db.collection("teams").document(self.id).update(
             {
-                "members": firestore.firestore.ArrayRemove([del_data])
+                "members": updated_data
             }
         )
         db.collection("affiliations").document(user_id).update(
@@ -170,6 +182,7 @@ class Teams:
                 "team": firestore.firestore.ArrayRemove([self.id])
             }
         )
+
 
     def set_previous(self, previous: str):
         previous = sanitizing_by_html(previous)
@@ -183,13 +196,38 @@ class Teams:
         else:
             raise
 
-    def delete_previous(self):
+    def set_relations(self, team: str):
         db = firestore.client()
+        relations = db.collection("teams").document(self.id).get().to_dict().get("relations")
+        relations += db.collection("teams").document(team).get().to_dict().get("relations")
+        for id in relations:
+            db.collection("teams").document(id).update(
+                {
+                    "relations": relations
+                }
+            )
+
+    def delete_relations(self):
+        db = firestore.client()
+        data = db.collection("teams").document(self.id).get().to_dict()
+        relations = data.get("relations")
+        relations.remove(self.id)
+        for id in relations:
+            db.collection("teams").document(id).update(
+                {
+                    "relations": relations,
+                }
+            )
         db.collection("teams").document(self.id).update(
             {
-                "previous": firestore.DELETE_FIELD,
+                "relations": [self.id],
             }
         )
+
+    def get_relations(self):
+        db = firestore.client()
+        relations = db.collection("teams").document(self.id).get().get("relations")
+        return relations
 
     def get_members(self):
         db = firestore.client()

@@ -17,13 +17,14 @@ from models.users import Users
 
 router = APIRouter()
 
-@router.get("/", response_model=list[TeamResponse])
+# @router.get("/", response_model=list[TeamResponse])
+@router.get("/")
 def get_teams():
     try:
-        data = Teams.get_teams()
+        teams = Teams.get_teams()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to get teams")
-    return [TeamResponse(id=key, **value) for key, value in data.items()]
+    return teams
 
 @router.post("/", response_model=TeamSimpleResponse)
 def post_team(req: TeamRequest, x_auth_token: Optional[str] = Header(None)):
@@ -99,32 +100,32 @@ def delete_team_members(team_id: str, member_id: str, x_auth_token: Optional[str
         raise StarletteHTTPException(status_code=500, detail="Failed to delete team members")
     return API_OK()
 
-@router.post("/{team_id}/previous", response_model=API_OK)
-def post_team_previous(team_id: str, previous_secret: str, x_auth_token: Optional[str] = Header(None)):
+@router.post("/{team_id}/relations", response_model=API_OK)
+def post_team_relations(team_id: str, secret: str, x_auth_token: Optional[str] = Header(None)):
     if not Teams.is_exist(team_id):
         raise StarletteHTTPException(status_code=404, detail="Team not found")
     if not isAuthed(Teams(team_id).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
 
-    previous =  Teams.get_by_secret(previous_secret)
-    if previous is None:
+    team =  Teams.get_by_secret(secret)
+    if team is None:
         raise StarletteHTTPException(status_code=404, detail="Team not found")
     try:
-        Teams(team_id).set_previous(previous)
+        Teams(team_id).set_relations(team)
     except:
-        raise StarletteHTTPException(status_code=500, detail="Failed to post team previous")
+        raise StarletteHTTPException(status_code=500, detail="Failed to post team relations")
     return API_OK()
 
-@router.delete("/{team_id}/previous", response_model=API_OK)
-def delete_team_previous(team_id: str, x_auth_token: Optional[str] = Header(None)):
+@router.delete("/{team_id}/relations", response_model=API_OK)
+def delete_team_relations(team_id: str, x_auth_token: Optional[str] = Header(None)):
     if not Teams.is_exist(team_id):
         raise StarletteHTTPException(status_code=404, detail="Team not found")
     if not isAuthed(Teams(team_id).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
-        Teams(team_id).delete_previous()
+        Teams(team_id).delete_relations()
     except:
-        raise StarletteHTTPException(status_code=500, detail="Failed to delete team previous")
+        raise StarletteHTTPException(status_code=500, detail="Failed to delete team relations")
     return API_OK()
 
 @router.get("/invitation/{team_secret}", response_model=Team)

@@ -2,6 +2,7 @@ from firebase_admin import firestore
 from helper.util import sha1_hash
 from helper.sanitize import sanitizing_id, sanitizing_by_html, sanitizing_str, sanitizing_int
 import shutil
+from typing import Optional
 import tempfile
 import os
 import datetime
@@ -15,8 +16,10 @@ from models.requests import (
     ProjectDetails,
     ProjectReview,
     Install,
-    ProjectSummary
+    ProjectSummary,
+    RequiredSpecRequest
 )
+from models.teams import Teams
 
 class Project:
     def __init__(self, id):
@@ -66,7 +69,7 @@ class Project:
         if info.img is not None:
             info.img = Project.gen_img_url(info.img)
         info.details.img_screenshot = {img_id: Project.gen_img_url(path) for img_id, path in info.details.img_screenshot.items()}
-
+        info.team = Teams(info.team).get_name()
         return info
 
     def set_name(self, name: str):
@@ -246,10 +249,10 @@ class Project:
         else:
             raise
 
-    def get_required_spec(self) -> {str: RequiredSpec}:
+    def get_required_spec(self) -> list[RequiredSpec]:
         db = firestore.client()
         required_spec = db.collection("projects").document(self.id).get().to_dict().get("details", {}).get("required_spec", {})
-        return {key: RequiredSpec(**value) for key, value in required_spec.items()}
+        return [RequiredSpec(id = key, **value) for key, value in required_spec.items()]
 
     def delete_required_spec(self, spec_id: str):
         db = firestore.client()
@@ -260,10 +263,10 @@ class Project:
         )
 
     ## install
-    def get_install(self) -> {str, Install}:
+    def get_install(self) -> list[Install]:
         db = firestore.client()
         install = db.collection("projects").document(self.id).get().to_dict().get("details", {}).get("install", {})
-        return {key: Install(**value) for key, value in install.items()}
+        return [Install(id=key, **value) for key, value in install.items()]
 
     def add_install(self, install: Install):
         install.method = sanitizing_by_html(install.method)
@@ -367,10 +370,40 @@ class Project:
         )
 
     @staticmethod
-    def get_project():
+    def get_project(limit: int, page: int, order: Optional[str], year: Optional[int], team: Optional[str]) -> list[ProjectSummary]:
         db = firestore.client()
-        docs = db.collection("projects").select(ProjectSummary.__annotations__.keys()).stream()
-        return {doc.id: doc.to_dict() for doc in docs}
+        snapshot = db.collection("projects")
+
+        if year is not None:
+            docs = db.collection("teams").where(filter=firestore.firestore.FieldFilter("year", "==", year)).get()
+            candidate = [doc.id for doc in docs]
+            if len(candidate) > 0:
+                snapshot = snapshot.where(filter=firestore.firestore.FieldFilter("team", "in", candidate))
+            else:
+                return dict()
+        if team is not None:
+            if Teams.is_exist(team):
+                candidate = Teams(team).get_relations()
+                snapshot = snapshot.where(filter=firestore.firestore.FieldFilter("team", "in", candidate))
+            else:
+                return dict()
+        if order is None:
+            st_doc = snapshot.limit(1 + limit * (page - 1)).get()[-1]
+            snapshot = snapshot.start_at(st_doc).limit(limit)
+        else:
+            st_doc = snapshot.order_by(order).limit(1 + limit * (page - 1)).get()[-1]
+            snapshot = snapshot.start_at(st_doc).order_by(order).limit(limit)
+
+        def convert(data):
+            data["team"] = Teams(data["team"]).get_name()
+            return data
+
+        docs =  snapshot.select(ProjectSummary.__annotations__.keys()).get()
+        return [ProjectSummary(id = doc.id, **convert(doc.to_dict())) for doc in docs]
+
+    @staticmethod
+    def allow_order(order: Optional[str]):
+        return order is None or order in ["rating.total", "rating.count"]
 
     def delete(self):
         db = firestore.client()
