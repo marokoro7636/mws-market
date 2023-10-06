@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import { Box, Grid } from "@mui/material";
+import { Box, Button, Grid, Select, MenuItem, } from "@mui/material";
 import AppCard from "@/components/AppCard";
 
 import { CircularProgress } from '@mui/material';
@@ -39,7 +39,49 @@ const AppList = () => {
     }
 
     return (
-        <Box sx={{ mt: 3 }}>
+        <Box sx={{ mt: 2 }}>
+            <Box>
+                <Grid container spacing={2}
+                    columns={{ xs: 12 }}
+                    sx={{ height: "2rem", m: 3 }}>
+                    {/* <Grid xs={2}>
+                        <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            label="Age"
+
+                            inputProps={{
+                                name: 'age',
+                                id: 'age-native-simple',
+                            }}
+                        >
+                            <MenuItem value={10}>Ten</MenuItem>
+                            <MenuItem value={20}>Twenty</MenuItem>
+                            <MenuItem value={30}>Thirty</MenuItem>
+                        </Select>
+                    </Grid>
+                    <Grid xs={2}>
+                        <Button variant="outlined">新規作成</Button>
+                    </Grid>
+                    <Grid xs={2}>
+                        <Button variant="outlined">新規作成</Button>
+                    </Grid>
+                    <Grid xs={2}>
+                        <Button variant="outlined">新規作成</Button>
+                    </Grid> */}
+                    {/* <Grid xs={4}>
+                        読み込みサイズ
+                        <RadioGroup
+                            row
+                            defaultValue="6"
+                        >
+                            <FormControlLabel value="6" control={<Radio />} label="6" />
+                            <FormControlLabel value="12" control={<Radio />} label="12" />
+                            <FormControlLabel value="24" control={<Radio />} label="24" />
+                        </RadioGroup>
+                    </Grid> */}
+                </Grid>
+            </Box>
             <Grid container spacing={2} rowSpacing={5}>
                 {
                     data.map((item, i) => (

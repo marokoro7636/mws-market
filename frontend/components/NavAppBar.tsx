@@ -7,13 +7,16 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import AdbIcon from '@mui/icons-material/Adb';
-
+import { ButtonBase } from '@mui/material';
 
 import { MypageButton } from './MypageButton';
+import { Avatar } from '@mui/material';
+import { useRouter } from 'next/navigation';
 
 const appName = "MWS Market | MUUS"
 
 function NavAppBar() {
+    const router = useRouter()
     const appBarStyle = {
         color: "#003893",
         backgroundColor: "#0055df10",
@@ -27,50 +30,57 @@ function NavAppBar() {
         >
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
-                    {/* TODO: icon HERE */}
-                    <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+                    <ButtonBase onClick={() => {
+                        router.push("/")
+                    }}>
+                        <Avatar src='/icon256.png' sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }}></Avatar>
 
-                    <Typography
-                        variant="h6"
-                        noWrap
-                        component="a"
-                        href="#app-bar-with-responsive-menu"
-                        sx={{
-                            mr: 2,
-                            display: { xs: 'none', md: 'flex' },
-                            fontFamily: 'Gemunu Libre',
-                            fontSize: '2rem',
-                            fontWeight: 700,
-                            letterSpacing: '.3rem',
-                            color: 'inherit',
-                            textDecoration: 'none',
-                        }}
-                    >
-                        {appName}
-                    </Typography>
+                        <Typography
+                            variant="h6"
+                            noWrap
+                            component="a"
+                            href="#app-bar-with-responsive-menu"
+                            sx={{
+                                mr: 2,
+                                display: { xs: 'none', md: 'flex' },
+                                fontFamily: 'Gemunu Libre',
+                                fontSize: '2rem',
+                                fontWeight: 700,
+                                letterSpacing: '.3rem',
+                                color: 'inherit',
+                                textDecoration: 'none',
+                            }}
+                        >
+                            {appName}
+                        </Typography>
+                    </ButtonBase>
 
                     <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
 
                     </Box>
 
-                    <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
-                    <Typography
-                        variant="h5"
-                        noWrap
-                        component="a"
-                        href="#app-bar-with-responsive-menu"
-                        sx={{
-                            mr: 2,
-                            display: { xs: 'flex', md: 'none' },
-                            fontFamily: 'Gemunu Libre',
-                            fontWeight: 700,
-                            letterSpacing: '.3rem',
-                            color: 'inherit',
-                            textDecoration: 'none',
-                        }}
-                    >
-                        {appName}
-                    </Typography>
+                    <ButtonBase onClick={() => {
+                        router.push("/")
+                    }}>
+                        <Avatar src='/icon256.png' sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} ></Avatar>
+                        <Typography
+                            variant="h5"
+                            noWrap
+                            component="a"
+                            href="#app-bar-with-responsive-menu"
+                            sx={{
+                                mr: 2,
+                                display: { xs: 'flex', md: 'none' },
+                                fontFamily: 'Gemunu Libre',
+                                fontWeight: 700,
+                                letterSpacing: '.3rem',
+                                color: 'inherit',
+                                textDecoration: 'none',
+                            }}
+                        >
+                            {appName}
+                        </Typography>
+                    </ButtonBase>
                     <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'flex' } }}>
                     </Box>
 
@@ -79,7 +89,7 @@ function NavAppBar() {
                     </Box>
                 </Toolbar>
             </Container>
-        </AppBar>
+        </AppBar >
     );
 }
 export default NavAppBar;
