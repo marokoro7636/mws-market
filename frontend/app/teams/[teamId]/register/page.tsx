@@ -198,7 +198,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
         setAppScreenshot(newScreenshot)
     }
 
-    const installMethods = ["Chrome拡張機能", "実行ファイル", "Webアプリ"]
+    const installMethods = ["Chrome拡張機能", "実行ファイル", "Webアプリ", "データセット", "その他"]
 
     if (status !== "authenticated") {
         return <AuthGuard enabled={true} />
