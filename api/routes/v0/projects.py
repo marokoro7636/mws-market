@@ -34,7 +34,8 @@ def get_projects(limit: int = 10, page: int = 1, order: Optional[str] = None, ye
         raise StarletteHTTPException(status_code=400, detail="Incorrect order")
     try:
         summary = Project.get_project(limit, page, order, year, team)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to get projects")
     return summary
 
