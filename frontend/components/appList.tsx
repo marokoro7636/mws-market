@@ -16,6 +16,8 @@ type AppSummaryData = {
         total: number,
         count: number
     }
+    icon: string,
+    img: string
 }
 
 const AppList = () => {
@@ -42,7 +44,7 @@ const AppList = () => {
                 {
                     data.map((item, i) => (
                         <Grid item xs={4} key={i}>
-                            <AppCard id={item.id} name={item.name} team={item.team} description={item.description} rating={item.rating} />
+                            <AppCard id={item.id} name={item.name} team={item.team} description={item.description} rating={item.rating} icon={item.icon} img={item.img} />
                         </Grid>
                     ))
                 }

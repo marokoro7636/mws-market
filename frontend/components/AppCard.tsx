@@ -16,7 +16,7 @@ interface AppCardProps {
     id: string,
     name: string,
     team: string,
-    screenshot: string,
+    img: string,
     icon: string,
     description: string
     rating: {
@@ -25,7 +25,7 @@ interface AppCardProps {
     }
 }
 
-const AppCard = ({ id, name, team, description, rating, icon, screenshot }: AppCardProps) => {
+const AppCard = ({ id, name, team, description, rating, icon, img }: AppCardProps) => {
     return (
         <Card sx={{ maxWidth: 345, "border": "1px solid #0055df10", borderRadius: 4 }} elevation={0}>
             <CardActionArea href={`/apps/${id}`}>
@@ -33,7 +33,7 @@ const AppCard = ({ id, name, team, description, rating, icon, screenshot }: AppC
                     component="img"
                     height="180"
                     width="180"
-                    image={screenshot || "https://placehold.jp/4380E0/ffffff/180x180.png?text=no%20image"}
+                    image={img || "https://placehold.jp/4380E0/ffffff/180x180.png?text=no%20image"}
                 />
                 <CardContent>
                     <Grid container columns={{ xs: 4 }}>

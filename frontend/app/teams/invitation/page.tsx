@@ -1,7 +1,9 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { Button, Container, Grid, Typography, Card, CardContent, CardActions, CardHeader, TextField, FormControl } from "@mui/material";
+import { Button, Container, Grid, Typography, Card, CardContent, CardActions, CardHeader, List, ListItem, ListItemAvatar, ListItemText, Avatar } from "@mui/material";
+
+import Divider from '@mui/material/Divider';
 
 import createTheme from '@mui/material/styles/createTheme';
 import { ThemeProvider } from '@mui/material/styles';
@@ -30,12 +32,14 @@ interface Member {
 }
 
 interface TeamInternalInfo {
+    id: string
     name: string,
     year: string,
     description: string,
     members: Member[],
     secret: string,
     previous: string,
+    relations: TeamInternalInfo[],
 }
 
 export default function Page() {
@@ -74,6 +78,7 @@ export default function Page() {
                     return e.id === session?.uid
                 })
                 if (alreadyJoined) {
+                    // console.log("already joined")
                     router.push(`/teams/${data.id}`)
                 }
                 setTeamInternalInfo(data)
@@ -86,66 +91,94 @@ export default function Page() {
         return <AuthGuard enabled={true} />
     }
 
-    const session = _session as Session
-
-
+    const joinTeam = () => {
+        const secret = searchParams.get("secret") as string
+        const session = _session as Session
+        fetch(`/api/v0/teams/invitation/${secret}?member_id=${session.uid}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-AUTH-TOKEN": session?.access_token as string,
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data)
+                if (data.detail) {
+                    enqueueSnackbar("参加できませんでした", { variant: "error" })
+                }
+                if (data.status === "ok") {
+                    enqueueSnackbar("参加しました", { variant: "success" })
+                    setTimeout(() => router.push(`/teams/${teamInternalInfo.id}`), 1000)
+                }
+            })
+    }
 
     return (
         <Container sx={{ p: 3 }}>
             <SnackbarProvider />
 
-            <Typography variant="h3">Register New Team</Typography>
+            <Typography variant="h3">Join New Team</Typography>
 
             <Card sx={{ mt: 5, p: 3, "border": "1px solid #0055df50", }} elevation={0}>
-                <CardHeader
-                    title="Team Info"
-                />
                 <CardContent>
-                    {/* <Grid container spacing={2} columns={{ xs: 3, sm: 8, md: 12 }}>
+                    <Typography variant='h4' sx={{ mb: 3 }}>Team Info</Typography>
+                    <Grid container spacing={2} columns={{ xs: 3, sm: 8, md: 12 }}>
                         <Grid item xs={3} md={3}>
                             Team Name :
                         </Grid>
                         <Grid item xs={3} md={9}>
-                            <TextField size="small"
-                                variant="standard"
-                                onChange={(e) => { data.name = e.target.value }}
-                            >
-                            </TextField>
+                            <Typography variant="body1">{teamInternalInfo.name}</Typography>
                         </Grid>
                         <Grid item xs={3} md={3}>
                             Year:
                         </Grid>
                         <Grid item xs={3} md={9}>
-                            <TextField size="small"
-                                variant="standard"
-                                onChange={(e) => { data.year = e.target.value }}
-                            >
-                            </TextField>
+                            <Typography variant="body1">{teamInternalInfo.year}</Typography>
                         </Grid>
                         <Grid item xs={3} md={3}>
                             Description:
                         </Grid>
                         <Grid item xs={3} md={9}>
-                            <TextField size="small"
-                                multiline fullWidth
-                                variant="standard"
-                                onChange={(e) => { data.description = e.target.value }}
-                            >
-                            </TextField>
+                            <Typography variant="body1">{teamInternalInfo.description}</Typography>
                         </Grid>
-                    </Grid> */}
+                    </Grid>
+                    <Divider sx={{ my: 2 }}></Divider>
+                    <Typography variant='h6'>Members</Typography>
+                    <List >
+                        {teamInternalInfo.members?.map((e) => (
+                            <ListItem key={e.id}           >
+                                <ListItemAvatar>
+                                    <Avatar
+                                        src={e.image}
+                                    />
+                                </ListItemAvatar>
+                                <ListItemText
+                                    primary={e.name}
+                                />
+                            </ListItem>
+                        ))}
+                    </List>
+                    <Divider sx={{ my: 2 }}></Divider>
+                    <Typography variant='h6'>Relationship</Typography>
+                    <List >
+                        {teamInternalInfo.relations?.map((e) => (
+                            <ListItem key={e.id}>
+                                <ListItemText
+                                    primary={e.name}
+                                    secondary={e.year}
+                                />
+                            </ListItem>
+                        ))}
+                    </List>
 
                 </CardContent>
                 <CardActions>
                     <Grid container justifyContent="flex-end">
                         <ThemeProvider theme={theme}>
                             <Button color="primary" variant="contained" disableElevation={true} onClick={() => {
-                                // const validated = validate(data)
-                                // if (validated === null) {
-                                //     return
-                                // }
-                                // submit(validated)
-                            }}>Create Team</Button>
+                                joinTeam()
+                            }}>Join Team</Button>
                         </ThemeProvider>
                     </Grid>
                 </CardActions>
