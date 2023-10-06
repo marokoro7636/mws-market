@@ -134,13 +134,10 @@ class Teams:
         if len(data["members"]) < 2:
             print("members is less than 2")
             raise
-        del_data = list(filter(lambda x: x["id"] == user_id, data["members"]))
-        if len(del_data) == 0:
-            print("user not found in teams")
-            raise
+        updated_data = list(filter(lambda x: x["id"] != user_id, data["members"]))
         db.collection("teams").document(self.id).update(
             {
-                "members": firestore.firestore.ArrayRemove([del_data])
+                "members": updated_data
             }
         )
         db.collection("affiliations").document(user_id).update(
