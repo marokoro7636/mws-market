@@ -14,6 +14,7 @@ from models.requests import (
     RequiredSpec,
     ProjectDetails,
     ProjectReview,
+    ProjectReviewRequest,
     Install,
     ProjectSummary,
     RequiredSpecRequest,
@@ -293,7 +294,7 @@ class Project:
         review = db.collection("projects").document(self.id).get().to_dict().get("review", {})
         return [review(id=key, **value) for key, value in review.items()]
 
-    def add_review(self, review: ProjectReview):
+    def add_review(self, review: ProjectReviewRequest):
         db = firestore.client()
         timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         review_id = sha1_hash(f"{self.id}{review}{timestamp}")
