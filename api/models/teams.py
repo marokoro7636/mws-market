@@ -26,7 +26,9 @@ class Teams:
                 "description": req.description,
                 "members": req.members,
                 "secret": secret,
-                "previous": None
+                "relations": [
+                    id,
+                ]
             }
         )
         db.collection("secrets").document(secret).set(
@@ -128,21 +130,38 @@ class Teams:
             }
         )
 
-    def set_previous(self, previous: str):
+    def set_relations(self, team: str):
         db = firestore.client()
+        relations = db.collection("teams").document(self.id).get().to_dict().get("relations")
+        relations += db.collection("teams").document(team).get().to_dict().get("relations")
+        for id in relations:
+            db.collection("teams").document(id).update(
+                {
+                    "relations": relations
+                }
+            )
+
+    def delete_relations(self):
+        db = firestore.client()
+        data = db.collection("teams").document(self.id).get().to_dict()
+        relations = data.get("relations")
+        relations.remove(self.id)
+        for id in relations:
+            db.collection("teams").document(id).update(
+                {
+                    "relations": relations,
+                }
+            )
         db.collection("teams").document(self.id).update(
             {
-                "previous": previous,
+                "relations": [self.id],
             }
         )
 
-    def delete_previous(self):
+    def get_relations(self):
         db = firestore.client()
-        db.collection("teams").document(self.id).update(
-            {
-                "previous": firestore.DELETE_FIELD,
-            }
-        )
+        relations = db.collection("teams").document(self.id).get().get("relations")
+        return relations
 
     def get_members(self):
         db = firestore.client()

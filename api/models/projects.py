@@ -323,19 +323,35 @@ class Project:
     ## Projectのドキュメントを全てリストに集める
     ## 要求データは存在すると仮定
     @staticmethod
-    def get_project(limit: int, page: int, order: Optional[str]):
+    def get_project(limit: int, page: int, order: Optional[str], year: Optional[int], team: Optional[str]):
         db = firestore.client()
+        snapshot = db.collection("projects")
+
+        if year is not None:
+            docs = db.collection("teams").where(filter=firestore.firestore.FieldFilter("year", "==", year)).get()
+            candidate = [doc.id for doc in docs]
+            if len(candidate) > 0:
+                snapshot = snapshot.where(filter=firestore.firestore.FieldFilter("team", "in", candidate))
+            else:
+                return dict()
+        if team is not None:
+            if Teams.is_exist(team):
+                candidate = Teams(team).get_relations()
+                snapshot = snapshot.where(filter=firestore.firestore.FieldFilter("team", "in", candidate))
+            else:
+                return dict()
         if order is None:
-            st_doc = db.collection("projects").limit(1 + limit * (page - 1)).get()[-1]
-            docs = db.collection("projects").start_at(st_doc).limit(limit).select(ProjectSummary.__annotations__.keys()).get()
+            st_doc = snapshot.limit(1 + limit * (page - 1)).get()[-1]
+            snapshot = snapshot.start_at(st_doc).limit(limit)
         else:
-            st_doc = db.collection("projects").order_by(order).limit(1 + limit * (page - 1)).get()[-1]
-            docs = db.collection("projects").start_at(st_doc).order_by(order).limit(limit).select(ProjectSummary.__annotations__.keys()).get()
+            st_doc = snapshot.order_by(order).limit(1 + limit * (page - 1)).get()[-1]
+            snapshot = snapshot.start_at(st_doc).order_by(order).limit(limit)
 
         def convert(data):
             data["team"] = Teams(data["team"]).get_name()
             return data
 
+        docs =  snapshot.select(ProjectSummary.__annotations__.keys()).get()
         return {doc.id: convert(doc.to_dict()) for doc in docs}
 
     @staticmethod

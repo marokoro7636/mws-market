@@ -61,15 +61,15 @@ class ProjectSummary(BaseModel):
 
 class Team(BaseModel):
     name: str
-    year: Optional[int] = None
+    year: int
     description: Optional[str] = None
     members: list[str]
     secret: Optional[str] = None
-    previous: Optional[str] = None
+    relations: list[str]
 
 class TeamRequest(BaseModel):
     name: str
-    year: Optional[int] = None
+    year: int
     description: Optional[str] = None
     members: list[str]
 
@@ -79,7 +79,8 @@ class TeamResponse(BaseModel):
     year: int
     description: str
     members: list[str]
-    previous: Optional[str] = None
+    relations: list[str]
+
 
 class TeamSimpleResponse(BaseModel):
     id: str
