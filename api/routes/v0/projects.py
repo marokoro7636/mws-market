@@ -34,17 +34,17 @@ def get_projects(limit: int = 10, page: int = 1, order: Optional[str] = None, ye
         raise StarletteHTTPException(status_code=400, detail="Incorrect order")
     try:
         summary = Project.get_project(limit, page, order, year, team)
-    except Exception as e:
-        print(e)
+    except:
         raise StarletteHTTPException(status_code=500, detail="Failed to get projects")
     return summary
 
 @router.get("/{project_id}", response_model=ProjectInfo)
-def get_project(project_id: str):
+def get_project(project_id: str, x_auth_token: Optional[str] = Header(None)):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
         info = Project(project_id).get_info()
+        info.own = isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to get projects")
     return info

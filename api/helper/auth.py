@@ -11,8 +11,8 @@ class AuthedUser:
 
 def isAuthed(members: list[str], idToken: Optional[str]):
     if idToken is None:
-        return True
-        # return False
+        # return True
+        return False
     try:
         db = firestore.client()
         doc = db.collection("session2uid").document(idToken).get()
