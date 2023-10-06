@@ -84,26 +84,19 @@ class ProjectSummary(BaseModel):
     rating: Rating
     youtube: Optional[str] = None
     team: Optional[str] = None
+    icon: Optional[str] = None
+    img: Optional[str] = None
 
 class TeamMember(BaseModel):
     id: str
     name: str
     image: str
 
-class Team(BaseModel):
-    name: str
-    year: int
-    description: Optional[str] = None
-    members: list[TeamMember]
-    secret: Optional[str] = None
-    relations: list[str]
-
 class TeamRequest(BaseModel):
     name: str
     year: int
     description: Optional[str] = None
     members: list[str]
-    secret: str
 
 class TeamResponse(BaseModel):
     id: str
@@ -112,6 +105,15 @@ class TeamResponse(BaseModel):
     description: str
     members: list[TeamMember]
     relations: list[str]
+
+class Team(BaseModel):
+    id:str
+    name: str
+    year: int
+    description: Optional[str] = None
+    members: list[TeamMember]
+    secret: Optional[str] = None
+    relations: list[TeamResponse]
 
 class TeamSimpleResponse(BaseModel):
     id: str

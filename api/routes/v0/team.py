@@ -47,7 +47,8 @@ def get_team(team_id: str, x_auth_token: Optional[str] = Header(None)):
 
     try:
         data = Teams(team_id).get()
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to get teams")
     return Team(**data)
 
