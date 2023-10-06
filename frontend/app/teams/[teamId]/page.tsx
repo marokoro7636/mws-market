@@ -22,6 +22,8 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { useRouter } from 'next/navigation'
 
 import AuthGuard from "@/components/AuthGuard";
+import SimpleGraph from '@/components/RelationGraph';
+import RelationGraph from '@/components/RelationGraph';
 
 const theme = createTheme({
     palette: {
@@ -38,12 +40,14 @@ interface Member {
 }
 
 interface TeamInternalInfo {
+    id: string
     name: string,
     year: string,
     description: string,
     members: Member[],
     secret: string,
     previous: string,
+    relations: TeamInternalInfo[],
 }
 
 export default function Page({ params }: { params: { teamId: string } }) {
@@ -60,6 +64,8 @@ export default function Page({ params }: { params: { teamId: string } }) {
 
     const [modalOpen, setModalOpen] = React.useState(false)
     const [userDelete, setUserDelete] = React.useState({} as Member)
+
+    const [teamRelationSecret, setTeamRelationSecret] = useState<string>("")
 
     const router = useRouter()
 
@@ -264,6 +270,28 @@ export default function Page({ params }: { params: { teamId: string } }) {
         </Button>
     }
 
+    const linkTeams = (secert: string) => {
+        return fetch(`/api/v0/teams/${teamId}/relations?secret=${secert}`, {
+            method: 'POST',
+            headers: {
+                "X-AUTH-TOKEN": session.access_token as string,
+            },
+        }).then((response) => {
+            if (response.status === 200) {
+                enqueueSnackbar("Linked successfully", { variant: "success" })
+                return response.json()
+            } else {
+                enqueueSnackbar("Failed to link", { variant: "error" })
+                return response.json()
+            }
+        }).then((e) => {
+            console.log(e)
+            if (e.status === "ok") {
+                router.refresh()
+            }
+        })
+    }
+
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text)
             .then(function () {
@@ -275,6 +303,12 @@ export default function Page({ params }: { params: { teamId: string } }) {
 
     const generateInviteLink = () => {
         return `https://mws2023.pfpf.dev/teams/invitation?secret=${teamInternalInfo.secret}`
+    }
+
+    const genGraphData = () => {
+        let ret = teamInternalInfo.relations || []
+        ret.push(teamInternalInfo)
+        return ret
     }
 
     const handleModalOpen = () => setModalOpen(true);
@@ -450,25 +484,27 @@ export default function Page({ params }: { params: { teamId: string } }) {
                         過去のチームのsecretを設定することで，継承されたチームであることを表現できます(仮文)
                     </Typography>
                     <Grid container spacing={2} alignItems="center">
-                        <Grid item md={6}>
-                            <Typography align="center" variant="h5" >
-                                リンク済み： {teamInternalInfo.previous}
-                            </Typography>
-                        </Grid>
                         <Grid item md={5}>
                             <TextField
                                 fullWidth
-                                disabled
-                                defaultValue="cHZmydlYzXN2YdOPmFWf"
+                                label="team secret"
+                                defaultValue=""
+                                onChange={(e) => {
+                                    setTeamRelationSecret(e.target.value)
+                                }}
                             />
                         </Grid>
                         <Grid item md={1}>
                             <ThemeProvider theme={theme}>
-                                <Button disabled variant="contained">設定</Button>
+                                <Button variant="contained"
+                                    onClick={() => {
+                                        linkTeams(teamRelationSecret)
+                                    }}
+                                >設定</Button>
                             </ThemeProvider>
                         </Grid>
                     </Grid>
-
+                    <RelationGraph teams={genGraphData()} />
                 </CardContent>
             </Card>
         </Container>
