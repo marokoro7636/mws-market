@@ -1,0 +1,1 @@
+export const installMethods = ["Chrome拡張機能", "実行ファイル", "Webアプリ", "データセット", "その他"]

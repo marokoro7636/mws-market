@@ -1,6 +1,18 @@
 "use client"
 import React, { useCallback, useRef, useState, useEffect } from 'react'
-import { Box, Button, Container, Grid, IconButton, Rating, Stack, TextField, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    Container,
+    Grid,
+    IconButton,
+    MenuItem,
+    Rating,
+    Select,
+    Stack,
+    TextField,
+    Typography
+} from "@mui/material";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import ScreenshotCarousel from "@/components/ScreenshotCarousel";
 import { useDropzone } from "react-dropzone";
@@ -9,6 +21,8 @@ import { CircularProgress } from '@mui/material';
 import {enqueueSnackbar, SnackbarProvider} from "notistack";
 import {useSession} from "next-auth/react";
 import {Session} from "next-auth";
+import {installMethods} from "@/app/const/const";
+import {router} from "next/client";
 
 interface AppInfo {
     id: string,
@@ -99,7 +113,7 @@ export default function Page({ params }: { params: { appId: string } }) {
             team: data.team,
             description: data.short_description || "説明はまだ追加されていません",
             youtube: data.youtube,
-            icon: data.icon,
+            icon: data.icon ?? "https://placehold.jp/4380E0/ffffff/180x180.png?text=no%20image",
             details: {
                 imgScreenshot: data.details.img_screenshot.map((item) => item.img),
                 requiredSpec: data.details.required_spec,
@@ -115,6 +129,8 @@ export default function Page({ params }: { params: { appId: string } }) {
     const appNameRef = useRef<HTMLInputElement>()
     const appDescriptionRef = useRef<HTMLInputElement>()
     const appYoutubeRef = useRef<HTMLInputElement>()
+    const appDownloadLinkRef = useRef<HTMLInputElement>()
+    const appInstallMethodRef = useRef<HTMLInputElement>()
 
     const [isEditable, setEditable] = useState<boolean>(false)
     const [appInfo, setAppInfo] = useState<AppInfo>(NullAppData)
@@ -229,21 +245,21 @@ export default function Page({ params }: { params: { appId: string } }) {
                 setAppInfo({ ...appInfo, youtube: (appYoutubeRef.current?.value as string) })
             }
             // Install
-            // if (appInstallMethodRef.current?.value !== "" || appDownloadLinkRef.current?.value !== "") {
-            //     await fetch(`/api/v0/projects/${projectId}/details/install`, {
-            //         method: "post",
-            //         headers: {
-            //             "x-auth-token": session.access_token as string,
-            //             "Content-Type": "application/json"
-            //
-            //         },
-            //         body: JSON.stringify({
-            //             method: appInstallMethodRef.current?.value,
-            //             info: appDownloadLinkRef.current?.value,
-            //             additional: ""
-            //         })
-            //     })
-            // }
+            if (appInstallMethodRef.current?.value !== "" || appDownloadLinkRef.current?.value !== "") {
+                await fetch(`/api/v0/projects/${appId}/details/install`, {
+                    method: "post",
+                    headers: {
+                        "x-auth-token": session.access_token as string,
+                        "Content-Type": "application/json"
+
+                    },
+                    body: JSON.stringify({
+                        method: appInstallMethodRef.current?.value,
+                        info: appDownloadLinkRef.current?.value,
+                        additional: ""
+                    })
+                })
+            }
             // App icon
             if (appIcon) {
                 const sendIcon = new FormData()
@@ -330,18 +346,19 @@ export default function Page({ params }: { params: { appId: string } }) {
         <>
             <Container sx={{ mt: 3 }}>
                 <SnackbarProvider />
-
-                <Box sx={{ textAlign: "right" }}>
-                    {isEditable ?
-                        <>
-                            <Button variant="contained" color="secondary" onClick={onSaveAppInfo}
-                                sx={{ mr: 1 }}>Save</Button>
-                            <Button variant="contained" color="error" onClick={onCancelEdit}>Cancel</Button>
-                        </> :
-                        <Button variant="contained" color="secondary" onClick={onEditAppInfo}>Edit</Button>
-                    }
-                </Box>
-
+                {/*TODO 自分のチームのプロジェクトのときだけEDITボタンを表示する*/}
+                {status === "authenticated" &&
+                    <Box sx={{ textAlign: "right" }}>
+                        {isEditable ?
+                            <>
+                                <Button variant="contained" color="secondary" onClick={onSaveAppInfo}
+                                        sx={{ mr: 1 }}>Save</Button>
+                                <Button variant="contained" color="error" onClick={onCancelEdit}>Cancel</Button>
+                            </> :
+                            <Button variant="contained" color="secondary" onClick={onEditAppInfo}>Edit</Button>
+                        }
+                    </Box>
+                }
                 <Grid container alignItems="center" sx={{ mt: 3 }}>
                     <Grid item xs={3}>
                         {isEditable ?
@@ -369,7 +386,10 @@ export default function Page({ params }: { params: { appId: string } }) {
                     </Grid>
                     <Grid item xs={3}>
                         <Button variant="contained" sx={{ width: 2 / 3, height: 50 }}
-                            disabled={isEditable}>インストール</Button>
+                                href={appInfo.details.install[0].info}
+                                onClick={() => {router.push("/")}}
+                                disabled={isEditable || appInfo.details.install.length === 0}>ダウンロード</Button>
+                        {/*TODO ボタンをクリックしたらダウンロードをするとともにインストール説明ページに遷移*/}
                     </Grid>
                 </Grid>
                 <Stack spacing={2} mt={5}>
@@ -395,6 +415,32 @@ export default function Page({ params }: { params: { appId: string } }) {
                 </Stack>
                 {isEditable &&
                     <Box sx={{ textAlign: "center" }}>スクリーンショットのサイズは{`${screenshotConfig.width}x${screenshotConfig.height}`}にしてください</Box>
+                }
+                {isEditable &&
+                    <Grid container>
+                        <Grid item xs={4}>
+                            <Stack spacing={2} mt={5}>
+                                <Typography variant="h4">アプリの種類</Typography>
+                                <Select
+                                    defaultValue={appInfo.details.install[0].method}
+                                    sx={{width: 300}}
+                                    inputRef={appInstallMethodRef}
+                                >
+                                    {
+                                        installMethods.map((item, i) => <MenuItem value={item} key={i}>{item}</MenuItem>)
+                                    }
+                                </Select>
+                            </Stack>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <Stack spacing={2} mt={5}>
+                                <Typography variant="h4">GitHub Releasesのダウンロードリンク</Typography>
+                                <TextField variant="outlined" inputRef={appDownloadLinkRef}
+                                           defaultValue={appInfo.details.install[0].info}
+                                />
+                            </Stack>
+                        </Grid>
+                    </Grid>
                 }
                 <Stack spacing={2} mt={5}>
                     <Typography variant="h4">紹介動画</Typography>
