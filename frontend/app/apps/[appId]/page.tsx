@@ -21,7 +21,7 @@ import { CircularProgress } from '@mui/material';
 import {enqueueSnackbar, SnackbarProvider} from "notistack";
 import {useSession} from "next-auth/react";
 import {Session} from "next-auth";
-import {installMethods} from "@/app/const/const";
+import {installMethods} from "@/const/const";
 import {router} from "next/client";
 
 interface AppInfo {
@@ -55,12 +55,13 @@ type AppInfoData = {
     youtube: string,
     own: boolean,
     details: {
-        img_screenshot: { id: string, img: string }[],
+        img_screenshot: { id: string, path: string }[],
         required_spec: {
             item: string,
             required: string
         }[],
         install: {
+            id: string,
             method: string,
             info: string,
             additional: string
@@ -112,15 +113,15 @@ export default function Page({ params }: { params: { appId: string } }) {
             id: data.id,
             name: data.name,
             team: data.team,
-            description: data.short_description || "説明はまだ追加されていません",
+            description: data.description || "説明はまだ追加されていません",
             youtube: data.youtube,
             icon: data.img ?? "https://placehold.jp/4380E0/ffffff/180x180.png?text=no%20image",
             details: {
-                imgScreenshot: data.details.img_screenshot.map((item) => item.img),
-                requiredSpec: data.details.required_spec,
-                install: data.details.install,
-                forJob: data.details.forJob
-            },
+                imgScreenshot: data.details?.img_screenshot.map((item) => item.path) ?? [],
+                requiredSpec: data.details?.required_spec ?? [],
+                install: data.details?.install ?? [],
+                forJob: data.details?.forJob ?? ""
+            }
         }
     }
 
@@ -158,6 +159,7 @@ export default function Page({ params }: { params: { appId: string } }) {
             })
                 .then((response) => response.json())
                 .then((data) => {
+                    console.log(data)
                     setData(data)
                     setAppInfo(initAppInfo(data))
                 })
@@ -262,6 +264,15 @@ export default function Page({ params }: { params: { appId: string } }) {
             }
             // Install
             if (appInstallMethodRef.current?.value !== "" || appDownloadLinkRef.current?.value !== "") {
+                if (data?.details.install) {
+                    console.log(data?.details.install[0].id)
+                    await fetch(`/api/v0/projects/${appId}/details/install/${data?.details.install[0].id}`, {
+                        method: "delete",
+                        headers: {
+                            "x-auth-token": session.access_token as string,
+                        },
+                    })
+                }
                 await fetch(`/api/v0/projects/${appId}/details/install`, {
                     method: "post",
                     headers: {
@@ -339,7 +350,7 @@ export default function Page({ params }: { params: { appId: string } }) {
         // Delete用
         if (data) {
             const newDeleteImgId = data.details.img_screenshot.map((item) => {
-                if (item.img === url) {
+                if (item.path === url) {
                     return item.id
                 }
             }) as string[]
@@ -397,12 +408,12 @@ export default function Page({ params }: { params: { appId: string } }) {
                             <Typography variant="h3">{appInfo.name}</Typography>
                         }
                         <Typography variant="subtitle1">{appInfo.team}</Typography>
-                        <Rating name="read-only" value={3} size="small" sx={{ mt: 2 }} />
+                        <Rating readOnly value={3} size="small" sx={{ mt: 2 }} />
                     </Grid>
                     <Grid item xs={3}>
                         {appInfo.details.install.length >= 0 &&
                             <Button variant="contained" sx={{ width: 2 / 3, height: 50 }}
-                                    href={appInfo.details.install[0].info}
+                                    href={appInfo.details.install.length !== 0 ? appInfo.details.install[0].info : "#"}
                                     onClick={() => {router.push("/")}}
                                     disabled={isEditable || appInfo.details.install.length === 0}>ダウンロード</Button>
                         }
@@ -439,7 +450,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                             <Stack spacing={2} mt={5}>
                                 <Typography variant="h4">アプリの種類</Typography>
                                 <Select
-                                    defaultValue={appInfo.details.install[0].method}
+                                    defaultValue={appInfo.details.install.length !== 0 ? appInfo.details.install[0].method : ""}
                                     sx={{width: 300}}
                                     inputRef={appInstallMethodRef}
                                 >
@@ -453,7 +464,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                             <Stack spacing={2} mt={5}>
                                 <Typography variant="h4">GitHub Releasesのダウンロードリンク</Typography>
                                 <TextField variant="outlined" inputRef={appDownloadLinkRef}
-                                           defaultValue={appInfo.details.install[0].info}
+                                           defaultValue={appInfo.details.install.length !== 0 ? appInfo.details.install[0].info : ""}
                                 />
                             </Stack>
                         </Grid>
