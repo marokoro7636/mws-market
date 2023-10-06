@@ -1,7 +1,7 @@
 "use client"
 
 import React, { Suspense, useState, useRef, MutableRefObject, useEffect } from 'react'
-import { Box, Fab, Modal, Button, Container, Grid, List, ListItem, ListItemAvatar, ListItemText, Avatar, IconButton, Typography, Card, CardContent, CardActions, CardHeader, TextField, Chip } from "@mui/material";
+import { Box, Fab, Modal, Button, Container, Grid, List, ListItem, ListItemAvatar, ListItemText, Avatar, IconButton, Typography, Card, CardContent, CardActions, CardHeader, TextField, Chip, ButtonBase } from "@mui/material";
 import { grey, pink, teal } from '@mui/material/colors';
 
 import { Session } from "next-auth"
@@ -77,16 +77,18 @@ export default function Page({ params }: { params: { teamId: string } }) {
         })
             .then((response) => response.json())
             .then((data) => {
-                if (data as TeamInternalInfo == null) {
+                console.log(data)
+                if (data.detail) {
                     enqueueSnackbar(data.detail, { variant: "error" })
                     enqueueSnackbar("3秒後にメインページに戻ります", { variant: "info" })
                     setTimeout(() => router.push(`/`), 3000)
+                    return
                 }
                 setTeamInternalInfo(data)
             })
     }
 
-    useEffect(updateTeamInfo, [status])
+    useEffect(updateTeamInfo, [status, _session, teamId, router])
 
     if (status !== "authenticated") {
         return <AuthGuard enabled={true} />
@@ -262,7 +264,16 @@ export default function Page({ params }: { params: { teamId: string } }) {
         </Button>
     }
 
-    const generateInviteLinkMock = () => {
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text)
+            .then(function () {
+                enqueueSnackbar("Copied to clipboard", { variant: "success" })
+            }, function (err) {
+                //    do nothing
+            });
+    }
+
+    const generateInviteLink = () => {
         return `https://mws2023.pfpf.dev/teams/invitation?secret=${teamInternalInfo.secret}`
     }
 
@@ -419,9 +430,15 @@ export default function Page({ params }: { params: { teamId: string } }) {
                     <Typography sx={{ pb: 2 }}>
                         メンバーに以下のリンクを共有し，招待してください．
                     </Typography>
-                    <Typography fontFamily='Ubuntu Mono' bgcolor={grey[300]} color={teal[500]} sx={{ padding: '8px', borderRadius: '10px' }}>
-                        {generateInviteLinkMock()}
-                    </Typography>
+                    <ButtonBase
+                        sx={{ width: '100%' }}
+                        onClick={() => {
+                            copyToClipboard(generateInviteLink())
+                        }}>
+                        <Typography fontFamily='Ubuntu Mono' bgcolor={grey[300]} color={teal[500]} sx={{ padding: '8px', borderRadius: '10px', width: "100%" }}>
+                            {generateInviteLink()}
+                        </Typography>
+                    </ButtonBase>
                 </CardContent>
             </Card>
             <Card sx={{ mt: 5, p: 3, "border": "1px solid #0055df50", }} elevation={0}>
