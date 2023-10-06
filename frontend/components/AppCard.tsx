@@ -1,9 +1,11 @@
 import React from 'react';
 import {
+    Avatar,
     Button,
     Card,
     CardActionArea,
     CardActions,
+    Grid,
     CardContent,
     CardMedia,
     Rating,
@@ -14,6 +16,7 @@ interface AppCardProps {
     id: string,
     name: string,
     team: string,
+    screenshot: string,
     icon: string,
     description: string
     rating: {
@@ -22,23 +25,34 @@ interface AppCardProps {
     }
 }
 
-const AppCard = ({ id, name, team, description, rating }: AppCardProps) => {
+const AppCard = ({ id, name, team, description, rating, icon, screenshot }: AppCardProps) => {
     return (
         <Card sx={{ maxWidth: 345, "border": "1px solid #0055df10", borderRadius: 4 }} elevation={0}>
             <CardActionArea href={`/apps/${id}`}>
                 <CardMedia
                     component="img"
-                    height="140"
-                    image="https://t3.ftcdn.net/jpg/02/48/42/64/240_F_248426448_NVKLywWqArG2ADUxDq6QprtIzsF82dMF.jpg"
+                    height="180"
+                    width="180"
+                    image={screenshot || "https://placehold.jp/4380E0/ffffff/180x180.png?text=no%20image"}
                 />
                 <CardContent>
-                    <Typography gutterBottom variant="h5" component="div">
-                        {name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        {team}
-                    </Typography>
-                    <Rating value={rating.total / rating.count} size="small" sx={{ mt: 1 }} readOnly precision={0.25} /> ({rating.count})
+                    <Grid container columns={{ xs: 4 }}>
+                        <Grid xs={2} sx={{ p: 1 }}>
+                            <Avatar variant="square"
+                                src={icon || "https://placehold.jp/4380E0/ffffff/180x180.png?text=no%20image"}
+                                sx={{ width: 100, height: 100 }}
+                            />
+                        </Grid>
+                        <Grid xs={2} sx={{ pt: 2 }}>
+                            <Typography gutterBottom variant="h5" component="div">
+                                {name}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                {team}
+                            </Typography>
+                            <Rating value={rating.total / rating.count} size="small" sx={{ mt: 1 }} readOnly precision={0.25} /> ({rating.count})
+                        </Grid>
+                    </Grid>
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 2, wordBreak: "break-all" }} height="3rem">
                         {
                             description ?
@@ -51,7 +65,7 @@ const AppCard = ({ id, name, team, description, rating }: AppCardProps) => {
             {/* <CardActions>
                 <Button variant="contained" fullWidth={true}>インストール</Button>
             </CardActions> */}
-        </Card>
+        </Card >
     );
 };
 

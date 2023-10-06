@@ -11,7 +11,7 @@ import AdbIcon from '@mui/icons-material/Adb';
 
 import { MypageButton } from './MypageButton';
 
-const appName = "MWS Market"
+const appName = "MWS Market | MUUS"
 
 function NavAppBar() {
     const appBarStyle = {
