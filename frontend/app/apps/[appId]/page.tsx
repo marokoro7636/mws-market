@@ -22,7 +22,7 @@ import {enqueueSnackbar, SnackbarProvider} from "notistack";
 import {useSession} from "next-auth/react";
 import {Session} from "next-auth";
 import {installMethods} from "@/const/const";
-import {router} from "next/client";
+import {useRouter} from "next/navigation";
 
 interface AppInfo {
     id: string,
@@ -103,6 +103,7 @@ export default function Page({ params }: { params: { appId: string } }) {
     const { data: _session, status } = useSession()
     const session = _session as Session
 
+    const router = useRouter()
     const [data, setData] = useState<AppInfoData | null>(null)
 
     const initAppInfo = (data: AppInfoData | null): AppInfo => {
@@ -137,7 +138,7 @@ export default function Page({ params }: { params: { appId: string } }) {
     const [isEditable, setEditable] = useState<boolean>(false)
     const [appInfo, setAppInfo] = useState<AppInfo>(NullAppData)
     const [prevAppInfo, setPrevAppInfo] = useState<AppInfo>(appInfo)
-    const [appIcon, setAppIcon] = useState<Img>()
+    const [appIcon, setAppIcon] = useState<Img | null>(null)
     const [appScreenshot, setAppScreenshot] = useState<Img[]>([])
     const [deleteImgId, setDeleteImgId] = useState<string[]>([])
 
@@ -159,7 +160,6 @@ export default function Page({ params }: { params: { appId: string } }) {
             })
                 .then((response) => response.json())
                 .then((data) => {
-                    console.log(data)
                     setData(data)
                     setAppInfo(initAppInfo(data))
                 })
@@ -265,7 +265,6 @@ export default function Page({ params }: { params: { appId: string } }) {
             // Install
             if (appInstallMethodRef.current?.value !== "" || appDownloadLinkRef.current?.value !== "") {
                 if (data?.details.install) {
-                    console.log(data?.details.install[0].id)
                     await fetch(`/api/v0/projects/${appId}/details/install/${data?.details.install[0].id}`, {
                         method: "delete",
                         headers: {
@@ -333,6 +332,9 @@ export default function Page({ params }: { params: { appId: string } }) {
     }
 
     const onCancelEdit = () => {
+        setAppScreenshot([])
+        setAppIcon(null)
+        setDeleteImgId([])
         setAppInfo(prevAppInfo)
         setEditable(false)
     }
@@ -348,13 +350,12 @@ export default function Page({ params }: { params: { appId: string } }) {
         setAppScreenshot(newAppScreenshot)
 
         // Delete用
-        if (data) {
-            const newDeleteImgId = data.details.img_screenshot.map((item) => {
-                if (item.path === url) {
-                    return item.id
+        if (data && data.details.img_screenshot) {
+            for (const img of data.details.img_screenshot) {
+                if (img.path === url) {
+                    setDeleteImgId([...deleteImgId, img.id])
                 }
-            }) as string[]
-            setDeleteImgId(newDeleteImgId)
+            }
         }
     }
 
