@@ -388,9 +388,7 @@ class Project:
     def save_img(path: str, img):
         bucket = storage.bucket("mws-market.appspot.com")
         blob = bucket.blob(path)
-        with tempfile.NamedTemporaryFile(delete=True, dir=".", suffix=".stl") as tmp:
-            shutil.copyfileobj(img, tmp)
-            blob.upload_from_filename(tmp.name)
+        blob.upload_from_file(img)
 
     @staticmethod
     def drop_img(path: str):
