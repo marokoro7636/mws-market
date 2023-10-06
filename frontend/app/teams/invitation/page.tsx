@@ -1,12 +1,14 @@
 "use client"
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button, Container, Grid, Typography, Card, CardContent, CardActions, CardHeader, TextField, FormControl } from "@mui/material";
 
 import createTheme from '@mui/material/styles/createTheme';
 import { ThemeProvider } from '@mui/material/styles';
 
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
+
+import { useSearchParams } from "next/navigation";
 
 import { useSession } from "next-auth/react"
 import AuthGuard from "@/components/AuthGuard";
@@ -21,22 +23,64 @@ const theme = createTheme({
     },
 });
 
-type FormData = {
-    name: string | null,
-    year: string | null,
-    description: string | null,
+interface Member {
+    id: string,
+    name: string,
+    image: string,
 }
 
-type FormDataValidated = {
+interface TeamInternalInfo {
     name: string,
     year: string,
     description: string,
-    members: string[]
+    members: Member[],
+    secret: string,
+    previous: string,
 }
 
 export default function Page() {
     const { data: _session, status } = useSession()
     const router = useRouter()
+
+    const searchParams = useSearchParams();
+
+    const [teamInternalInfo, setTeamInternalInfo] = useState<TeamInternalInfo>({} as TeamInternalInfo)
+
+    const updateTeamInfo = () => {
+        if (!searchParams.has("secret")) {
+            return
+        }
+        if (status !== "authenticated") {
+            return
+        }
+        const secret = searchParams.get("secret") as string
+        const session = _session as Session
+        fetch(`/api/v0/teams/invitation/${secret}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "X-AUTH-TOKEN": session?.access_token as string,
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data)
+                if (data.detail) {
+                    enqueueSnackbar(data.detail, { variant: "error" })
+                    enqueueSnackbar("3秒後にメインページに戻ります", { variant: "info" })
+                    setTimeout(() => router.push(`/`), 3000)
+                }
+                const alreadyJoined = data.members.some((e: Member) => {
+                    return e.id === session?.uid
+                })
+                if (alreadyJoined) {
+                    router.push(`/teams/${data.id}`)
+                }
+                setTeamInternalInfo(data)
+            })
+    }
+
+    useEffect(updateTeamInfo, [status, searchParams])
 
     if (status !== "authenticated") {
         return <AuthGuard enabled={true} />
@@ -44,57 +88,7 @@ export default function Page() {
 
     const session = _session as Session
 
-    let data = {} as FormData
 
-    const validate = (data: FormData): FormDataValidated | null => {
-        if (!data.name && data.name !== "") {
-            enqueueSnackbar("Team name is required", { variant: "error" })
-            return null
-        }
-        if (!data.year) {
-            enqueueSnackbar("Year is required", { variant: "error" })
-            return null
-        }
-        const year = parseFloat(data.year)
-        if (!year || !(2015 <= year && year <= 2030)) {
-            enqueueSnackbar("Year should be between 2015 and 2030", { variant: "error" })
-            return null
-        }
-        let description = "None"
-        if (data.description && data.description !== "") {
-            description = data.description
-        }
-        return {
-            name: data.name,
-            year: data.year,
-            description: description,
-            members: [session.uid as string]
-        }
-    }
-
-    const submit = (data: FormDataValidated) => {
-        fetch('/api/v0/teams/', {
-            method: 'POST',
-            headers: {
-                "content-type": "application/json",
-                "X-AUTH-TOKEN": session.access_token as string,
-            },
-            body: JSON.stringify(data),
-        }).then((response) => {
-            if (response.status === 200) {
-                enqueueSnackbar("Team created successfully", { variant: "success" })
-                return response.json()
-            } else {
-                enqueueSnackbar("Failed to create team", { variant: "error" })
-                return response.json()
-            }
-        }).then((e) => {
-            if (e.id) {
-                router.push(`/teams/${e.id}`)
-            }
-            console.log(e)
-        })
-    }
 
     return (
         <Container sx={{ p: 3 }}>
@@ -107,7 +101,7 @@ export default function Page() {
                     title="Team Info"
                 />
                 <CardContent>
-                    <Grid container spacing={2} columns={{ xs: 3, sm: 8, md: 12 }}>
+                    {/* <Grid container spacing={2} columns={{ xs: 3, sm: 8, md: 12 }}>
                         <Grid item xs={3} md={3}>
                             Team Name :
                         </Grid>
@@ -139,18 +133,18 @@ export default function Page() {
                             >
                             </TextField>
                         </Grid>
-                    </Grid>
+                    </Grid> */}
 
                 </CardContent>
                 <CardActions>
                     <Grid container justifyContent="flex-end">
                         <ThemeProvider theme={theme}>
                             <Button color="primary" variant="contained" disableElevation={true} onClick={() => {
-                                const validated = validate(data)
-                                if (validated === null) {
-                                    return
-                                }
-                                submit(validated)
+                                // const validated = validate(data)
+                                // if (validated === null) {
+                                //     return
+                                // }
+                                // submit(validated)
                             }}>Create Team</Button>
                         </ThemeProvider>
                     </Grid>

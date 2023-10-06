@@ -88,6 +88,7 @@ def post_team_description(team_id: str, description: str, x_auth_token: Optional
     return API_OK()
 
 @router.delete("/{team_id}/members", response_model=API_OK)
+<<<<<<< Updated upstream
 def delete_team_members(team_id: str, member_id: str, x_auth_token: Optional[str] = Header(None)):
     if not Teams.is_exist(team_id):
         raise StarletteHTTPException(status_code=404, detail="Team not found")
@@ -125,10 +126,20 @@ def delete_team_previous(team_id: str, x_auth_token: Optional[str] = Header(None
         Teams(team_id).delete_previous()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to delete team previous")
+=======
+def delete_team_members(team_id: str, member_id: str):
+    # if db.get_team_by_id(team_id) is None:
+    #     raise StarletteHTTPException(status_code=404, detail="Team not found")
+    # try:
+    #     db.delete_team_member(team_id, member_id)
+    # except:
+    #     raise StarletteHTTPException(status_code=500, detail="Failed to delete team members")
+>>>>>>> Stashed changes
     return API_OK()
 
 @router.get("/invitation/{team_secret}", response_model=Team)
 def get_team_with_secret(team_secret: str):
+<<<<<<< Updated upstream
     id =  Teams.get_by_secret(team_secret)
     if id is None:
         raise StarletteHTTPException(status_code=404, detail="Team not found")
@@ -154,3 +165,27 @@ def post_team_members(team_secret: str, member_id: str, x_auth_token: Optional[s
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post team members")
     return API_OK()
+=======
+    # try:
+    #     data = db.get_teams_by_secret(team_secret)
+    # except:
+    #     raise StarletteHTTPException(status_code=500, detail="Failed to get teams")
+    data = Team(
+            name="Team1",
+            year=2021,
+            description="Team1 description",
+            members=["member1", "member2"],
+            secret="nijfdhuif428942rr43huifrehuig3y894",
+        )
+    return data
+
+@router.post("/invitation/{team_secret}", response_model=API_OK)
+def post_team_members(team_secret: str, member_id: str):
+    # if db.get_team_by_id(team_id) is None:
+    #     raise StarletteHTTPException(status_code=404, detail="Team not found")
+    # try:
+    #     db.add_team_member(team_secret, member_id)
+    # except:
+    #     raise StarletteHTTPException(status_code=500, detail="Failed to post team members")
+    return API_OK()
+>>>>>>> Stashed changes
