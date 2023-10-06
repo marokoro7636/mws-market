@@ -93,6 +93,7 @@ class ProjectInfo(BaseModel):
     hidden: Optional[bool] = None
     icon: Optional[str] = None
     img: Optional[str] = None
+    own: bool = False
 
     @field_validator("review", mode="before")
     def convert(cls, d):
