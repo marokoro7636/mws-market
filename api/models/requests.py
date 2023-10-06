@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from typing import Optional
 
 class RequiredSpec(BaseModel):
@@ -23,7 +23,7 @@ class InstallRequest(BaseModel):
 
 class ImgScreenshot(BaseModel):
     id: str
-    img: str
+    path: str
 
 class ProjectDetails(BaseModel):
     img_screenshot: Optional[list[ImgScreenshot]] = list()
@@ -31,10 +31,26 @@ class ProjectDetails(BaseModel):
     install: Optional[list[Install]] = list()
     forjob: Optional[str] = None
 
-    @validator("img_screenshot", "required_spec", "install")
-    def convert(cls, d):
+    @field_validator("required_spec", mode="before")
+    def convert_required_spec(cls, d):
         if isinstance(d, dict):
-            return [{"id":key, **value} for key, value in d.items()]
+            return [RequiredSpec(id=key, **value) for key, value in d.items()]
+        else:
+            return []
+
+    @field_validator("img_screenshot", mode="before")
+    def convert_img_screenshot(cls, d):
+        if isinstance(d, dict):
+            return [ImgScreenshot(id=key, path=value) for key, value in d.items()]
+        else:
+            return []
+
+    @field_validator("install", mode="before")
+    def convert_install(cls, d):
+        if isinstance(d, dict):
+            return [Install(id=key, **value) for key, value in d.items()]
+        else:
+            return []
 
 class SimpleSpecResponse(BaseModel):
     spec_id: str
@@ -72,10 +88,12 @@ class ProjectInfo(BaseModel):
     icon: Optional[str] = None
     img: Optional[str] = None
 
-    @validator("review")
+    @field_validator("review", mode="before")
     def convert(cls, d):
         if isinstance(d, dict):
-            return [{"id":key, **value} for key, value in d.items()]
+            return [ProjectReview(id=key, **value) for key, value in d.items()]
+        else:
+            return []
 
 class ProjectSummary(BaseModel):
     id: str

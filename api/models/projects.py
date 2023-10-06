@@ -16,7 +16,8 @@ from models.requests import (
     ProjectReview,
     Install,
     ProjectSummary,
-    RequiredSpecRequest
+    RequiredSpecRequest,
+    ImgScreenshot
 )
 from models.teams import Teams
 
@@ -55,15 +56,14 @@ class Project:
     def get_info(self) -> ProjectInfo:
         db = firestore.client()
         doc = db.collection("projects").document(self.id).get()
-        print("doc: ", doc.to_dict())
         info = ProjectInfo(id=doc.id, **doc.to_dict())
         if info.icon is not None:
             info.icon = Project.gen_img_url(info.icon)
         if info.img is not None:
             info.img = Project.gen_img_url(info.img)
         if info.details is not None:
-            if "img_screenshot" in info.details:
-                info.details.img_screenshot = {img_id: Project.gen_img_url(path) for img_id, path in info.details.img_screenshot.items()}
+            if info.details.img_screenshot is not None:
+                info.details.img_screenshot = [ImgScreenshot(id=img_screenshot.id, path=Project.gen_img_url(img_screenshot.path)) for img_screenshot in info.details.img_screenshot]
         info.team = Teams(info.team).get_name()
         return info
 
@@ -181,7 +181,7 @@ class Project:
         db = firestore.client()
         data = db.collection("projects").document(self.id).get().to_dict().get("details", {})
         details = ProjectDetails(**data)
-        details.img_screenshot = {img_id: Project.gen_img_url(path) for img_id, path in details.img_screenshot.items()}
+        details.img_screenshot = [ImgScreenshot(id=img_screenshot.id, path=Project.gen_img_url(img_screenshot.path)) for img_screenshot in details.img_screenshot]
         return details
 
     def add_img_screenshot(self, img):
@@ -193,10 +193,7 @@ class Project:
         Project.save_img(path, img)
         db.collection("projects").document(self.id).update(
             {
-                f"details.img_screenshot": firestore.firestore.ArrayUnion([{
-                    "id": img_id,
-                    "img": path,
-                }])
+                f"details.img_screenshot.{img_id}": path
             }
         )
 
@@ -291,10 +288,10 @@ class Project:
         )
 
     # project_review
-    def get_review(self) -> {str: ProjectReview}:
+    def get_review(self) -> [ProjectReview]:
         db = firestore.client()
         review = db.collection("projects").document(self.id).get().to_dict().get("review", {})
-        return {key: ProjectReview(**value) for key, value in review.items()}
+        return [review(id=key, **value) for key, value in review.items()]
 
     def add_review(self, review: ProjectReview):
         db = firestore.client()

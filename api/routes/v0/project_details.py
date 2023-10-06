@@ -26,6 +26,7 @@ def get_project_details(project_id: str):
     if not Project.is_exist(project_id):
         raise StarletteHTTPException(status_code=404, detail="Project not found")
     try:
+        return Project(project_id).get_details()
         details = Project(project_id).get_details()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to post project details")
