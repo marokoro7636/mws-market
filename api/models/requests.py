@@ -63,6 +63,12 @@ class ProjectReview(BaseModel):
     content: str
     rating: int
 
+class ProjectReviewRequest(BaseModel):
+    user: str
+    title: str
+    content: str
+    rating: int
+
 class ProjectSimpleResponse(BaseModel):
     id: str
 
