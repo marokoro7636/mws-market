@@ -24,6 +24,8 @@ import { useRouter } from 'next/navigation'
 import AuthGuard from "@/components/AuthGuard";
 import SimpleGraph from '@/components/RelationGraph';
 import RelationGraph from '@/components/RelationGraph';
+import AppCard from '@/components/AppCard';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
 const theme = createTheme({
     palette: {
@@ -473,6 +475,42 @@ export default function Page({ params }: { params: { teamId: string } }) {
                             {generateInviteLink()}
                         </Typography>
                     </ButtonBase>
+                </CardContent>
+            </Card>
+            <Card sx={{ mt: 5, p: 3, "border": "1px solid #0055df50", }} elevation={0}>
+                <CardHeader
+                    title="Project"
+                />
+                <CardContent>
+                    {
+                        (<div style={{ display: 'flex', justifyContent: 'center' }}>
+                            <Button
+                                sx={{
+                                    bgcolor: "#00389340",
+                                    ':hover': {
+                                        bgcolor: "#00389360",
+                                    },
+                                    width: "200px",
+                                    height: "200px",
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexWrap: 'wrap',
+                                    color: '#003893',
+
+                                }}
+                                onClick={() => {
+                                    router.push(`/teams/${teamId}/register`)
+                                }}
+                            >
+                                <AddCircleOutlineIcon sx={{ fontSize: 100 }} ></AddCircleOutlineIcon>
+                            </Button>
+
+                        </div>)
+                    }
+                    {/* <AppCard id={teamInternalInfo.id} name={teamInternalInfo.name} >
+                            
+                        </AppCard> */}
                 </CardContent>
             </Card>
             <Card sx={{ mt: 5, p: 3, "border": "1px solid #0055df50", }} elevation={0}>
