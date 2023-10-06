@@ -5,6 +5,8 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import ScreenshotCarousel from "@/components/ScreenshotCarousel";
 import { useDropzone } from "react-dropzone";
 
+import { CircularProgress } from '@mui/material';
+
 interface AppInfo {
     id: string,
     name: string,
@@ -218,7 +220,9 @@ export default function Page({ params }: { params: { appId: string } }) {
     }
 
     if (data === null) {
-        return <div>loading...</div>
+        return <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <CircularProgress  />
+        </div>
     }
 
     return (

@@ -1,6 +1,6 @@
 'use client'
 import { useSession, signIn } from "next-auth/react"
-import { useRouter, usePathname } from 'next/navigation';
+import { CircularProgress } from '@mui/material';
 
 interface AuthGuardProps {
     enabled: boolean
@@ -16,7 +16,9 @@ const AuthGuard = ({ enabled }: AuthGuardProps) => {
     }
 
     if (status === "loading") {
-        return <p>Loading...</p>
+        return <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <CircularProgress />
+        </div>
     }
 
     if (status === "authenticated") {

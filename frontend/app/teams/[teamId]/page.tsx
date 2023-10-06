@@ -19,6 +19,8 @@ import TeamInfoEditor from "@/components/TeamInfoEditor"
 
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
+import { useRouter } from 'next/navigation'
+
 import AuthGuard from "@/components/AuthGuard";
 
 const theme = createTheme({
@@ -29,11 +31,17 @@ const theme = createTheme({
     },
 });
 
+interface Member {
+    id: string,
+    name: string,
+    image: string,
+}
+
 interface TeamInternalInfo {
     name: string,
     year: string,
     description: string,
-    members: string[],
+    members: Member[],
     secret: string,
     previous: string,
 }
@@ -51,8 +59,11 @@ export default function Page({ params }: { params: { teamId: string } }) {
     const [teamInternalInfo, setTeamInternalInfo] = useState<TeamInternalInfo>({} as TeamInternalInfo)
 
     const [modalOpen, setModalOpen] = React.useState(false)
+    const [userDelete, setUserDelete] = React.useState({} as Member)
 
-    useEffect(() => {
+    const router = useRouter()
+
+    const updateTeamInfo = () => {
         if (status !== "authenticated") {
             return
         }
@@ -66,9 +77,16 @@ export default function Page({ params }: { params: { teamId: string } }) {
         })
             .then((response) => response.json())
             .then((data) => {
+                if (data as TeamInternalInfo == null) {
+                    enqueueSnackbar(data.detail, { variant: "error" })
+                    enqueueSnackbar("3秒後にメインページに戻ります", { variant: "info" })
+                    setTimeout(() => router.push(`/`), 3000)
+                }
                 setTeamInternalInfo(data)
             })
-    }, [status])
+    }
+
+    useEffect(updateTeamInfo, [status])
 
     if (status !== "authenticated") {
         return <AuthGuard enabled={true} />
@@ -186,18 +204,18 @@ export default function Page({ params }: { params: { teamId: string } }) {
         })
     }
 
-    const deleteTeam = () =>{
-        return fetch(`/api/v0/teams/${teamId}`, {
+    const deleteMember = (id: string) => {
+        return fetch(`/api/v0/teams/${teamId}/members?member_id=${id}`, {
             method: 'DELETE',
             headers: {
                 "X-AUTH-TOKEN": session.access_token as string,
             },
         }).then((response) => {
             if (response.status === 200) {
-                enqueueSnackbar("Team deleted successfully", { variant: "success" })
+                enqueueSnackbar("Member deleted successfully", { variant: "success" })
                 return response.json()
             } else {
-                enqueueSnackbar("Failed to delete team", { variant: "error" })
+                enqueueSnackbar("Failed to delete member", { variant: "error" })
                 return response.json()
             }
         }).then((e) => {
@@ -282,17 +300,18 @@ export default function Page({ params }: { params: { teamId: string } }) {
                     >
                         Delete Team
                     </Typography>
-                    <Typography>Are you sure to delete this team?</Typography>
+                    <Typography>Are you sure to delete {userDelete.name}? </Typography>
 
                     <Grid container spacing={2} columns={{ xs: 3, sm: 8, md: 12 }} justifyItems="flex-end" display="flex" sx={{
                         pt: 4, pl: 8
                     }}>
                         <Grid md={6} justifyContent="flex-end">
                             <Button sx={{ color: "#94200F" }} onClick={async () => {
-                                // const res = await deleteTeam()
-                                // if (res) {
-                                //     router.push("/mypage")
-                                // }
+                                const res = await deleteMember(userDelete.id)
+                                if (res) {
+                                    updateTeamInfo()
+                                    handleModalClose()
+                                }
                             }}
                             >Delete</Button>
                         </Grid>
@@ -372,54 +391,30 @@ export default function Page({ params }: { params: { teamId: string } }) {
                 />
                 <CardContent>
                     <List >
-                        <ListItem
-                            secondaryAction={
-                                <IconButton edge="end" aria-label="delete">
-                                    <LogoutIcon />
-                                </IconButton>
-                            }
-                        >
-                            <ListItemAvatar>
-                                <Avatar
-                                // src="/public/placeholder.jpg"
+                        {teamInternalInfo.members?.map((e) => (
+                            <ListItem
+                                key={e.id}
+                                secondaryAction={
+                                    <IconButton edge="end" aria-label="delete"
+                                        onClick={() => {
+                                            setUserDelete(e)
+                                            handleModalOpen()
+                                        }}
+                                    >
+                                        <LogoutIcon />
+                                    </IconButton>
+                                }
+                            >
+                                <ListItemAvatar>
+                                    <Avatar
+                                        src={e.image}
+                                    />
+                                </ListItemAvatar>
+                                <ListItemText
+                                    primary={e.name}
                                 />
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary="Name1"
-                            />
-                        </ListItem>
-                        <ListItem
-                            secondaryAction={
-                                <IconButton edge="end" aria-label="delete">
-                                    <LogoutIcon />
-                                </IconButton>
-                            }
-                        >
-                            <ListItemAvatar>
-                                <Avatar
-                                // src="/public/placeholder.jpg"
-                                />
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary="Name2"
-                            />
-                        </ListItem>
-                        <ListItem
-                            secondaryAction={
-                                <IconButton edge="end" aria-label="delete">
-                                    <LogoutIcon />
-                                </IconButton>
-                            }
-                        >
-                            <ListItemAvatar>
-                                <Avatar
-                                // src="/public/placeholder.jpg"
-                                />
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary="Name3"
-                            />
-                        </ListItem>
+                            </ListItem>
+                        ))}
                     </List>
                     <Typography sx={{ pb: 2 }}>
                         メンバーに以下のリンクを共有し，招待してください．

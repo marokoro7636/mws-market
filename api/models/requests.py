@@ -103,6 +103,7 @@ class TeamRequest(BaseModel):
     year: int
     description: Optional[str] = None
     members: list[str]
+    secret: str
 
 class TeamResponse(BaseModel):
     id: str

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from starlette.middleware.cors import CORSMiddleware
-import routes.mock_router as mock
+# import routes.mock_router as mock
 import routes.v0_router as v0
 from helper.check import check_env
 from helper.init import init_firebase
