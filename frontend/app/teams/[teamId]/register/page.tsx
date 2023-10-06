@@ -6,6 +6,8 @@ import { useDropzone } from "react-dropzone";
 import {useSession} from "next-auth/react";
 import AuthGuard from "@/components/AuthGuard";
 import {Session} from "next-auth";
+import {useRouter} from "next/navigation";
+import {enqueueSnackbar, SnackbarProvider} from "notistack";
 
 type Img = {
     url: string,
@@ -20,6 +22,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
     const iconConfig = { width: 180, height: 180 }
     const screenshotConfig = { width: 800, height: 450 }
 
+    const router = useRouter()
     const appNameRef = useRef<HTMLInputElement>()
     const [appNameError, setAppNameError] = useState<boolean>(false)
     const appNameChange = () => {
@@ -63,14 +66,14 @@ export default function Page({ params }: { params: { teamId : string } }) {
 
     const onDropIcon = useCallback(async (acceptedFiles: File[]) => {
         if (acceptedFiles[0].type !== "image/png" && acceptedFiles[0].type !== "image/jpeg") {
-            alert("pngファイルまたはjpegファイルを選択してください")
+            enqueueSnackbar("pngファイルまたはjpegファイルを選択してください", { variant: "error" })
             return
         }
 
         const url = window.URL.createObjectURL(acceptedFiles[0])
         const { width, height } = await imageSize(url)
         if (!(width === iconConfig.width && height === iconConfig.height)) {
-            alert(`"スクリーンショットのサイズは${iconConfig.width}x${iconConfig.height}にしてください`)
+            enqueueSnackbar(`"スクリーンショットのサイズは${iconConfig.width}x${iconConfig.height}にしてください`, { variant: "error" })
             return
         }
 
@@ -79,14 +82,14 @@ export default function Page({ params }: { params: { teamId : string } }) {
 
     const onDropSs = useCallback(async (acceptedFiles: File[]) => {
         if (acceptedFiles[0].type !== "image/png" && acceptedFiles[0].type !== "image/jpeg") {
-            alert("pngファイルまたはjpegファイルを選択してください")
+            enqueueSnackbar("pngファイルまたはjpegファイルを選択してください", { variant: "error" })
             return
         }
 
         const url = window.URL.createObjectURL(acceptedFiles[0])
         const { width, height } = await imageSize(url)
         if (!(width === screenshotConfig.width && height === screenshotConfig.height)) {
-            alert(`画像サイズは${screenshotConfig.width}x${screenshotConfig.height}にしてください`)
+            enqueueSnackbar(`画像サイズは${screenshotConfig.width}x${screenshotConfig.height}にしてください`, { variant: "error" })
             return
         }
 
@@ -178,8 +181,9 @@ export default function Page({ params }: { params: { teamId : string } }) {
                     })
                 }
             }
+            router.push(`/apps/${projectId}`)
         } catch (e) {
-            alert("通信に失敗しました")
+            enqueueSnackbar("通信に失敗しました", { variant: "error" })
         }
     }
 
@@ -203,6 +207,8 @@ export default function Page({ params }: { params: { teamId : string } }) {
     return (
         <>
             <Container sx={{ mt: 3 }}>
+                <SnackbarProvider />
+
                 <Grid container alignItems="center" sx={{ mt: 3 }}>
                     <Grid item xs={3}>
                         <div {...getRootPropsIcon()}>
