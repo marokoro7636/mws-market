@@ -23,8 +23,8 @@ class Users:
     def are_exist(user_id: list[str]):
         return all([Users.is_exist(x) for x in user_id])
 
-    def get(self):
+    def get(self) -> User:
         db = firestore.client()
         name = db.collection("users").document(self.id).get().get("name")
         team = db.collection("affiliations").document(self.id).get().get("team")
-        return {"name": name, "team": team}
+        return User(**{"id": self.id, "name": name, "team": team})
