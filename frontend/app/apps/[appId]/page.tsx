@@ -6,6 +6,9 @@ import ScreenshotCarousel from "@/components/ScreenshotCarousel";
 import { useDropzone } from "react-dropzone";
 
 import { CircularProgress } from '@mui/material';
+import {enqueueSnackbar, SnackbarProvider} from "notistack";
+import {useSession} from "next-auth/react";
+import {Session} from "next-auth";
 
 interface AppInfo {
     id: string,
@@ -37,7 +40,7 @@ type AppInfoData = {
     description: string,
     youtube: string,
     details: {
-        img_screenshot: string[],
+        img_screenshot: { id: string, img: string }[],
         required_spec: {
             item: string,
             required: string
@@ -59,6 +62,11 @@ type AppInfoData = {
     img: string
 }
 
+type Img = {
+    url: string,
+    img: File
+}
+
 const NullAppData = {
     id: "",
     name: "",
@@ -76,6 +84,8 @@ const NullAppData = {
 
 export default function Page({ params }: { params: { appId: string } }) {
     const appId = params.appId
+    const { data: _session, status } = useSession()
+    const session = _session as Session
 
     const [data, setData] = useState<AppInfoData | null>(null)
 
@@ -91,7 +101,7 @@ export default function Page({ params }: { params: { appId: string } }) {
             youtube: data.youtube,
             icon: data.icon,
             details: {
-                imgScreenshot: data.details.img_screenshot,
+                imgScreenshot: data.details.img_screenshot.map((item) => item.img),
                 requiredSpec: data.details.required_spec,
                 install: data.details.install,
                 forJob: data.details.forJob
@@ -109,8 +119,9 @@ export default function Page({ params }: { params: { appId: string } }) {
     const [isEditable, setEditable] = useState<boolean>(false)
     const [appInfo, setAppInfo] = useState<AppInfo>(NullAppData)
     const [prevAppInfo, setPrevAppInfo] = useState<AppInfo>(appInfo)
-    const [appIcon, setAppIcon] = useState<File>()
-    const [appScreenshot, setAppScreenshot] = useState<File[]>([])
+    const [appIcon, setAppIcon] = useState<Img>()
+    const [appScreenshot, setAppScreenshot] = useState<Img[]>([])
+    const [deleteImgId, setDeleteImgId] = useState<string[]>([])
 
     useEffect(() => {
         fetch(`/api/v0/projects/${appId}`)
@@ -144,35 +155,35 @@ export default function Page({ params }: { params: { appId: string } }) {
 
     const onDropIcon = useCallback(async (acceptedFiles: File[]) => {
         if (acceptedFiles[0].type !== "image/png" && acceptedFiles[0].type !== "image/jpeg") {
-            alert("pngファイルまたはjpegファイルを選択してください")
+            enqueueSnackbar("pngファイルまたはjpegファイルを選択してください", { variant: "error" })
             return
         }
 
         const url = window.URL.createObjectURL(acceptedFiles[0])
         const { width, height } = await imageSize(url)
         if (!(width === iconConfig.width && height === iconConfig.height)) {
-            alert(`"スクリーンショットのサイズは${iconConfig.width}x${iconConfig.height}にしてください`)
+            enqueueSnackbar(`"スクリーンショットのサイズは${iconConfig.width}x${iconConfig.height}にしてください`, { variant: "error" })
             return
         }
 
-        setAppIcon(acceptedFiles[0])
+        setAppIcon({ url: url, img: acceptedFiles[0] })
         setAppInfo({ ...appInfo, icon: url })
     }, [appIcon, appInfo])
 
     const onDropSs = useCallback(async (acceptedFiles: File[]) => {
         if (acceptedFiles[0].type !== "image/png" && acceptedFiles[0].type !== "image/jpeg") {
-            alert("pngファイルまたはjpegファイルを選択してください")
+            enqueueSnackbar("pngファイルまたはjpegファイルを選択してください", { variant: "error" })
             return
         }
 
         const url = window.URL.createObjectURL(acceptedFiles[0])
         const { width, height } = await imageSize(url)
         if (!(width === screenshotConfig.width && height === screenshotConfig.height)) {
-            alert(`画像サイズは${screenshotConfig.width}x${screenshotConfig.height}にしてください`)
+            enqueueSnackbar(`画像サイズは${screenshotConfig.width}x${screenshotConfig.height}にしてください`, { variant: "error" })
             return
         }
 
-        setAppScreenshot([...appScreenshot, acceptedFiles[0]])
+        setAppScreenshot([...appScreenshot, {url: url, img: acceptedFiles[0] }])
         const newScreenshotUrl = [...appInfo.details.imgScreenshot, url]
         const newDetails = { ...appInfo.details, imgScreenshot: newScreenshotUrl }
         setAppInfo({ ...appInfo, details: newDetails })
@@ -181,21 +192,96 @@ export default function Page({ params }: { params: { appId: string } }) {
     const { getRootProps: getRootPropsIcon, getInputProps: getInputPropsIcon } = useDropzone({ onDrop: onDropIcon })
     const { getRootProps: getRootPropsSs, getInputProps: getInputPropsSs, open } = useDropzone({ onDrop: onDropSs, noDrag: true, noClick: true })
 
-    const onSaveAppInfo = () => {
-        if (appNameRef.current?.value != appInfo.name) {
-            console.log("name changed")
-            // TODO: update name by API
-            setAppInfo({ ...appInfo, name: (appNameRef.current?.value as string) })
+    const onSaveAppInfo = async () => {
+        if (appNameRef.current?.value === "") {
+            enqueueSnackbar("アプリ名を入力してください", { variant: "error" })
+            return
         }
-        if (appDescriptionRef.current?.value != appInfo.description) {
-            console.log("description changed")
-            setAppInfo({ ...appInfo, description: (appDescriptionRef.current?.value as string) })
+        try {
+            // App name
+            if (appNameRef.current?.value !== "") {
+                await fetch(`/api/v0/projects/${appId}/name?name=${appNameRef.current?.value}`, {
+                    method: "post",
+                    headers: {
+                        "x-auth-token": session.access_token as string
+                    }
+                })
+                setAppInfo({ ...appInfo, name: (appNameRef.current?.value as string) })
+            }
+            // App description
+            if (appDescriptionRef.current?.value !== "") {
+                await fetch(`/api/v0/projects/${appId}/description?description=${appDescriptionRef.current?.value}`, {
+                    method: "post",
+                    headers: {
+                        "x-auth-token": session.access_token as string
+                    }
+                })
+                setAppInfo({ ...appInfo, description: (appDescriptionRef.current?.value as string) })
+            }
+            // YouTube
+            if (appYoutubeRef.current?.value !== "") {
+                await fetch(`/api/v0/projects/${appId}/youtube?youtube=${appYoutubeRef.current?.value}`, {
+                    method: "post",
+                    headers: {
+                        "x-auth-token": session.access_token as string
+                    }
+                })
+                setAppInfo({ ...appInfo, youtube: (appYoutubeRef.current?.value as string) })
+            }
+            // Install
+            // if (appInstallMethodRef.current?.value !== "" || appDownloadLinkRef.current?.value !== "") {
+            //     await fetch(`/api/v0/projects/${projectId}/details/install`, {
+            //         method: "post",
+            //         headers: {
+            //             "x-auth-token": session.access_token as string,
+            //             "Content-Type": "application/json"
+            //
+            //         },
+            //         body: JSON.stringify({
+            //             method: appInstallMethodRef.current?.value,
+            //             info: appDownloadLinkRef.current?.value,
+            //             additional: ""
+            //         })
+            //     })
+            // }
+            // App icon
+            if (appIcon) {
+                const sendIcon = new FormData()
+                sendIcon.append("img", appIcon.img)
+                await fetch(`/api/v0/projects/${appId}/img`, {
+                    method: "post",
+                    headers: {
+                        "x-auth-token": session.access_token as string,
+                    },
+                    body: sendIcon
+                })
+            }
+            // Send screenshot
+            for (const item of appScreenshot) {
+                const sendScreenshot = new FormData()
+                sendScreenshot.append("img", item.img)
+                await fetch(`/api/v0/projects/${appId}/details/imgs`, {
+                    method: "post",
+                    headers: {
+                        "x-auth-token": session.access_token as string,
+                    },
+                    body: sendScreenshot
+                })
+            }
+            // Delete screenshot
+            for (const imgId of deleteImgId) {
+                await fetch(`/api/v0/projects/${appId}/details/imgs/${imgId}`, {
+                    method: "delete",
+                    headers: {
+                        "x-auth-token": session.access_token as string,
+                    }
+                })
+            }
+            enqueueSnackbar("アプリの更新が完了しました", { variant: "success" })
+            setEditable(false)
+        } catch (e) {
+            enqueueSnackbar("通信に失敗しました", { variant: "error" })
         }
-        if (appYoutubeRef.current?.value != appInfo.youtube && appYoutubeRef.current?.value.startsWith("https://youtu.be/")) {
-            console.log("youtube changed")
-            setAppInfo({ ...appInfo, youtube: (appYoutubeRef.current?.value as string) })
-        }
-        setEditable(false)
     }
 
     const onEditAppInfo = () => {
@@ -209,9 +295,24 @@ export default function Page({ params }: { params: { appId: string } }) {
     }
 
     const onDeleteScreenshot = (url: string) => {
-        const newScreenshot = appInfo.details.imgScreenshot.filter((item) => item !== url)
-        const newDetails = { ...appInfo.details, imgScreenshot: newScreenshot }
+        // 表示用
+        const newAppInfoScreenshot = appInfo.details.imgScreenshot.filter((item) => item !== url)
+        const newDetails = { ...appInfo.details, imgScreenshot: newAppInfoScreenshot }
         setAppInfo({ ...appInfo, details: newDetails })
+
+        // POST用
+        const newAppScreenshot = appScreenshot.filter((item) => item.url !== url)
+        setAppScreenshot(newAppScreenshot)
+
+        // Delete用
+        if (data) {
+            const newDeleteImgId = data.details.img_screenshot.map((item) => {
+                if (item.img === url) {
+                    return item.id
+                }
+            }) as string[]
+            setDeleteImgId(newDeleteImgId)
+        }
     }
 
     const convertYoutubeLink = (link: string): string => {
@@ -228,6 +329,8 @@ export default function Page({ params }: { params: { appId: string } }) {
     return (
         <>
             <Container sx={{ mt: 3 }}>
+                <SnackbarProvider />
+
                 <Box sx={{ textAlign: "right" }}>
                     {isEditable ?
                         <>
