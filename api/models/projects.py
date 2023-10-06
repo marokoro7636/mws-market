@@ -106,7 +106,7 @@ class Project:
 
     def set_youtube(self, youtube: str):
         # YoutubeのURLか
-        if re.match(r'https?:\/\/(www.youtube.com\/|youtu.be\/)(\w+)', youtube) is None:
+        if re.match(r'https:\/\/youtu.be\/(\w+)', youtube) is None:
             raise
 
         db = firestore.client()

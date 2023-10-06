@@ -55,7 +55,7 @@ def post_project(req: ProjectRequest, x_auth_token: Optional[str] = Header(None)
         raise StarletteHTTPException(status_code=404, detail="Team not found")
     if not isAuthed(Teams(req.team).get_members(), x_auth_token):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
-    if Teams(req.team).get_project is not None:
+    if Teams(req.team).get_project() is not None:
         raise StarletteHTTPException(status_code=400, detail="Team has project")
     try:
         prj = Project.create(req)
