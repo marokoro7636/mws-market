@@ -42,6 +42,7 @@ class Project:
                 }
             }
         )
+        Teams(req.team).set_project(id)
         return Project(id=id)
 
     @staticmethod
@@ -62,9 +63,7 @@ class Project:
             info.icon = Project.gen_img_url(info.icon)
         if info.img is not None:
             info.img = Project.gen_img_url(info.img)
-        if info.details is not None:
-            if info.details.img_screenshot is not None:
-                info.details.img_screenshot = [ImgScreenshot(id=img_screenshot.id, path=Project.gen_img_url(img_screenshot.path)) for img_screenshot in info.details.img_screenshot]
+        info.details.img_screenshot = [ImgScreenshot(id=img_screenshot.id, path=Project.gen_img_url(img_screenshot.path)) for img_screenshot in info.details.img_screenshot]
         info.team = Teams(info.team).get_name()
         return info
 

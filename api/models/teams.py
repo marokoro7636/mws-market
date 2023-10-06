@@ -203,3 +203,16 @@ class Teams:
         db = firestore.client()
         data = db.collection("teams").document(self.id).get().to_dict()
         return list(map(lambda x: x["id"],  data["members"]))
+
+
+    def set_project(self, project: str):
+        db = firestore.client()
+        db.collection("teams").document(self.id).update(
+            {
+                "project": project,
+            }
+        )
+    def get_project(self):
+        db = firestore.client()
+        project = db.collection("teams").document(self.id).get().to_dict().get("project")
+        return project

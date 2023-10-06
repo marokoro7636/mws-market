@@ -22,7 +22,7 @@ def get_user(user_id: str, x_auth_token: Optional[str] = Header(None)):
         raise StarletteHTTPException(status_code=404, detail="User not found")
 
     try:
-        data = Users(user_id).get()
+        user= Users(user_id).get()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to get Users")
-    return User(**data)
+    return user
