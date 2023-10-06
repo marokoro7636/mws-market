@@ -53,6 +53,7 @@ type AppInfoData = {
     short_description: string,
     description: string,
     youtube: string,
+    own: boolean,
     details: {
         img_screenshot: { id: string, img: string }[],
         required_spec: {
@@ -113,7 +114,7 @@ export default function Page({ params }: { params: { appId: string } }) {
             team: data.team,
             description: data.short_description || "説明はまだ追加されていません",
             youtube: data.youtube,
-            icon: data.icon ?? "https://placehold.jp/4380E0/ffffff/180x180.png?text=no%20image",
+            icon: data.img ?? "https://placehold.jp/4380E0/ffffff/180x180.png?text=no%20image",
             details: {
                 imgScreenshot: data.details.img_screenshot.map((item) => item.img),
                 requiredSpec: data.details.required_spec,
@@ -147,6 +148,21 @@ export default function Page({ params }: { params: { appId: string } }) {
                 setAppInfo(initAppInfo(data))
             })
     }, [])
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            fetch(`/api/v0/projects/${appId}`, {
+                headers : {
+                    "x-auth-token": session.access_token as string
+                }
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    setData(data)
+                    setAppInfo(initAppInfo(data))
+                })
+        }
+    }, [session])
 
     const imageSize = async (url: string): Promise<{ width: number, height: number }> => {
         return new Promise((resolve, reject) => {
@@ -346,8 +362,7 @@ export default function Page({ params }: { params: { appId: string } }) {
         <>
             <Container sx={{ mt: 3 }}>
                 <SnackbarProvider />
-                {/*TODO 自分のチームのプロジェクトのときだけEDITボタンを表示する*/}
-                {status === "authenticated" &&
+                {data.own &&
                     <Box sx={{ textAlign: "right" }}>
                         {isEditable ?
                             <>
@@ -377,33 +392,35 @@ export default function Page({ params }: { params: { appId: string } }) {
                     <Grid item xs={6}>
                         {isEditable ?
                             <TextField size="small" variant="outlined" inputRef={appNameRef}
-                                inputProps={{ style: { fontSize: 48 } }} sx={{ width: 500 }}
-                                defaultValue={appInfo.name} /> :
+                                       inputProps={{ style: { fontSize: 48 } }} sx={{ width: 500 }}
+                                       defaultValue={appInfo.name} /> :
                             <Typography variant="h3">{appInfo.name}</Typography>
                         }
                         <Typography variant="subtitle1">{appInfo.team}</Typography>
                         <Rating name="read-only" value={3} size="small" sx={{ mt: 2 }} />
                     </Grid>
                     <Grid item xs={3}>
-                        <Button variant="contained" sx={{ width: 2 / 3, height: 50 }}
-                                href={appInfo.details.install[0].info}
-                                onClick={() => {router.push("/")}}
-                                disabled={isEditable || appInfo.details.install.length === 0}>ダウンロード</Button>
+                        {appInfo.details.install.length >= 0 &&
+                            <Button variant="contained" sx={{ width: 2 / 3, height: 50 }}
+                                    href={appInfo.details.install[0].info}
+                                    onClick={() => {router.push("/")}}
+                                    disabled={isEditable || appInfo.details.install.length === 0}>ダウンロード</Button>
+                        }
                         {/*TODO ボタンをクリックしたらダウンロードをするとともにインストール説明ページに遷移*/}
                     </Grid>
                 </Grid>
                 <Stack spacing={2} mt={5}>
                     <Typography variant="h4">このアプリについて</Typography>
                     {isEditable ?
-                        <TextField fullWidth multiline size="small" variant="outlined"
-                            inputRef={appDescriptionRef}
-                            defaultValue={appInfo.description} /> :
+                        <TextField fullWidth multiline rows={5} size="small" variant="outlined"
+                                   inputRef={appDescriptionRef}
+                                   defaultValue={appInfo.description} /> :
                         <Typography component="div">{appInfo.description}</Typography>
                     }
                 </Stack>
                 <Stack sx={{ mt: 5 }} direction="row" alignItems="center">
                     <ScreenshotCarousel imgList={appInfo.details.imgScreenshot} editable={isEditable}
-                        onDelete={onDeleteScreenshot} />
+                                        onDelete={onDeleteScreenshot} />
                     {isEditable &&
                         <div {...getRootPropsSs()}>
                             <input {...getInputPropsSs()} />
@@ -446,17 +463,21 @@ export default function Page({ params }: { params: { appId: string } }) {
                     <Typography variant="h4">紹介動画</Typography>
                     {isEditable ?
                         <TextField size="small" variant="outlined" inputRef={appYoutubeRef}
-                            defaultValue={appInfo.youtube} sx={{ width: 500 }} /> :
-                        <Box sx={{ display: "flex", justifyContent: "center" }}>
-                            <Box sx={{ width: 0.7 }}>
-                                <Box className="video">
-                                    <iframe width="560" height="315" src={convertYoutubeLink(appInfo.youtube)}
-                                        title="YouTube video player" frameBorder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                        allowFullScreen></iframe>
+                                   defaultValue={appInfo.youtube} sx={{ width: 500 }} /> :
+                        <>
+                            {appInfo.youtube &&
+                                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                                    <Box sx={{ width: 0.7 }}>
+                                        <Box className="video">
+                                            <iframe width="560" height="315" src={convertYoutubeLink(appInfo.youtube)}
+                                                    title="YouTube video player" frameBorder="0"
+                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                    allowFullScreen></iframe>
+                                        </Box>
+                                    </Box>
                                 </Box>
-                            </Box>
-                        </Box>
+                            }
+                        </>
 
                     }
                 </Stack>
