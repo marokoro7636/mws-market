@@ -87,7 +87,7 @@ class ProjectInfo(BaseModel):
     short_description: Optional[str] = None
     description: Optional[str] = None
     youtube: Optional[str] = None
-    details: Optional[ProjectDetails] = dict()
+    details: Optional[ProjectDetails] = ProjectDetails()
     review: Optional[list[ProjectReview]] = list()
     rating: Rating
     hidden: Optional[bool] = None
@@ -130,6 +130,7 @@ class TeamResponse(BaseModel):
     description: str
     members: list[TeamMember]
     relations: list[str]
+    project: Optional[str] = None
 
 class Team(BaseModel):
     id:str
@@ -139,6 +140,7 @@ class Team(BaseModel):
     members: list[TeamMember]
     secret: Optional[str] = None
     relations: list[TeamResponse]
+    project: Optional[str] = None
 
 class TeamSimpleResponse(BaseModel):
     id: str
