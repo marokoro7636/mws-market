@@ -66,15 +66,15 @@ class TeamMember(BaseModel):
 
 class Team(BaseModel):
     name: str
-    year: Optional[int] = None
+    year: int
     description: Optional[str] = None
     members: list[TeamMember]
     secret: Optional[str] = None
-    previous: Optional[str] = None
+    relations: list[str]
 
 class TeamRequest(BaseModel):
     name: str
-    year: Optional[int] = None
+    year: int
     description: Optional[str] = None
     members: list[str]
 
@@ -83,8 +83,8 @@ class TeamResponse(BaseModel):
     name: str
     year: int
     description: str
-    members: list[TeamMember]
-    previous: Optional[str] = None
+    members: list[str]
+    relations: list[str]
 
 class TeamSimpleResponse(BaseModel):
     id: str
