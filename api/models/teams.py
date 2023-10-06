@@ -26,12 +26,24 @@ class Teams:
             id = sha1_hash(req.name+timestamp)
             db = firestore.client()
             secret = make_secret(20)
+            members = []
+            for user_id in req.members:
+                user = db.collection("users").document(user_id).get()
+                if not user.exists:
+                    print("user not found")
+                    raise
+                user = user.to_dict()
+                members.append({
+                    "id": user_id,
+                    "name": user["name"],
+                    "image": user["image"]
+                })
             db.collection("teams").document(id).set(
                 {
                     "name": req.name,
-                    "year": req.year, # int 型
+                    "year": req.year, # int 型 None?
                     "description": req.description, # None?
-                    "members": req.members, # 処理済み(member_id)
+                    "members": members, # 関数内で生成
                     "secret": secret, # 関数内で生成
                     "previous": None
                 }
@@ -44,7 +56,7 @@ class Teams:
             for user_id in req.members:
                 db.collection("affiliations").document(user_id).set(
                     {
-                        "team": firestore.firestore.ArrayUnion([id])
+                       "team": firestore.firestore.ArrayUnion([id])
                     }
                 , merge=True)
             return Teams(id = id)
@@ -83,9 +95,18 @@ class Teams:
 
     def add_member(self, user_id: str):
         db = firestore.client()
+        user = db.collection("users").document(user_id).get()
+        if not user.exists:
+            print("user not found")
+            raise
+        user = user.to_dict()
         db.collection("teams").document(self.id).update(
             {
-                "members": firestore.firestore.ArrayUnion([user_id])
+                "members": firestore.firestore.ArrayUnion([{
+                    "id": user_id,
+                    "name": user["name"],
+                    "image": user["image"],
+                }])
             }
         )
         db.collection("affiliations").document(user_id).set(
@@ -133,10 +154,15 @@ class Teams:
         db = firestore.client()
         data = db.collection("teams").document(self.id).get().to_dict()
         if len(data["members"]) < 2:
+            print("members is less than 2")
+            raise
+        del_data = list(filter(lambda x: x["id"] == user_id, data["members"]))
+        if len(del_data) == 0:
+            print("user not found in teams")
             raise
         db.collection("teams").document(self.id).update(
             {
-                "members": firestore.firestore.ArrayRemove([user_id])
+                "members": firestore.firestore.ArrayRemove([del_data])
             }
         )
         db.collection("affiliations").document(user_id).update(
@@ -168,4 +194,4 @@ class Teams:
     def get_members(self):
         db = firestore.client()
         data = db.collection("teams").document(self.id).get().to_dict()
-        return data["members"]
+        return list(map(lambda x: x["id"],  data["members"]))

@@ -19,7 +19,7 @@ export default function RootLayout({
     return (
         <html lang="ja">
             <head>
-                <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap" rel="stylesheet" />
+                <link href="https://fonts.googleapis.com/css2?family=Gemunu+Libre&family=Ubuntu+Mono&display=swap" rel="stylesheet" />
             </head>
             <body>
                 <div className={inter.className}>

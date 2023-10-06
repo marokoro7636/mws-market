@@ -59,11 +59,16 @@ class ProjectSummary(BaseModel):
     youtube: Optional[str] = None
     team: Optional[str] = None
 
+class TeamMember(BaseModel):
+    id: str
+    name: str
+    image: str
+
 class Team(BaseModel):
     name: str
     year: Optional[int] = None
     description: Optional[str] = None
-    members: list[str]
+    members: list[TeamMember]
     secret: Optional[str] = None
     previous: Optional[str] = None
 
@@ -78,7 +83,7 @@ class TeamResponse(BaseModel):
     name: str
     year: int
     description: str
-    members: list[str]
+    members: list[TeamMember]
     previous: Optional[str] = None
 
 class TeamSimpleResponse(BaseModel):

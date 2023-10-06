@@ -36,5 +36,5 @@ init_firebase()
 # static file routing
 # app.mount("/", StaticFiles(directory="./public", html=True), name="public")
 
-app.include_router(mock.get_router(), prefix="/api/mock", tags=["api_mock"])
-app.include_router(v0.get_router(), prefix="/api/v0", tags=["api_v0"])
+# app.include_router(mock.get_router(), prefix="/api/mock", tags=["api_mock"])
+app.include_router(v0.get_router(), prefix="/api/v0")

@@ -31,6 +31,7 @@ const handler = NextAuth({
                 const access_token = sha1(`${Date.now()}` + account.id_token)
                 const uid = token.sub
                 token.access_token = access_token
+                token.uid = uid
                 adminDB.collection("session2uid").doc(access_token).set({ uid: uid })
                 const docRef = adminDB.collection("users").doc(uid as string)
                 const userInfo = (await docRef.get()).data()
@@ -44,10 +45,11 @@ const handler = NextAuth({
             return token
         },
         session: async ({ session, token, user }) => {
-            // console.log({ token, session, user })
-            if (token && token.access_token === 'string') {
-                session.access_token = token.access_token
+            if (token && token.access_token && token.uid) {
+                session.access_token = token.access_token as string
+                session.uid = token.uid as string
             }
+            // console.log({ token, session, user })
             return session
         }
     },
