@@ -17,8 +17,7 @@ from models.users import Users
 
 router = APIRouter()
 
-# @router.get("/", response_model=list[TeamResponse])
-@router.get("/")
+@router.get("/", response_model=list[TeamResponse])
 def get_teams():
     try:
         teams = Teams.get_teams()
