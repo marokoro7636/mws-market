@@ -17,13 +17,14 @@ from models.users import Users
 
 router = APIRouter()
 
-@router.get("/", response_model=list[TeamResponse])
+# @router.get("/", response_model=list[TeamResponse])
+@router.get("/")
 def get_teams():
     try:
-        data = Teams.get_teams()
+        teams = Teams.get_teams()
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to get teams")
-    return [TeamResponse(id=key, **value) for key, value in data.items()]
+    return teams
 
 @router.post("/", response_model=TeamSimpleResponse)
 def post_team(req: TeamRequest, x_auth_token: Optional[str] = Header(None)):

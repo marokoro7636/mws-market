@@ -15,7 +15,8 @@ from models.requests import (
     ProjectDetails,
     ProjectReview,
     Install,
-    ProjectSummary
+    ProjectSummary,
+    RequiredSpecRequest
 )
 from models.teams import Teams
 
@@ -205,7 +206,7 @@ class Project:
         )
 
     ## required_spec
-    def add_required_spec(self, required_spec: RequiredSpec):
+    def add_required_spec(self, required_spec: RequiredSpecRequest):
         db = firestore.client()
         timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         spec_id = sha1_hash(f"{self.id}{required_spec}{timestamp}")
@@ -219,10 +220,10 @@ class Project:
             }
         )
 
-    def get_required_spec(self) -> {str: RequiredSpec}:
+    def get_required_spec(self) -> list[RequiredSpec]:
         db = firestore.client()
         required_spec = db.collection("projects").document(self.id).get().to_dict().get("details", {}).get("required_spec", {})
-        return {key: RequiredSpec(**value) for key, value in required_spec.items()}
+        return [RequiredSpec(id = key, **value) for key, value in required_spec.items()]
 
     def delete_required_spec(self, spec_id: str):
         db = firestore.client()
@@ -233,10 +234,10 @@ class Project:
         )
 
     ## install
-    def get_install(self) -> {str, Install}:
+    def get_install(self) -> list[Install]:
         db = firestore.client()
         install = db.collection("projects").document(self.id).get().to_dict().get("details", {}).get("install", {})
-        return {key: Install(**value) for key, value in install.items()}
+        return [Install(id=key, **value) for key, value in install.items()]
 
     def add_install(self, install: Install):
         db = firestore.client()
@@ -323,7 +324,7 @@ class Project:
     ## Projectのドキュメントを全てリストに集める
     ## 要求データは存在すると仮定
     @staticmethod
-    def get_project(limit: int, page: int, order: Optional[str], year: Optional[int], team: Optional[str]):
+    def get_project(limit: int, page: int, order: Optional[str], year: Optional[int], team: Optional[str]) -> list[ProjectSummary]:
         db = firestore.client()
         snapshot = db.collection("projects")
 
@@ -352,7 +353,7 @@ class Project:
             return data
 
         docs =  snapshot.select(ProjectSummary.__annotations__.keys()).get()
-        return {doc.id: convert(doc.to_dict()) for doc in docs}
+        return [ProjectSummary(id = doc.id, **convert(doc.to_dict())) for doc in docs]
 
     @staticmethod
     def allow_order(order: Optional[str]):

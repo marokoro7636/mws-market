@@ -4,7 +4,8 @@ import datetime
 from models.requests import (
     Team,
     TeamSimpleResponse,
-    TeamRequest
+    TeamRequest,
+    TeamResponse
 )
 
 
@@ -69,8 +70,8 @@ class Teams:
     def get_teams():
         db = firestore.client()
         docs = db.collection("teams").stream()
-        data = {doc.id: doc.to_dict() for doc in docs}
-        return data
+        teams = [TeamResponse(id=doc.id, **doc.to_dict()) for doc in docs]
+        return teams
 
     @staticmethod
     def get_by_secret(secret: str):

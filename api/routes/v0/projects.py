@@ -36,7 +36,7 @@ def get_projects(limit: int = 10, page: int = 1, order: Optional[str] = None, ye
         summary = Project.get_project(limit, page, order, year, team)
     except:
         raise StarletteHTTPException(status_code=500, detail="Failed to get projects")
-    return [ProjectSummary(id = key, **value) for key, value in summary.items()]
+    return summary
 
 @router.get("/{project_id}", response_model=ProjectInfo)
 def get_project(project_id: str):
