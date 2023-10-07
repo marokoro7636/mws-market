@@ -316,8 +316,8 @@ export default function Page({ params }: { params: { appId: string } }) {
             // App icon
             if (appIcon) {
                 const sendIcon = new FormData()
-                sendIcon.append("img", appIcon.img)
-                await fetch(`/api/v0/projects/${appId}/img`, {
+                sendIcon.append("icon", appIcon.img)
+                await fetch(`/api/v0/projects/${appId}/icon`, {
                     method: "post",
                     headers: {
                         "x-auth-token": session.access_token as string,

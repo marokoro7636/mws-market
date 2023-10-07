@@ -140,8 +140,8 @@ export default function Page({ params }: { params: { teamId : string } }) {
             // App icon
             if (appIcon) {
                 const sendIcon = new FormData()
-                sendIcon.append("img", appIcon.img)
-                await fetch(`/api/v0/projects/${projectId}/img`, {
+                sendIcon.append("icon", appIcon.img)
+                await fetch(`/api/v0/projects/${projectId}/icon`, {
                     method: "post",
                     headers: {
                         "x-auth-token": session.access_token as string,
