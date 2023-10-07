@@ -9,6 +9,7 @@ import {Session} from "next-auth";
 import {useRouter} from "next/navigation";
 import {enqueueSnackbar, SnackbarProvider} from "notistack";
 import {installMethods} from "@/const/const";
+import {imageSize} from "@/util/util";
 
 type Img = {
     url: string,
@@ -44,27 +45,6 @@ export default function Page({ params }: { params: { teamId : string } }) {
 
     const [appIcon, setAppIcon] = useState<Img>()
     const [appScreenshot, setAppScreenshot] = useState<Img[]>([])
-
-    const imageSize = async (url: string): Promise<{ width: number, height: number }> => {
-        return new Promise((resolve, reject) => {
-            const img = new Image()
-
-            img.onload = () => {
-                const size = {
-                    width: img.naturalWidth,
-                    height: img.naturalHeight,
-                }
-
-                resolve(size)
-            }
-
-            img.onerror = (error) => {
-                reject(error)
-            }
-
-            img.src = url
-        })
-    }
 
     const onDropIcon = useCallback(async (acceptedFiles: File[]) => {
         if (acceptedFiles[0].type !== "image/png" && acceptedFiles[0].type !== "image/jpeg") {
@@ -160,8 +140,8 @@ export default function Page({ params }: { params: { teamId : string } }) {
             // App icon
             if (appIcon) {
                 const sendIcon = new FormData()
-                sendIcon.append("img", appIcon.img)
-                await fetch(`/api/v0/projects/${projectId}/img`, {
+                sendIcon.append("icon", appIcon.img)
+                await fetch(`/api/v0/projects/${projectId}/icon`, {
                     method: "post",
                     headers: {
                         "x-auth-token": session.access_token as string,
