@@ -50,6 +50,21 @@ interface TeamInternalInfo {
     secret: string,
     previous: string,
     relations: TeamInternalInfo[],
+    project: string,
+}
+
+interface ProjectInfo {
+    id: string
+    name: string,
+    description: string,
+    rating: {
+        total: number,
+        count: number,
+    },
+    youtube: string,
+    team: string,
+    icon: string,
+    img: string,
 }
 
 export default function Page({ params }: { params: { teamId: string } }) {
@@ -68,8 +83,28 @@ export default function Page({ params }: { params: { teamId: string } }) {
     const [userDelete, setUserDelete] = React.useState({} as Member)
 
     const [teamRelationSecret, setTeamRelationSecret] = useState<string>("")
+    const [projInfo, setProjInfo] = useState<ProjectInfo | null>(null)
 
     const router = useRouter()
+
+    const updateProjectInfo = (projId: string) => {
+        if (projId === "") {
+            return
+        }
+        fetch(`/api/v0/projects/${projId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data?.name) {
+                    setProjInfo(data)
+                }
+                console.log(data)
+            })
+    }
 
     const updateTeamInfo = () => {
         if (status !== "authenticated") {
@@ -93,6 +128,10 @@ export default function Page({ params }: { params: { teamId: string } }) {
                     return
                 }
                 setTeamInternalInfo(data)
+                console.log(data)
+                if (data.project) {
+                    updateProjectInfo(data.project)
+                }
             })
     }
 
@@ -483,30 +522,41 @@ export default function Page({ params }: { params: { teamId: string } }) {
                 />
                 <CardContent>
                     {
-                        (<div style={{ display: 'flex', justifyContent: 'center' }}>
-                            <Button
-                                sx={{
-                                    bgcolor: "#00389340",
-                                    ':hover': {
-                                        bgcolor: "#00389360",
-                                    },
-                                    width: "200px",
-                                    height: "200px",
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    flexWrap: 'wrap',
-                                    color: '#003893',
+                        projInfo !== undefined && projInfo !== null ? (
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <AppCard
+                                    id={projInfo.id} name={projInfo.name}
+                                    description={projInfo.description} rating={projInfo.rating}
+                                    team={projInfo.team} icon={projInfo.icon} img={projInfo.img}
+                                />
+                            </div>
 
-                                }}
-                                onClick={() => {
-                                    router.push(`/teams/${teamId}/register`)
-                                }}
-                            >
-                                <AddCircleOutlineIcon sx={{ fontSize: 100 }} ></AddCircleOutlineIcon>
-                            </Button>
+                        ) : (
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <Button
+                                    sx={{
+                                        bgcolor: "#00389340",
+                                        ':hover': {
+                                            bgcolor: "#00389360",
+                                        },
+                                        width: "200px",
+                                        height: "200px",
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexWrap: 'wrap',
+                                        color: '#003893',
 
-                        </div>)
+                                    }}
+                                    onClick={() => {
+                                        router.push(`/teams/${teamId}/register`)
+                                    }}
+                                >
+                                    <AddCircleOutlineIcon sx={{ fontSize: 100 }} ></AddCircleOutlineIcon>
+                                </Button>
+
+                            </div>
+                        )
                     }
                     {/* <AppCard id={teamInternalInfo.id} name={teamInternalInfo.name} >
                             

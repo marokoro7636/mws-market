@@ -53,7 +53,7 @@ const AppCard = ({ id, name, team, description, rating, icon, img }: AppCardProp
                             <Typography variant="body2" color="text.secondary">
                                 {team}
                             </Typography>
-                            <Rating value={rating.total / rating.count} size="small" sx={{ mt: 1 }} readOnly precision={0.25} /> ({rating.count})
+                            <Rating value={rating?.total / rating?.count} size="small" sx={{ mt: 1 }} readOnly precision={0.25} /> ({rating?.count})
                         </Grid>
                     </Grid>
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 2, wordBreak: "break-all" }} height="3rem">
