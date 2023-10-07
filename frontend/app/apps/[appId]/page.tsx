@@ -201,15 +201,16 @@ export default function Page({ params }: { params: { appId: string } }) {
                         setAppInfo(initAppInfo(data))
                         return data
                     })
-                for (const reviewer of fetchData.review) {
-                    await fetch(`/api/v0/users/${reviewer.user}`, {
-                        headers: {
-                            "x-auth-token": session.access_token as string
-                        }
-                    })
-                        .then((response) => response.json())
-                        .then((user: User) => { if (user.name) setReviewerName([...reviewerName, user.name]) })
-                }
+                // レビュアーを取ってくる処理
+                // for (const reviewer of fetchData.review) {
+                //     await fetch(`/api/v0/users/${reviewer.user}`, {
+                //         headers: {
+                //             "x-auth-token": session.access_token as string
+                //         }
+                //     })
+                //         .then((response) => response.json())
+                //         .then((user: User) => { if (user.name) setReviewerName([...reviewerName, user.name]) })
+                // }
             })()
         }
     }, [session, appId, status])
