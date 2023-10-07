@@ -11,18 +11,18 @@ import {
     Select,
     Stack,
     TextField,
-    Typography
+    Typography,
 } from "@mui/material";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import ScreenshotCarousel from "@/components/ScreenshotCarousel";
 import { useDropzone } from "react-dropzone";
 
 import { CircularProgress } from '@mui/material';
-import {enqueueSnackbar, SnackbarProvider} from "notistack";
-import {useSession} from "next-auth/react";
-import {Session} from "next-auth";
-import {installMethods} from "@/const/const";
-import {useRouter} from "next/navigation";
+import { enqueueSnackbar, SnackbarProvider } from "notistack";
+import { useSession } from "next-auth/react";
+import { Session } from "next-auth";
+import { installMethods } from "@/const/const";
+import { useRouter } from "next/navigation";
 
 interface AppInfo {
     id: string,
@@ -149,12 +149,12 @@ export default function Page({ params }: { params: { appId: string } }) {
                 setData(data)
                 setAppInfo(initAppInfo(data))
             })
-    }, [])
+    }, [appId])
 
     useEffect(() => {
         if (status === "authenticated") {
             fetch(`/api/v0/projects/${appId}`, {
-                headers : {
+                headers: {
                     "x-auth-token": session.access_token as string
                 }
             })
@@ -164,7 +164,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                     setAppInfo(initAppInfo(data))
                 })
         }
-    }, [session])
+    }, [session, appId, status])
 
     const imageSize = async (url: string): Promise<{ width: number, height: number }> => {
         return new Promise((resolve, reject) => {
@@ -202,7 +202,7 @@ export default function Page({ params }: { params: { appId: string } }) {
 
         setAppIcon({ url: url, img: acceptedFiles[0] })
         setAppInfo({ ...appInfo, icon: url })
-    }, [appIcon, appInfo])
+    }, [appInfo, iconConfig.height, iconConfig.width])
 
     const onDropSs = useCallback(async (acceptedFiles: File[]) => {
         if (acceptedFiles[0].type !== "image/png" && acceptedFiles[0].type !== "image/jpeg") {
@@ -217,11 +217,11 @@ export default function Page({ params }: { params: { appId: string } }) {
             return
         }
 
-        setAppScreenshot([...appScreenshot, {url: url, img: acceptedFiles[0] }])
+        setAppScreenshot([...appScreenshot, { url: url, img: acceptedFiles[0] }])
         const newScreenshotUrl = [...appInfo.details.imgScreenshot, url]
         const newDetails = { ...appInfo.details, imgScreenshot: newScreenshotUrl }
         setAppInfo({ ...appInfo, details: newDetails })
-    }, [appScreenshot, appInfo])
+    }, [appScreenshot, appInfo, screenshotConfig.height, screenshotConfig.width])
 
     const { getRootProps: getRootPropsIcon, getInputProps: getInputPropsIcon } = useDropzone({ onDrop: onDropIcon })
     const { getRootProps: getRootPropsSs, getInputProps: getInputPropsSs, open } = useDropzone({ onDrop: onDropSs, noDrag: true, noClick: true })
@@ -366,7 +366,7 @@ export default function Page({ params }: { params: { appId: string } }) {
 
     if (data === null) {
         return <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <CircularProgress  />
+            <CircularProgress />
         </div>
     }
 
@@ -379,7 +379,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                         {isEditable ?
                             <>
                                 <Button variant="contained" color="secondary" onClick={onSaveAppInfo}
-                                        sx={{ mr: 1 }}>Save</Button>
+                                    sx={{ mr: 1 }}>Save</Button>
                                 <Button variant="contained" color="error" onClick={onCancelEdit}>Cancel</Button>
                             </> :
                             <Button variant="contained" color="secondary" onClick={onEditAppInfo}>Edit</Button>
@@ -392,20 +392,20 @@ export default function Page({ params }: { params: { appId: string } }) {
                             <div {...getRootPropsIcon()}>
                                 <input {...getInputPropsIcon()} />
                                 <Box sx={{ position: "relative" }}>
-                                    <img src={appInfo.icon} alt="icon" style={{ width: iconConfig.width, height: iconConfig.height }} />
+                                    <Box component="img" src={appInfo.icon} alt="icon" width={iconConfig.width} height={iconConfig.height} />
                                     <Box sx={{ backgroundColor: "white", opacity: 0.7, width: iconConfig.width, height: iconConfig.height, position: "absolute", top: 0, display: "flex", justifyContent: "center", alignItems: "center" }}>
                                         <Box sx={{ textAlign: "center" }}>ここに画像を<br />ドロップ<br />{`(${iconConfig.width}x${iconConfig.height})`}</Box>
                                     </Box>
                                 </Box>
                             </div> :
-                            <img src={appInfo.icon} alt="icon" style={{ width: 180, height: 180 }} />
+                            <Box component="img" src={appInfo.icon} alt="icon" width={180} height={180} />
                         }
                     </Grid>
                     <Grid item xs={6}>
                         {isEditable ?
                             <TextField size="small" variant="outlined" inputRef={appNameRef}
-                                       inputProps={{ style: { fontSize: 48 } }} sx={{ width: 500 }}
-                                       defaultValue={appInfo.name} /> :
+                                inputProps={{ style: { fontSize: 48 } }} sx={{ width: 500 }}
+                                defaultValue={appInfo.name} /> :
                             <Typography variant="h3">{appInfo.name}</Typography>
                         }
                         <Typography variant="subtitle1">{appInfo.team}</Typography>
@@ -414,9 +414,9 @@ export default function Page({ params }: { params: { appId: string } }) {
                     <Grid item xs={3}>
                         {appInfo.details.install.length >= 0 &&
                             <Button variant="contained" sx={{ width: 2 / 3, height: 50 }}
-                                    href={appInfo.details.install.length !== 0 ? appInfo.details.install[0].info : "#"}
-                                    onClick={() => {router.push("/")}}
-                                    disabled={isEditable || appInfo.details.install.length === 0}>ダウンロード</Button>
+                                href={appInfo.details.install.length !== 0 ? appInfo.details.install[0].info : "#"}
+                                onClick={() => { router.push("/") }}
+                                disabled={isEditable || appInfo.details.install.length === 0}>ダウンロード</Button>
                         }
                         {/*TODO ボタンをクリックしたらダウンロードをするとともにインストール説明ページに遷移*/}
                     </Grid>
@@ -425,14 +425,14 @@ export default function Page({ params }: { params: { appId: string } }) {
                     <Typography variant="h4">このアプリについて</Typography>
                     {isEditable ?
                         <TextField fullWidth multiline rows={5} size="small" variant="outlined"
-                                   inputRef={appDescriptionRef}
-                                   defaultValue={appInfo.description} /> :
+                            inputRef={appDescriptionRef}
+                            defaultValue={appInfo.description} /> :
                         <Typography component="div">{appInfo.description}</Typography>
                     }
                 </Stack>
                 <Stack sx={{ mt: 5 }} direction="row" alignItems="center">
                     <ScreenshotCarousel imgList={appInfo.details.imgScreenshot} editable={isEditable}
-                                        onDelete={onDeleteScreenshot} />
+                        onDelete={onDeleteScreenshot} />
                     {isEditable &&
                         <div {...getRootPropsSs()}>
                             <input {...getInputPropsSs()} />
@@ -452,7 +452,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                                 <Typography variant="h4">アプリの種類</Typography>
                                 <Select
                                     defaultValue={appInfo.details.install.length !== 0 ? appInfo.details.install[0].method : ""}
-                                    sx={{width: 300}}
+                                    sx={{ width: 300 }}
                                     inputRef={appInstallMethodRef}
                                 >
                                     {
@@ -465,7 +465,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                             <Stack spacing={2} mt={5}>
                                 <Typography variant="h4">GitHub Releasesのダウンロードリンク</Typography>
                                 <TextField variant="outlined" inputRef={appDownloadLinkRef}
-                                           defaultValue={appInfo.details.install.length !== 0 ? appInfo.details.install[0].info : ""}
+                                    defaultValue={appInfo.details.install.length !== 0 ? appInfo.details.install[0].info : ""}
                                 />
                             </Stack>
                         </Grid>
@@ -475,16 +475,16 @@ export default function Page({ params }: { params: { appId: string } }) {
                     <Typography variant="h4">紹介動画</Typography>
                     {isEditable ?
                         <TextField size="small" variant="outlined" inputRef={appYoutubeRef}
-                                   defaultValue={appInfo.youtube} sx={{ width: 500 }} /> :
+                            defaultValue={appInfo.youtube} sx={{ width: 500 }} /> :
                         <>
                             {appInfo.youtube &&
                                 <Box sx={{ display: "flex", justifyContent: "center" }}>
                                     <Box sx={{ width: 0.7 }}>
                                         <Box className="video">
                                             <iframe width="560" height="315" src={convertYoutubeLink(appInfo.youtube)}
-                                                    title="YouTube video player" frameBorder="0"
-                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                                    allowFullScreen></iframe>
+                                                title="YouTube video player" frameBorder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                allowFullScreen></iframe>
                                         </Box>
                                     </Box>
                                 </Box>
