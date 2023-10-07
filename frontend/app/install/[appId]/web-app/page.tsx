@@ -75,16 +75,16 @@ export default function Page({ params }: { params: { appId: string } }) {
     return (
         <Container>
             <Typography variant="h3" mt={3}>利用方法</Typography>
-            <Stack spacing={5} mt={5}>
-                <Stack spacing={1} sx={{padding: 4, borderRadius: 5}}>
+            <Stack spacing={6} mt={5}>
+                <Stack spacing={1} sx={{px: 4, py: 1, borderRadius: 5}}>
                     <Stack direction="row" alignItems="center" spacing={1}>
                         <LinkIcon fontSize="inherit" sx={{fontSize: 48}}/>
                         <Typography variant="h4">アクセス先</Typography>
                     </Stack>
-                    <Typography component="a" href={data?.details.install[0].info}></Typography>
+                    <Typography component="a" href={data?.details.install[0].info}>{data?.details.install[0].info}</Typography>
                     <Typography variant="body1">本リンク先はWebアプリです。</Typography>
                 </Stack>
-                <Stack spacing={1} sx={{padding: 4, borderRadius: 5}}>
+                <Stack spacing={1} sx={{px: 4, py: 1, borderRadius: 5}}>
                     <Stack direction="row" alignItems="center" spacing={1}>
                         <InstallDesktopIcon fontSize="inherit" sx={{fontSize: 48}}/>
                         <Typography variant="h4">インストール手順</Typography>
@@ -103,8 +103,11 @@ export default function Page({ params }: { params: { appId: string } }) {
                     <Stack direction="row" alignItems="center" spacing={1}>
                         <InfoIcon fontSize="inherit" sx={{fontSize: 48}}/>
                         <Typography variant="h4">詳細説明</Typography>
-                        <Typography variant="body1">{data?.details.install[0].additional}</Typography>
                     </Stack>
+                    {data?.details.install[0].additional !== "" ?
+                        <Typography variant="body1">{data?.details.install[0].additional}</Typography> :
+                        <Typography variant="body1">詳細説明は登録されていません</Typography>
+                    }
                 </Stack>
             </Stack>
         </Container>
