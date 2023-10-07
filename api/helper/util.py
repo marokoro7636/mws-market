@@ -28,7 +28,8 @@ def make_secret(length: int):
 def make_description(youtube: Optional[str] = None, github: Optional[str] = None, description: Optional[str] = None):
     youtube = get_script(youtube)
     github = get_readme(github)
-    description = url_decode(description)
+    if description is not None:
+        description = Document(page_content=description)
 
     chat = ChatOpenAI(temperature=0)
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20)
@@ -88,9 +89,3 @@ def get_readme(url: str):
 
     text = base64.b64decode(response.get("content")).decode()
     return Document(page_content=text[:min(len(text) // 5, 1000)])
-
-def url_decode(description: str):
-    if description is None:
-        return None
-    else:
-        return Document(page_content=unquote(description))

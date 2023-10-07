@@ -5,6 +5,7 @@ from fastapi import Header
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from helper.util import sha1_hash
 from helper.auth import isAuthed
+from helper.util import make_description
 import datetime
 
 from models.requests import (
@@ -79,7 +80,15 @@ def delete_project(project_id: str, x_auth_token: Optional[str] = Header(None)):
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project")
     return ProjectSimpleResponse(id=project_id)
 
+@router.get("/generate/description")
+def get_description(youtube: Optional[str] = None, github: Optional[str] = None, description: Optional[str] = None):
+    try:
+        description, source = make_description(youtube, github, description)
+    except Exception as e:
+        print(e)
+        raise StarletteHTTPException(status_code=500, detail="Failed to get project description")
+    return {"description": description, "src": source}
+
 router.include_router(project_info.router, prefix="", tags=["project_info"])
 router.include_router(project_details.router, prefix="", tags=["project_details"])
 router.include_router(project_review.router, prefix="", tags=["project_review"])
-router.include_router(project_option.router, prefix="", tags=["project_option"])
