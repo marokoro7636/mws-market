@@ -1,6 +1,6 @@
 from firebase_admin import firestore
 from helper.util import sha1_hash, make_secret
-from helper.sanitize import sanitizing_id, sanitizing_by_html, sanitizing_str, sanitizing_int
+from helper.sanitize import sanitizing_sha1, sanitizing_by_html, sanitizing_str, sanitizing_int
 import datetime
 from models.requests import (
     Team,
@@ -68,8 +68,7 @@ class Teams:
 
     @staticmethod
     def is_exist(team_id: str):
-        team_id = sanitizing_by_html(team_id)
-        if sanitizing_str(team_id, 40):
+        if sanitizing_sha1(team_id):
             db = firestore.client()
             doc = db.collection("teams").document(team_id).get()
             if doc.exists:
