@@ -58,11 +58,16 @@ const AppCard = ({ id, name, team, description, rating, icon, img, team_id }: Ap
                             <Rating value={rating?.total / rating?.count} size="small" sx={{ mt: 1 }} readOnly precision={0.25} /> ({rating?.count})
                         </Grid>
                     </Grid>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 2, wordBreak: "break-all" }} height="3rem">
+                    <Typography variant="body2" color="text.secondary" sx={{
+                        wordBreak: "break-all",
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        lineHeight: '1.4rem',
+                    }} minHeight="calc( 1.4rem * 3 )" >
                         {
-                            description ?
-                                description.slice(0, Math.min(50, description.length)) + (description.length < 50 ? "" : "...") :
-                                "説明文がありません"
+                            description ?? "説明文がありません"
                         }
                     </Typography>
                 </CardContent>

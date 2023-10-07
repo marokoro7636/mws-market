@@ -527,7 +527,8 @@ export default function Page({ params }: { params: { teamId: string } }) {
                                 <AppCard
                                     id={projInfo.id} name={projInfo.name}
                                     description={projInfo.description} rating={projInfo.rating}
-                                    team={projInfo.team} icon={projInfo.icon} img={projInfo.img}
+                                    team={projInfo.team} team_id={teamId}
+                                    icon={projInfo.icon} img={projInfo.img}
                                 />
                             </div>
 
