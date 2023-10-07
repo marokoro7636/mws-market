@@ -72,6 +72,7 @@ class Project:
         if info.img is not None:
             info.img = Project.gen_img_url(info.img)
         info.details.img_screenshot = [ImgScreenshot(id=img_screenshot.id, path=Project.gen_img_url(img_screenshot.path)) for img_screenshot in info.details.img_screenshot]
+        info.previous = Project.get_project(team=info.team, include=False)
         info.team = Teams(info.team).get_name()
         return info
 
@@ -377,7 +378,7 @@ class Project:
     ## Projectのドキュメントを全てリストに集める
     ## 要求データは存在すると仮定
     @staticmethod
-    def get_project(limit: int, page: int, order: Optional[str], year: Optional[int], team: Optional[str]) -> list[ProjectSummary]:
+    def get_project(limit: int = 10, page: int = 1, order: Optional[str] = None, year: Optional[int] = None, team: Optional[str] = None, include: Optional[bool] = True) -> list[ProjectSummary]:
         db = firestore.client()
         snapshot = db.collection("projects")
 
@@ -387,13 +388,18 @@ class Project:
             if len(candidate) > 0:
                 snapshot = snapshot.where(filter=firestore.firestore.FieldFilter("team", "in", candidate))
             else:
-                return dict()
+                return list()
         if team is not None:
             if Teams.is_exist(team):
                 candidate = Teams(team).get_relations()
+                if not include:
+                    if len(candidate) > 1:
+                        candidate.remove(team)
+                    else:
+                        return list()
                 snapshot = snapshot.where(filter=firestore.firestore.FieldFilter("team", "in", candidate))
             else:
-                return dict()
+                return list()
         if order is None:
             st_doc = snapshot.limit(1 + limit * (page - 1)).get()[-1]
             snapshot = snapshot.start_at(st_doc).limit(limit)

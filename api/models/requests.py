@@ -80,6 +80,17 @@ class Rating(BaseModel):
     total: int
     count: int
 
+class ProjectSummary(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    rating: Rating
+    youtube: Optional[str] = None
+    team: Optional[str] = None
+    icon: Optional[str] = None
+    img: Optional[str] = None
+    team_id: Optional[str] = None
+
 class ProjectInfo(BaseModel):
     id: str
     name: str
@@ -94,6 +105,7 @@ class ProjectInfo(BaseModel):
     icon: Optional[str] = None
     img: Optional[str] = None
     own: bool = False
+    previous: Optional[list[ProjectSummary]] = list()
 
     @field_validator("review", mode="before")
     def convert(cls, d):
@@ -102,16 +114,6 @@ class ProjectInfo(BaseModel):
         else:
             return []
 
-class ProjectSummary(BaseModel):
-    id: str
-    name: str
-    description: Optional[str] = None
-    rating: Rating
-    youtube: Optional[str] = None
-    team: Optional[str] = None
-    team_id: Optional[str] = None
-    icon: Optional[str] = None
-    img: Optional[str] = None
 
 class TeamMember(BaseModel):
     id: str
