@@ -8,6 +8,7 @@ import AuthGuard from "@/components/AuthGuard";
 import {Session} from "next-auth";
 import {useRouter} from "next/navigation";
 import {enqueueSnackbar, SnackbarProvider} from "notistack";
+import {installMethods} from "@/const/const";
 
 type Img = {
     url: string,
@@ -200,8 +201,6 @@ export default function Page({ params }: { params: { teamId : string } }) {
         setAppScreenshot(newScreenshot)
     }
 
-    const installMethods = ["Chrome拡張機能", "実行ファイル", "Webアプリ", "データセット", "その他"]
-
     if (status !== "authenticated") {
         return <AuthGuard enabled={true} />
     }
@@ -222,17 +221,17 @@ export default function Page({ params }: { params: { teamId : string } }) {
                                     <Box sx={{width: iconConfig.width, height: iconConfig.height}}></Box>
                                 }
                                 <Box sx={{ bgcolor: "#cccccc", opacity: 0.7, width: iconConfig.width, height: iconConfig.height, position: "absolute", top: 0, display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                    <Box sx={{ textAlign: "center" }}>アプリアイコン画像を<br />ドロップ<br />{`(${iconConfig.width}x${iconConfig.height})`}</Box>
+                                    <Box sx={{ textAlign: "center" }}>アイコン画像を<br />ドロップ<br />{`(${iconConfig.width}x${iconConfig.height})`}</Box>
                                 </Box>
                             </Box>
                         </div>
                     </Grid>
                     <Grid item xs={6}>
-                        <Typography variant="h4">アプリ名</Typography>
+                        <Typography variant="h4">プロジェクト名</Typography>
                         <TextField variant="outlined" inputRef={appNameRef}
                                    inputProps={{ style: { fontSize: 48 } }} sx={{ width: 500, mt: 2 }}
                                    onChange={appNameChange} error={appNameError}
-                                   helperText={appNameError && "アプリ名を入力してください"}
+                                   helperText={appNameError && "プロジェクト名を入力してください"}
                         />
                     </Grid>
                     <Grid item xs={3}>
@@ -241,14 +240,14 @@ export default function Page({ params }: { params: { teamId : string } }) {
                     </Grid>
                 </Grid>
                 <Stack spacing={2} mt={5}>
-                    <Typography variant="h4">アプリの説明</Typography>
+                    <Typography variant="h4">プロジェクトの説明</Typography>
                     <TextField fullWidth multiline rows={5} variant="outlined"
                                inputRef={appDescriptionRef} />
                 </Stack>
                 <Grid container>
                     <Grid item xs={4}>
                         <Stack spacing={2} mt={5}>
-                            <Typography variant="h4">アプリの種類</Typography>
+                            <Typography variant="h4">プロジェクトの種類</Typography>
                             <Select
                                 defaultValue=""
                                 sx={{width: 300}}
@@ -262,13 +261,13 @@ export default function Page({ params }: { params: { teamId : string } }) {
                     </Grid>
                     <Grid item xs={8}>
                         <Stack spacing={2} mt={5}>
-                            <Typography variant="h4">アプリのダウンロードリンク</Typography>
+                            <Typography variant="h4">プロジェクトのダウンロードリンク</Typography>
                             <TextField variant="outlined" inputRef={appDownloadLinkRef} />
                         </Stack>
                     </Grid>
                 </Grid>
                 <Stack spacing={2} mt={5}>
-                    <Typography variant="h4">GitHubリポジトリ</Typography>
+                    <Typography variant="h4">GitHubリポジトリへのリンク</Typography>
                     <Typography>ダウンロードボタンを押下後に遷移する画面に表示されます。</Typography>
                     <TextField variant="outlined" inputRef={appInstallAditionalRef} />
                 </Stack>
