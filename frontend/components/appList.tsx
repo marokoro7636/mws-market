@@ -12,7 +12,7 @@ import { List, ListItem } from "@mui/material";
 const theme = createTheme({
     palette: {
         primary: {
-            main: '#0055df',
+            main: '#003893',
         },
     },
 });
