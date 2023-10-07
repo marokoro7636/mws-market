@@ -353,6 +353,7 @@ class Project:
 
         def convert(data):
             data["team"] = Teams(data["team"]).get_name()
+            data["team_id"] = data["team"]
 
             if "img" in data:
                 data["img"] = Project.gen_img_url(data["img"])

@@ -19,8 +19,8 @@ function NavAppBar() {
     const router = useRouter()
     const appBarStyle = {
         color: "#003893",
-        backgroundColor: "#0055df10",
-        backdropFilter: "blur(8px)"
+        backgroundColor: "#bfd4ef60",
+        backdropFilter: "blur(12px)"
     }
     return (
         <AppBar
