@@ -117,28 +117,28 @@ def delete_project_icon(project_id: str, x_auth_token: Optional[str] = Header(No
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project icon")
     return API_OK()
 
-@router.post("/{project_id}/img", response_model=API_OK)
-def post_project_img(project_id: str, img: UploadFile, x_auth_token: Optional[str] = Header(None)):
-    if not Project.is_exist(project_id):
-        raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
-        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
-    if check_img(img.file) is False:
-        raise StarletteHTTPException(status_code=400, detail="Invalid image")
-    try:
-        Project(project_id).set_img(img.file)
-    except:
-        raise StarletteHTTPException(status_code=500, detail="Failed to post project img")
-    return API_OK()
+# @router.post("/{project_id}/img", response_model=API_OK)
+# def post_project_img(project_id: str, img: UploadFile, x_auth_token: Optional[str] = Header(None)):
+#     if not Project.is_exist(project_id):
+#         raise StarletteHTTPException(status_code=404, detail="Project not found")
+#     if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
+#         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
+#     if check_img(img.file) is False:
+#         raise StarletteHTTPException(status_code=400, detail="Invalid image")
+#     try:
+#         Project(project_id).set_img(img.file)
+#     except:
+#         raise StarletteHTTPException(status_code=500, detail="Failed to post project img")
+#     return API_OK()
 
-@router.delete("/{project_id}/img", response_model=API_OK)
-def delete_project_img(project_id: str, x_auth_token: Optional[str] = Header(None)):
-    if not Project.is_exist(project_id):
-        raise StarletteHTTPException(status_code=404, detail="Project not found")
-    if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
-        raise StarletteHTTPException(status_code=401, detail="Unauthorized")
-    try:
-        Project(project_id).delete_img()
-    except:
-        raise StarletteHTTPException(status_code=500, detail="Failed to delete project img")
-    return API_OK()
+# @router.delete("/{project_id}/img", response_model=API_OK)
+# def delete_project_img(project_id: str, x_auth_token: Optional[str] = Header(None)):
+#     if not Project.is_exist(project_id):
+#         raise StarletteHTTPException(status_code=404, detail="Project not found")
+#     if not isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token):
+#         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
+#     try:
+#         Project(project_id).delete_img()
+#     except:
+#         raise StarletteHTTPException(status_code=500, detail="Failed to delete project img")
+#     return API_OK()

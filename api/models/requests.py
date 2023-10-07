@@ -39,11 +39,8 @@ class ProjectDetails(BaseModel):
             return []
 
     @field_validator("img_screenshot", mode="before")
-    def convert_img_screenshot(cls, d):
-        if isinstance(d, dict):
-            return [ImgScreenshot(id=key, path=value) for key, value in d.items()]
-        else:
-            return []
+    def convert_img_screenshot(cls, l):
+        return [ImgScreenshot(id=str(i), path=value) for i, value in enumerate(l)]
 
     @field_validator("install", mode="before")
     def convert_install(cls, d):
@@ -95,6 +92,7 @@ class ProjectInfo(BaseModel):
     id: str
     name: str
     team: str
+    team_id: Optional[str] = None
     short_description: Optional[str] = None
     description: Optional[str] = None
     youtube: Optional[str] = None

@@ -69,10 +69,11 @@ class Project:
         info = ProjectInfo(id=doc.id, **doc.to_dict())
         if info.icon is not None:
             info.icon = Project.gen_img_url(info.icon)
-        if info.img is not None:
-            info.img = Project.gen_img_url(info.img)
         info.details.img_screenshot = [ImgScreenshot(id=img_screenshot.id, path=Project.gen_img_url(img_screenshot.path)) for img_screenshot in info.details.img_screenshot]
+        if len(info.details.img_screenshot) > 0:
+            info.img = info.details.img_screenshot[0]
         info.previous = Project.get_project(team=info.team, include=False)
+        info.team_id = info.team
         info.team = Teams(info.team).get_name()
         return info
 
@@ -179,29 +180,29 @@ class Project:
             }
         )
 
-    def set_img(self, img):
-        db = firestore.client()
-        old = db.collection("projects").document(self.id).get().to_dict().get("img")
-        if old is not None:
-            Project.drop_img(old)
-        path  = os.path.join(self.id, f"img.{imghdr.what(img)}")
-        Project.save_img(path, img)
-        db.collection("projects").document(self.id).set(
-            {
-                "img": path,
-            }
-        , merge=True)
+    # def set_img(self, img):
+    #     db = firestore.client()
+    #     old = db.collection("projects").document(self.id).get().to_dict().get("img")
+    #     if old is not None:
+    #         Project.drop_img(old)
+    #     path  = os.path.join(self.id, f"img.{imghdr.what(img)}")
+    #     Project.save_img(path, img)
+    #     db.collection("projects").document(self.id).set(
+    #         {
+    #             "img": path,
+    #         }
+    #     , merge=True)
 
-    def delete_img(self):
-        db = firestore.client()
-        data = db.collection("projects").document(self.id).get().to_dict()
-        if "img" in data:
-            Project.drop_img(data["img"])
-        db.collection("projects").document(self.id).update(
-            {
-                "img": firestore.DELETE_FIELD,
-            }
-        )
+    # def delete_img(self):
+    #     db = firestore.client()
+    #     data = db.collection("projects").document(self.id).get().to_dict()
+    #     if "img" in data:
+    #         Project.drop_img(data["img"])
+    #     db.collection("projects").document(self.id).update(
+    #         {
+    #             "img": firestore.DELETE_FIELD,
+    #         }
+    #     )
 
     # project_details
     def get_details(self) -> ProjectDetails:
@@ -220,18 +221,19 @@ class Project:
         Project.save_img(path, img)
         db.collection("projects").document(self.id).update(
             {
-                f"details.img_screenshot.{img_id}": path
+                f"details.img_screenshot": firestore.firestore.ArrayUnion([path])
             }
         )
 
     def delete_img_screenshot(self, img_id: str):
         db = firestore.client()
-        data = db.collection("projects").document(self.id).get().to_dict()
-        if "details" in data and "img_screenshot" in data["details"]:
-            Project.drop_img(data["details"]["img_screenshot"][img_id])
+        img_screenshot = db.collection("projects").document(self.id).get().to_dict().get("details", {}).get("img_screenshot", [])
+        img_id = int(img_id)
+        if len(img_screenshot) > img_id:
+            Project.drop_img(img_screenshot[img_id])
         db.collection("projects").document(self.id).update(
             {
-                f"details.img_screenshot.{img_id}": firestore.DELETE_FIELD,
+                f"details.img_screenshot": firestore.firestore.ArrayRemove([img_screenshot[img_id]]),
             }
         )
 
@@ -407,18 +409,18 @@ class Project:
             st_doc = snapshot.order_by(order).limit(1 + limit * (page - 1)).get()[-1]
             snapshot = snapshot.start_at(st_doc).order_by(order).limit(limit)
 
-        def convert(data):
+        def convert(data: dict):
             data["team_id"] = data["team"]
             data["team"] = Teams(data["team"]).get_name()
 
-            if "img" in data:
-                data["img"] = Project.gen_img_url(data["img"])
             if "icon" in data:
                 data["icon"] = Project.gen_img_url(data["icon"])
+            img_screenshot = data.get("details", {}).get("img_screenshot", [])
+            if len(img_screenshot) > 0:
+                data["img"] = Project.gen_img_url(img_screenshot[0])
 
             return data
-
-        docs =  snapshot.select(ProjectSummary.__annotations__.keys()).get()
+        docs =  snapshot.select(["details.img_screenshot", *ProjectSummary.__annotations__.keys()]).get()
         return [ProjectSummary(id = doc.id, **convert(doc.to_dict())) for doc in docs]
 
     @staticmethod
@@ -437,7 +439,7 @@ class Project:
         blob = bucket.blob(path)
         return blob.generate_signed_url(
             version="v4",
-            expiration=datetime.timedelta(seconds=15),
+            expiration=datetime.timedelta(minutes=60),
             method="GET",
         )
 
