@@ -2,13 +2,7 @@ from fastapi import APIRouter
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from typing import Optional
 from fastapi import Header
-from helper.util import(
-    get_script,
-    get_readme,
-    is_youtube,
-    is_github,
-    make_description
-)
+from helper.util import make_description
 from fastapi import UploadFile
 import datetime
 from helper.auth import isAuthed
