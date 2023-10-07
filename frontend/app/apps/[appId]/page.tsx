@@ -1,5 +1,5 @@
 "use client"
-import React, {useCallback, useRef, useState, useEffect} from 'react'
+import React, { useCallback, useRef, useState, useEffect } from 'react'
 import {
     Box,
     Button, Card, CardContent,
@@ -349,8 +349,10 @@ export default function Page({ params }: { params: { appId: string } }) {
             }
             enqueueSnackbar("プロジェクトの更新が完了しました", { variant: "success" })
             setEditable(false)
+            window.location.reload()
         } catch (e) {
             enqueueSnackbar("通信に失敗しました", { variant: "error" })
+            console.log(e)
         }
     }
 
@@ -435,7 +437,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                         {isEditable ?
                             <>
                                 <Button variant="contained" color="secondary" onClick={onSaveAppInfo}
-                                        sx={{ mr: 1 }}>Save</Button>
+                                    sx={{ mr: 1 }}>Save</Button>
                                 <Button variant="contained" color="error" onClick={onCancelEdit}>Cancel</Button>
                             </> :
                             <Button variant="contained" color="secondary" onClick={onEditAppInfo}>Edit</Button>
@@ -460,8 +462,8 @@ export default function Page({ params }: { params: { appId: string } }) {
                     <Grid item xs={6}>
                         {isEditable ?
                             <TextField size="small" variant="outlined" inputRef={appNameRef}
-                                       inputProps={{ style: { fontSize: 48 } }} sx={{ width: 500 }}
-                                       defaultValue={appInfo.name} /> :
+                                inputProps={{ style: { fontSize: 48 } }} sx={{ width: 500 }}
+                                defaultValue={appInfo.name} /> :
                             <Typography variant="h3">{appInfo.name}</Typography>
                         }
                         <Typography variant="subtitle1">{appInfo.team}</Typography>
@@ -472,9 +474,9 @@ export default function Page({ params }: { params: { appId: string } }) {
                     </Grid>
                     <Grid item xs={3}>
                         {appInfo.details.install.length >= 0 &&
-                            <Button variant="contained" sx={{width: 2 / 3, height: 50}}
-                                    href={appInfo.details.install.length !== 0 ? `/install/${appId}/${installMethodToValue(appInfo.details.install[0].method)}` : "#"}
-                                    disabled={isEditable || appInfo.details.install.length === 0}>ダウンロード</Button>
+                            <Button variant="contained" sx={{ width: 2 / 3, height: 50 }}
+                                href={appInfo.details.install.length !== 0 ? `/install/${appId}/${installMethodToValue(appInfo.details.install[0].method)}` : "#"}
+                                disabled={isEditable || appInfo.details.install.length === 0}>ダウンロード</Button>
                         }
                     </Grid>
                 </Grid>
@@ -482,14 +484,14 @@ export default function Page({ params }: { params: { appId: string } }) {
                     <Typography variant="h4">このプロジェクトについて</Typography>
                     {isEditable ?
                         <TextField fullWidth multiline rows={5} size="small" variant="outlined"
-                                   inputRef={appDescriptionRef}
-                                   defaultValue={appInfo.description} /> :
+                            inputRef={appDescriptionRef}
+                            defaultValue={appInfo.description} /> :
                         <Typography component="div">{appInfo.description}</Typography>
                     }
                 </Stack>
                 <Stack sx={{ mt: 5 }} direction="row" alignItems="center">
                     <ScreenshotCarousel imgList={appInfo.details.imgScreenshot} editable={isEditable}
-                                        onDelete={onDeleteScreenshot} />
+                        onDelete={onDeleteScreenshot} />
                     {isEditable &&
                         <div {...getRootPropsSs()}>
                             <input {...getInputPropsSs()} />
@@ -523,7 +525,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                                 <Stack spacing={2} mt={5}>
                                     <Typography variant="h4">GitHub Releasesのダウンロードリンク</Typography>
                                     <TextField variant="outlined" inputRef={appDownloadLinkRef}
-                                               defaultValue={appInfo.details.install.length !== 0 ? appInfo.details.install[0].info : ""}
+                                        defaultValue={appInfo.details.install.length !== 0 ? appInfo.details.install[0].info : ""}
                                     />
                                 </Stack>
                             </Grid>
@@ -539,16 +541,16 @@ export default function Page({ params }: { params: { appId: string } }) {
                     <Typography variant="h4">紹介動画</Typography>
                     {isEditable ?
                         <TextField size="small" variant="outlined" inputRef={appYoutubeRef}
-                                   defaultValue={appInfo.youtube} sx={{ width: 500 }} /> :
+                            defaultValue={appInfo.youtube} sx={{ width: 500 }} /> :
                         <>
                             {appInfo.youtube &&
                                 <Box sx={{ display: "flex", justifyContent: "center" }}>
                                     <Box sx={{ width: 0.7 }}>
                                         <Box className="video">
                                             <iframe width="560" height="315" src={convertYoutubeLink(appInfo.youtube)}
-                                                    title="YouTube video player" frameBorder="0"
-                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                                    allowFullScreen></iframe>
+                                                title="YouTube video player" frameBorder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                allowFullScreen></iframe>
                                         </Box>
                                     </Box>
                                 </Box>
@@ -562,22 +564,22 @@ export default function Page({ params }: { params: { appId: string } }) {
                         <Typography variant="h4">レビュー・コメント</Typography>
                         {
                             data.review.map((item, i) => {
-                                    if (item.title === null || item.title === "") {
-                                        return <></>
-                                    }
-                                    return (
-                                        <Card sx={{ bgcolor: "#e8e8e8" }}>
-                                            <CardContent>
-                                                <Stack>
-                                                    <Typography variant="h5">{item.title}</Typography>
-                                                    {/* <Typography variant="body2" color="text.secondary">{reviewerName.length > 0 ? reviewerName[i] : "Anonymous"}</Typography> */}
-                                                    <Rating readOnly value={item.rating} />
-                                                    <Typography>{item.content}</Typography>
-                                                </Stack>
-                                            </CardContent>
-                                        </Card>
-                                    )
+                                if (item.title === null || item.title === "") {
+                                    return <></>
                                 }
+                                return (
+                                    <Card sx={{ bgcolor: "#e8e8e8" }}>
+                                        <CardContent>
+                                            <Stack>
+                                                <Typography variant="h5">{item.title}</Typography>
+                                                {/* <Typography variant="body2" color="text.secondary">{reviewerName.length > 0 ? reviewerName[i] : "Anonymous"}</Typography> */}
+                                                <Rating readOnly value={item.rating} />
+                                                <Typography>{item.content}</Typography>
+                                            </Stack>
+                                        </CardContent>
+                                    </Card>
+                                )
+                            }
                             )
                         }
                         {status === "authenticated" &&
