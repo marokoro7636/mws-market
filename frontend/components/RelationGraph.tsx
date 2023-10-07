@@ -46,8 +46,7 @@ function RelationGraph(teams: RelationGraphProps) {
             }
         }
     }
-
-    console.log(elements)
+    
     let cyRef: any = null
 
     return (
