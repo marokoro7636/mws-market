@@ -401,6 +401,8 @@ export default function Page({ params }: { params: { appId: string } }) {
                 rating: rating
             })
         })
+        enqueueSnackbar("レビューが投稿されました", { variant: "success" })
+        window.location.reload()
     }
 
     if (data === null) {
@@ -555,7 +557,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                                             <CardContent>
                                                 <Stack>
                                                     <Typography variant="h5">{item.title}</Typography>
-                                                    <Typography variant="body2" color="text.secondary">{reviewerName.length > 0 ? reviewerName[i] : "Anonymous"}</Typography>
+                                                    {/* <Typography variant="body2" color="text.secondary">{reviewerName.length > 0 ? reviewerName[i] : "Anonymous"}</Typography> */}
                                                     <Rating readOnly value={item.rating} />
                                                     <Typography>{item.content}</Typography>
                                                 </Stack>
