@@ -4,7 +4,7 @@ import IconButton from '@mui/material/IconButton';
 import Avatar from '@mui/material/Avatar';
 import { useRouter } from 'next/navigation'
 import { useSession } from "next-auth/react"
-import { CircularProgress } from '@mui/material';
+import { Skeleton } from '@mui/material';
 import { signOut } from 'next-auth/react';
 
 
@@ -21,7 +21,7 @@ export const MypageButton = () => {
         </IconButton>)
 
     const LoadingAvator = (
-        <CircularProgress sx={{ p: 0 }} />
+        <Skeleton variant="circular" width={40} height={40}/>
     )
 
     if (status === "loading") {

@@ -112,12 +112,22 @@ const AppList = () => {
 
     useEffect(() => {
         updateView()
-    }, [selectedYear, data])
+    }, [selectedYear, data, updateView])
 
     if (data === null) {
-        return <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <CircularProgress />
-        </div>
+        return <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%'
+        }}>
+            <ThemeProvider theme={theme}>
+                <CircularProgress
+                    size={75}
+                    disableShrink
+                />
+            </ThemeProvider>
+        </Box>
     }
 
     const listStyle = { display: 'flex', flexWrap: 'wrap', width: '100%' }
@@ -129,7 +139,7 @@ const AppList = () => {
                 <List sx={listStyle}>
                     {Array.from(years).sort().map((item) => {
                         console.log(years, selectedYear)
-                        return <ListItem sx={listItemStyle}>
+                        return <ListItem sx={listItemStyle} key={item}>
                             <ChipButton defaultSelected={true} label={`${item}年`} onChange={(e) => {
                                 if (e) {
                                     selectedYear.add(item)

@@ -30,9 +30,11 @@ function NavAppBar() {
         >
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
-                    <ButtonBase onClick={() => {
-                        router.push("/")
-                    }}>
+                    <ButtonBase
+                        disableRipple
+                        onClick={() => {
+                            router.push("/")
+                        }}>
                         <Avatar src='/icon256.png' sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }}></Avatar>
 
                         <Typography
@@ -59,9 +61,11 @@ function NavAppBar() {
 
                     </Box>
 
-                    <ButtonBase onClick={() => {
-                        router.push("/")
-                    }}>
+                    <ButtonBase
+                        disableRipple
+                        onClick={() => {
+                            router.push("/")
+                        }}>
                         <Avatar src='/icon256.png' sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} ></Avatar>
                         <Typography
                             variant="h5"
