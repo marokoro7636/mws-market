@@ -85,7 +85,7 @@ export default function Page() {
             })
     }
 
-    useEffect(updateTeamInfo, [status, searchParams])
+    useEffect(updateTeamInfo, [status, searchParams, _session, router])
 
     if (status !== "authenticated") {
         return <AuthGuard enabled={true} />

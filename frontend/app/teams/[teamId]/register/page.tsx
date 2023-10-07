@@ -78,7 +78,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
         }
 
         setAppIcon({ url: url, img: acceptedFiles[0] })
-    }, [appIcon])
+    }, [iconConfig.height, iconConfig.width])
 
     const onDropSs = useCallback(async (acceptedFiles: File[]) => {
         if (acceptedFiles[0].type !== "image/png" && acceptedFiles[0].type !== "image/jpeg") {
@@ -94,7 +94,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
         }
 
         setAppScreenshot([...appScreenshot, { url: url, img: acceptedFiles[0] }])
-    }, [appScreenshot])
+    }, [appScreenshot, screenshotConfig.height, screenshotConfig.width])
 
     const { getRootProps: getRootPropsIcon, getInputProps: getInputPropsIcon } = useDropzone({ onDrop: onDropIcon })
     const { getRootProps: getRootPropsSs, getInputProps: getInputPropsSs, open } = useDropzone({ onDrop: onDropSs, noDrag: true, noClick: true })
@@ -215,8 +215,8 @@ export default function Page({ params }: { params: { teamId : string } }) {
                             <input {...getInputPropsIcon()} />
                             <Box sx={{ position: "relative" }}>
                                 {appIcon ?
-                                    <img src={appIcon.url} alt="icon"
-                                         style={{width: iconConfig.width, height: iconConfig.height}}/> :
+                                    <Box component="img" src={appIcon.url} alt="icon"
+                                         width={iconConfig.width} height={iconConfig.height}/> :
                                     <Box sx={{width: iconConfig.width, height: iconConfig.height}}></Box>
                                 }
                                 <Box sx={{ bgcolor: "#cccccc", opacity: 0.7, width: iconConfig.width, height: iconConfig.height, position: "absolute", top: 0, display: "flex", justifyContent: "center", alignItems: "center" }}>
