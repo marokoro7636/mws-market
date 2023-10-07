@@ -24,7 +24,9 @@ import { Session } from "next-auth";
 import { installMethods } from "@/const/const";
 import { useRouter } from "next/navigation";
 import {getIdenticon} from "@/components/StableImages";
+import {convertYoutubeLink, imageSize} from "@/util/util";
 
+// Read and Write
 interface AppInfo {
     id: string,
     name: string,
@@ -47,6 +49,7 @@ interface AppInfo {
     }
 }
 
+// ReadOnly
 type AppInfoData = {
     id: string,
     name: string,
@@ -70,10 +73,31 @@ type AppInfoData = {
         forJob: string
     },
     review: {
-        // TODO
-    }
+        id: string
+        user: string
+        title: string
+        content: string
+        rating: number
+    }[],
     rating: {
-        // TODO
+        total: number
+        count: number
+    }
+    icon: string,
+    img: string,
+    previous: AppSummaryData[]
+}
+
+type AppSummaryData = {
+    id: string,
+    name: string,
+    description: string,
+    youtube: string,
+    team: string
+    team_id: string
+    rating: {
+        total: number,
+        count: number
     }
     icon: string,
     img: string
@@ -117,7 +141,7 @@ export default function Page({ params }: { params: { appId: string } }) {
             team: data.team,
             description: data.description || "説明はまだ追加されていません",
             youtube: data.youtube,
-            icon: data.img ?? getIdenticon(data.id),
+            icon: data.icon ?? getIdenticon(data.id),
             details: {
                 imgScreenshot: data.details?.img_screenshot.map((item) => item.path) ?? [],
                 requiredSpec: data.details?.required_spec ?? [],
@@ -167,27 +191,6 @@ export default function Page({ params }: { params: { appId: string } }) {
                 })
         }
     }, [session, appId, status])
-
-    const imageSize = async (url: string): Promise<{ width: number, height: number }> => {
-        return new Promise((resolve, reject) => {
-            const img = new Image()
-
-            img.onload = () => {
-                const size = {
-                    width: img.naturalWidth,
-                    height: img.naturalHeight,
-                }
-
-                resolve(size)
-            }
-
-            img.onerror = (error) => {
-                reject(error)
-            }
-
-            img.src = url
-        })
-    }
 
     const onDropIcon = useCallback(async (acceptedFiles: File[]) => {
         if (acceptedFiles[0].type !== "image/png" && acceptedFiles[0].type !== "image/jpeg") {
@@ -361,9 +364,8 @@ export default function Page({ params }: { params: { appId: string } }) {
         }
     }
 
-    const convertYoutubeLink = (link: string): string => {
-        const youtubeId = link.split("/").slice(-1)[0]
-        return `https://www.youtube.com/embed/${youtubeId}`
+    const onSendReview = () => {
+
     }
 
     if (data === null) {
@@ -411,7 +413,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                             <Typography variant="h3">{appInfo.name}</Typography>
                         }
                         <Typography variant="subtitle1">{appInfo.team}</Typography>
-                        <Rating readOnly value={3} size="small" sx={{ mt: 2 }} />
+                        <Rating readOnly value={ data ? data.rating.total / data.rating.count : 0 } size="small" sx={{ mt: 2 }} />
                     </Grid>
                     <Grid item xs={3}>
                         {appInfo.details.install.length >= 0 &&
@@ -502,6 +504,12 @@ export default function Page({ params }: { params: { appId: string } }) {
 
                     }
                 </Stack>
+                {(!isEditable && status === "authenticated") &&
+                    <Stack spacing={2} mt={5}>
+                        <Typography variant="h4">レビュー・コメント</Typography>
+
+                    </Stack>
+                }
             </Container>
         </>
     );
