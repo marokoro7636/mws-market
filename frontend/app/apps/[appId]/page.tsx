@@ -2,7 +2,7 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react'
 import {
     Box,
-    Button,
+    Button, Card, CardContent,
     Container,
     Grid,
     IconButton,
@@ -23,8 +23,8 @@ import { useSession } from "next-auth/react";
 import { Session } from "next-auth";
 import { installMethods } from "@/const/const";
 import { useRouter } from "next/navigation";
-import {getIdenticon} from "@/components/StableImages";
-import {convertYoutubeLink, imageSize} from "@/util/util";
+import { getIdenticon } from "@/components/StableImages";
+import { convertYoutubeLink, imageSize } from "@/util/util";
 
 // Read and Write
 interface AppInfo {
@@ -189,7 +189,7 @@ export default function Page({ params }: { params: { appId: string } }) {
 
     useEffect(() => {
         if (status === "authenticated") {
-            (async() => {
+            (async () => {
                 const fetchData = await fetch(`/api/v0/projects/${appId}`, {
                     headers: {
                         "x-auth-token": session.access_token as string
@@ -201,15 +201,16 @@ export default function Page({ params }: { params: { appId: string } }) {
                         setAppInfo(initAppInfo(data))
                         return data
                     })
-                for (const reviewer of fetchData.review) {
-                    await fetch(`/api/v0/users/${reviewer.user}`, {
-                        headers: {
-                            "x-auth-token": session.access_token as string
-                        }
-                    })
-                        .then((response) => response.json())
-                        .then((user: User) => { if (user.name) setReviewerName([...reviewerName, user.name]) })
-                }
+                // レビュアーを取ってくる処理
+                // for (const reviewer of fetchData.review) {
+                //     await fetch(`/api/v0/users/${reviewer.user}`, {
+                //         headers: {
+                //             "x-auth-token": session.access_token as string
+                //         }
+                //     })
+                //         .then((response) => response.json())
+                //         .then((user: User) => { if (user.name) setReviewerName([...reviewerName, user.name]) })
+                // }
             })()
         }
     }, [session, appId, status])
@@ -401,6 +402,8 @@ export default function Page({ params }: { params: { appId: string } }) {
                 rating: rating
             })
         })
+        enqueueSnackbar("レビューが投稿されました", { variant: "success" })
+        window.location.reload()
     }
 
     if (data === null) {
@@ -449,8 +452,8 @@ export default function Page({ params }: { params: { appId: string } }) {
                         }
                         <Typography variant="subtitle1">{appInfo.team}</Typography>
                         <Stack spacing={0.5} direction="row" sx={{ mt: 2 }}>
-                            <Rating readOnly value={ data ? data.rating.total / data.rating.count : 0 } />
-                            { data && <Typography>({data.rating.count})</Typography> }
+                            <Rating readOnly value={data ? data.rating.total / data.rating.count : 0} />
+                            {data && <Typography>({data.rating.count})</Typography>}
                         </Stack>
                     </Grid>
                     <Grid item xs={3}>
@@ -547,24 +550,35 @@ export default function Page({ params }: { params: { appId: string } }) {
                         <Typography variant="h4">レビュー・コメント</Typography>
                         {
                             data.review.map((item, i) => {
+                                    if (item.title === null || item.title === "") {
+                                        return <></>
+                                    }
                                     return (
-                                        <>
-                                            <Typography variant="h5">{item.title}</Typography>
-                                            <Rating readOnly value={item.rating} size="small" />
-                                            <Typography>{reviewerName.length > 0 ? reviewerName[i] : "Anonymous"}</Typography>
-                                            <Typography>{item.content}</Typography>
-                                        </>
+                                        <Card sx={{ bgcolor: "#e8e8e8" }}>
+                                            <CardContent>
+                                                <Stack>
+                                                    <Typography variant="h5">{item.title}</Typography>
+                                                    {/* <Typography variant="body2" color="text.secondary">{reviewerName.length > 0 ? reviewerName[i] : "Anonymous"}</Typography> */}
+                                                    <Rating readOnly value={item.rating} />
+                                                    <Typography>{item.content}</Typography>
+                                                </Stack>
+                                            </CardContent>
+                                        </Card>
                                     )
                                 }
                             )
                         }
                         {status === "authenticated" &&
-                            <>
-                                <Rating size="large" onChange={(e, newValue) => setRating(newValue)} sx={{ mt: 2 }} />
-                                <TextField size="small" variant="outlined" inputRef={reviewTitleRef} sx={{width: 2/3}} />
+                            <Stack>
+                                <Typography variant="h5" sx={{ mt: 3 }}>レビューを投稿</Typography>
+                                <Typography variant="h6" sx={{ mt: 2 }}>評価</Typography>
+                                <Rating size="large" onChange={(e, newValue) => setRating(newValue)} sx={{ width: 100 }} />
+                                <Typography variant="h6" sx={{ mt: 2 }}>タイトル</Typography>
+                                <TextField size="small" variant="outlined" inputRef={reviewTitleRef} sx={{ width: 2 / 3 }} />
+                                <Typography variant="h6" sx={{ mt: 2 }}>投稿</Typography>
                                 <TextField multiline rows={5} size="small" variant="outlined" inputRef={reviewContentRef} />
-                                <Button onClick={onSubmitReview}>Submit</Button>
-                            </>
+                                <Button variant="contained" onClick={onSubmitReview} sx={{ mt: 3, width: 200 }}>Submit</Button>
+                            </Stack>
                         }
                     </Stack>
                 }
