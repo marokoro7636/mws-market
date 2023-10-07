@@ -49,10 +49,24 @@ const AppCard = ({ id, name, team, description, rating, icon, img, team_id }: Ap
                             />
                         </Grid>
                         <Grid xs={2} sx={{ pt: 2 }}>
-                            <Typography gutterBottom variant="h5" component="div">
+                            <Typography gutterBottom variant="h5" content="div" sx={{
+                                wordBreak: "break-all",
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                                lineHeight: '2rem',
+                            }} minHeight="calc( 2rem * 2 )" >
                                 {name}
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
+
+                            <Typography variant="body2" color="text.secondary" sx={{
+                                wordBreak: "break-all",
+                                display: '-webkit-box',
+                                WebkitLineClamp: 1,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                            }}>
                                 {team}
                             </Typography>
                             <Rating value={rating?.total / rating?.count} size="small" sx={{ mt: 1 }} readOnly precision={0.25} /> ({rating?.count})
