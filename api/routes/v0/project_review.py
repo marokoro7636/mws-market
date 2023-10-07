@@ -20,7 +20,8 @@ def post_project_review(project_id: str, review: ProjectReviewRequest, x_auth_to
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).add_review(review)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to post project review")
     return API_OK()
 
@@ -35,6 +36,7 @@ def delete_project_review(project_id: str, review_id: str, x_auth_token: Optiona
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).delete_review(review_id)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project review")
     return API_OK()

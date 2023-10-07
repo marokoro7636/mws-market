@@ -1,25 +1,25 @@
 import React, { useState } from 'react';
 import { SxProps } from '@mui/system'
 
+const crypto = require('crypto')
+
+function sha1(str: string) {
+    const hash = crypto.createHash('sha1').update(str, 'binary').digest()
+    return new Uint8Array(hash)
+}
+
 const strHash = (str: string): number => {
-    if (!str || str.length === 0) {
-        str = "gfuEjOmoTyHS0Wy"
-    }
-    let ret = 1 << (Math.max(20 - str.length, 10))
-    console.log(ret)
-    const arr = (new TextEncoder).encode(str)
-    for (const i of Array.from(arr)) {
-        ret = ret * i * i % (1 << (i % 10) + 18) + ret
-        console.log(ret)
-    }
-    return ret
+    const hash = sha1(str)
+    const dataView = new DataView(hash.buffer)
+    return dataView.getUint32(hash[0] % 4 + 5)
 }
 
 const getTrialgleImage = (width: number, height: number, hash: string) => {
     const seed = strHash(hash)
     const color = seed % 99
-    const gap = ((seed % 8) + 2) * 10
-    return `https://generative-placeholders.glitch.me/image?width=${width/1.5}&height=${height/1.5}&style=triangles&gap=${gap}&colors=${color}`
+    const gap = ((seed) % 13 + 3) * 5
+    console.log(hash, color, gap)
+    return `https://generative-placeholders.glitch.me/image?width=${width / 1.5}&height=${height / 1.5}&style=triangles&gap=${gap}&colors=${color}`
 }
 
 const getIdenticon = (hash: string) => {

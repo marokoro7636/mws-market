@@ -1,10 +1,20 @@
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Grid, Select, MenuItem, } from "@mui/material";
+import { Box, Button, Grid, Select, MenuItem, Typography, createTheme, ThemeProvider } from "@mui/material";
 import AppCard from "@/components/AppCard";
 
 import { CircularProgress } from '@mui/material';
+import ChipButton from './chipButton';
+import { List, ListItem } from "@mui/material";
+
+const theme = createTheme({
+    palette: {
+        primary: {
+            main: '#0055df',
+        },
+    },
+});
 
 type AppSummaryData = {
     id: string,
@@ -18,7 +28,51 @@ type AppSummaryData = {
         count: number
     }
     icon: string,
-    img: string
+    img: string,
+    year: number
+}
+
+class BitSet<T> {
+    private original: Set<T>;
+    private bits: Set<T>;
+
+    constructor(init: Set<T> = new Set()) {
+        this.original = init;
+        this.bits = new Set();
+    }
+
+    set(x: T): Set<T> {
+        this.bits.add(x)
+        return new Set(this.bits)
+    }
+
+    reset(x: T): Set<T> {
+        this.bits.delete(x)
+        return new Set(this.bits)
+    }
+
+    get(): Set<T> {
+        return new Set(this.bits)
+    }
+
+    flush(mode: boolean): Set<T> {
+        if (mode) {
+            this.bits = new Set(this.original)
+        } else {
+            this.bits = new Set()
+        }
+        console.log(this, new Set(this.bits))
+        return new Set(this.bits)
+    }
+
+    has(x: T): boolean {
+        return this.bits.has(x)
+    }
+
+}
+
+const deepCopy = (obj: any) => {
+    return JSON.parse(JSON.stringify(obj))
 }
 
 const AppList = () => {
@@ -26,12 +80,38 @@ const AppList = () => {
     // https://qiita.com/masasami/items/8a9ff0cabcaa2ce54aee
 
     const [data, setData] = useState<AppSummaryData[] | null>(null)
+    const [viewData, setViewData] = useState<AppSummaryData[] | null>(null)
+    const [selectedYear, setSelectedYear] = useState<Set<number>>(new Set())
+    const [years, setYears] = useState<Set<number>>(new Set())
 
     useEffect(() => {
-        fetch('/api/v0/projects/')
+        fetch('/api/v0/projects/?limit=100')
             .then((response) => response.json())
-            .then((data) => setData(data))
+            .then((data) => {
+                setData(data)
+                if (!data) {
+                    return
+                }
+                const years = new Set<number>(data.map((item: AppSummaryData) => item.year))
+                setYears(years)
+                setSelectedYear(new Set(deepCopy(Array.from(years))))
+            })
     }, [])
+
+    const updateView = () => {
+        let selected = data
+        if (selected === null) {
+            return
+        }
+        if (selectedYear !== null) {
+            selected = selected.filter((item) => selectedYear.has(item.year))
+        }
+        setViewData(selected)
+    }
+
+    useEffect(() => {
+        updateView()
+    }, [selectedYear, data])
 
     if (data === null) {
         return <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -39,53 +119,33 @@ const AppList = () => {
         </div>
     }
 
+    const listStyle = { display: 'flex', flexWrap: 'wrap', width: '100%' }
+    const listItemStyle = { width: 'auto', ml: 1 }
+
     return (
         <Box sx={{ mt: 2 }}>
-            <Box>
-                <Grid container spacing={2}
-                    columns={{ xs: 12 }}
-                    sx={{ height: "2rem", m: 3 }}>
-                    {/* <Grid xs={2}>
-                        <Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            label="Age"
-
-                            inputProps={{
-                                name: 'age',
-                                id: 'age-native-simple',
-                            }}
-                        >
-                            <MenuItem value={10}>Ten</MenuItem>
-                            <MenuItem value={20}>Twenty</MenuItem>
-                            <MenuItem value={30}>Thirty</MenuItem>
-                        </Select>
-                    </Grid>
-                    <Grid xs={2}>
-                        <Button variant="outlined">新規作成</Button>
-                    </Grid>
-                    <Grid xs={2}>
-                        <Button variant="outlined">新規作成</Button>
-                    </Grid>
-                    <Grid xs={2}>
-                        <Button variant="outlined">新規作成</Button>
-                    </Grid> */}
-                    {/* <Grid xs={4}>
-                        読み込みサイズ
-                        <RadioGroup
-                            row
-                            defaultValue="6"
-                        >
-                            <FormControlLabel value="6" control={<Radio />} label="6" />
-                            <FormControlLabel value="12" control={<Radio />} label="12" />
-                            <FormControlLabel value="24" control={<Radio />} label="24" />
-                        </RadioGroup>
-                    </Grid> */}
-                </Grid>
-            </Box>
+            <ThemeProvider theme={theme}>
+                <List sx={listStyle}>
+                    {Array.from(years).sort().map((item) => {
+                        console.log(years, selectedYear)
+                        return <ListItem sx={listItemStyle}>
+                            <ChipButton defaultSelected={true} label={`${item}年`} onChange={(e) => {
+                                if (e) {
+                                    selectedYear.add(item)
+                                    setSelectedYear(new Set(selectedYear))
+                                } else {
+                                    selectedYear.delete(item)
+                                    setSelectedYear(new Set(selectedYear))
+                                }
+                                updateView()
+                            }} />
+                        </ListItem>
+                    })}
+                </List>
+            </ThemeProvider>
             <Grid container spacing={2} rowSpacing={5}>
                 {
-                    data.map((item, i) => (
+                    viewData?.map((item, i) => (
                         <Grid item xs={4} key={i}>
                             <AppCard id={item.id} name={item.name} team={item.team} description={item.description} rating={item.rating} icon={item.icon} img={item.img} team_id={item.team_id} />
                         </Grid>

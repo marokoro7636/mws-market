@@ -114,6 +114,17 @@ class ProjectInfo(BaseModel):
         else:
             return []
 
+class ProjectSummary(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    rating: Rating
+    youtube: Optional[str] = None
+    team: Optional[str] = None
+    team_id: Optional[str] = None
+    icon: Optional[str] = None
+    img: Optional[str] = None
+    year: Optional[int] = None
 
 class TeamMember(BaseModel):
     id: str

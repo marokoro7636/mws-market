@@ -23,6 +23,7 @@ def get_user(user_id: str, x_auth_token: Optional[str] = Header(None)):
 
     try:
         user= Users(user_id).get()
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to get Users")
     return user
