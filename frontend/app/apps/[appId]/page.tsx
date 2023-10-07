@@ -23,6 +23,7 @@ import { useSession } from "next-auth/react";
 import { Session } from "next-auth";
 import { installMethods } from "@/const/const";
 import { useRouter } from "next/navigation";
+import {getIdenticon} from "@/components/StableImages";
 
 interface AppInfo {
     id: string,
@@ -116,7 +117,7 @@ export default function Page({ params }: { params: { appId: string } }) {
             team: data.team,
             description: data.description || "説明はまだ追加されていません",
             youtube: data.youtube,
-            icon: data.img ?? "https://placehold.jp/4380E0/ffffff/180x180.png?text=no%20image",
+            icon: data.img ?? getIdenticon(data.id),
             details: {
                 imgScreenshot: data.details?.img_screenshot.map((item) => item.path) ?? [],
                 requiredSpec: data.details?.required_spec ?? [],

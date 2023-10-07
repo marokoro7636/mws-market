@@ -99,4 +99,6 @@ const StableImgCardMedia = ({ image, width, height, hash }: StableImgCardMediaPr
 export {
     StableAvatar,
     StableImgCardMedia,
+    strHash,
+    getIdenticon,
 }

@@ -220,7 +220,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
                                          width={iconConfig.width} height={iconConfig.height}/> :
                                     <Box sx={{width: iconConfig.width, height: iconConfig.height}}></Box>
                                 }
-                                <Box sx={{ bgcolor: "#cccccc", opacity: 0.7, width: iconConfig.width, height: iconConfig.height, position: "absolute", top: 0, display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                <Box sx={{ bgcolor: "#b3bac1", opacity: 0.7, width: iconConfig.width, height: iconConfig.height, position: "absolute", top: 0, display: "flex", justifyContent: "center", alignItems: "center" }}>
                                     <Box sx={{ textAlign: "center" }}>アイコン画像を<br />ドロップ<br />{`(${iconConfig.width}x${iconConfig.height})`}</Box>
                                 </Box>
                             </Box>
