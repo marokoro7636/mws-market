@@ -135,6 +135,9 @@ class Project:
 
     def set_icon(self, img):
         db = firestore.client()
+        old = db.collection("projects").document(self.id).get().to_dict().get("icon")
+        if old is not None:
+            Project.drop_img(old)
         path  = os.path.join(self.id, f"icon.{imghdr.what(img)}")
         Project.save_img(path, img)
         db.collection("projects").document(self.id).set(
@@ -157,6 +160,9 @@ class Project:
 
     def set_img(self, img):
         db = firestore.client()
+        old = db.collection("projects").document(self.id).get().to_dict().get("img")
+        if old is not None:
+            Project.drop_img(old)
         path  = os.path.join(self.id, f"img.{imghdr.what(img)}")
         Project.save_img(path, img)
         db.collection("projects").document(self.id).set(
