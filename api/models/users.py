@@ -1,6 +1,6 @@
 from firebase_admin import firestore
 from helper.util import sha1_hash, make_secret
-from helper.sanitize import sanitizing_by_html, sanitizing_str
+from helper.sanitize import sanitizing_user_id
 import datetime
 from models.requests import(
     User,
@@ -13,8 +13,7 @@ class Users:
 
     @staticmethod
     def is_exist(user_id: str):
-        user_id = sanitizing_by_html(user_id)
-        if sanitizing_str(user_id, 40):
+        if sanitizing_user_id(user_id):
             db = firestore.client()
             doc = db.collection("users").document(user_id).get()
             if doc.exists:

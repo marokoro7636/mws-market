@@ -1,6 +1,6 @@
 from firebase_admin import firestore
 from helper.util import sha1_hash
-from helper.sanitize import sanitizing_id, sanitizing_by_html, sanitizing_str, sanitizing_int
+from helper.sanitize import sanitizing_sha1, sanitizing_by_html, sanitizing_str, sanitizing_int
 import shutil
 from typing import Optional
 import tempfile
@@ -52,7 +52,7 @@ class Project:
 
     @staticmethod
     def is_exist(id: str) -> bool:
-        if sanitizing_id(id):
+        if sanitizing_sha1(id):
             db = firestore.client()
             doc = db.collection("projects").document(id).get()
             if doc.exists:
