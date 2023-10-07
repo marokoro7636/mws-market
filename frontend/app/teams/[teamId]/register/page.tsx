@@ -8,6 +8,7 @@ import AuthGuard from "@/components/AuthGuard";
 import {Session} from "next-auth";
 import {useRouter} from "next/navigation";
 import {enqueueSnackbar, SnackbarProvider} from "notistack";
+import {installMethods} from "@/const/const";
 
 type Img = {
     url: string,
@@ -39,6 +40,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
     const appYoutubeRef = useRef<HTMLInputElement>()
     const appDownloadLinkRef = useRef<HTMLInputElement>()
     const appInstallMethodRef = useRef<HTMLInputElement>()
+    const appInstallAditionalRef = useRef<HTMLInputElement>()
 
     const [appIcon, setAppIcon] = useState<Img>()
     const [appScreenshot, setAppScreenshot] = useState<Img[]>([])
@@ -140,7 +142,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
                 })
             }
             // Install
-            if (appInstallMethodRef.current?.value !== "" || appDownloadLinkRef.current?.value !== "") {
+            if (appInstallMethodRef.current?.value !== "" || appDownloadLinkRef.current?.value !== "" || appInstallAditionalRef.current?.value !== "") {
                 await fetch(`/api/v0/projects/${projectId}/details/install`, {
                     method: "post",
                     headers: {
@@ -151,7 +153,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
                     body: JSON.stringify({
                         method: appInstallMethodRef.current?.value,
                         info: appDownloadLinkRef.current?.value,
-                        additional: ""
+                        additional: appInstallAditionalRef.current?.value,
                     })
                 })
             }
@@ -181,6 +183,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
                     })
                 }
             }
+            enqueueSnackbar("プロジェクトの登録が完了しました")
             router.push(`/apps/${projectId}`)
         } catch (e) {
             enqueueSnackbar("通信に失敗しました", { variant: "error" })
@@ -197,8 +200,6 @@ export default function Page({ params }: { params: { teamId : string } }) {
         })
         setAppScreenshot(newScreenshot)
     }
-
-    const installMethods = ["Chrome拡張機能", "実行ファイル", "Webアプリ", "データセット", "その他"]
 
     if (status !== "authenticated") {
         return <AuthGuard enabled={true} />
@@ -219,18 +220,18 @@ export default function Page({ params }: { params: { teamId : string } }) {
                                          width={iconConfig.width} height={iconConfig.height}/> :
                                     <Box sx={{width: iconConfig.width, height: iconConfig.height}}></Box>
                                 }
-                                <Box sx={{ bgcolor: "#cccccc", opacity: 0.7, width: iconConfig.width, height: iconConfig.height, position: "absolute", top: 0, display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                    <Box sx={{ textAlign: "center" }}>アプリアイコン画像を<br />ドロップ<br />{`(${iconConfig.width}x${iconConfig.height})`}</Box>
+                                <Box sx={{ bgcolor: "#b3bac1", opacity: 0.7, width: iconConfig.width, height: iconConfig.height, position: "absolute", top: 0, display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    <Box sx={{ textAlign: "center" }}>アイコン画像を<br />ドロップ<br />{`(${iconConfig.width}x${iconConfig.height})`}</Box>
                                 </Box>
                             </Box>
                         </div>
                     </Grid>
                     <Grid item xs={6}>
-                        <Typography variant="h4">アプリ名</Typography>
+                        <Typography variant="h4">プロジェクト名</Typography>
                         <TextField variant="outlined" inputRef={appNameRef}
                                    inputProps={{ style: { fontSize: 48 } }} sx={{ width: 500, mt: 2 }}
                                    onChange={appNameChange} error={appNameError}
-                                   helperText={appNameError && "アプリ名を入力してください"}
+                                   helperText={appNameError && "プロジェクト名を入力してください"}
                         />
                     </Grid>
                     <Grid item xs={3}>
@@ -239,14 +240,14 @@ export default function Page({ params }: { params: { teamId : string } }) {
                     </Grid>
                 </Grid>
                 <Stack spacing={2} mt={5}>
-                    <Typography variant="h4">アプリの説明</Typography>
+                    <Typography variant="h4">プロジェクトの説明</Typography>
                     <TextField fullWidth multiline rows={5} variant="outlined"
                                inputRef={appDescriptionRef} />
                 </Stack>
                 <Grid container>
                     <Grid item xs={4}>
                         <Stack spacing={2} mt={5}>
-                            <Typography variant="h4">アプリの種類</Typography>
+                            <Typography variant="h4">プロジェクトの種類</Typography>
                             <Select
                                 defaultValue=""
                                 sx={{width: 300}}
@@ -260,11 +261,16 @@ export default function Page({ params }: { params: { teamId : string } }) {
                     </Grid>
                     <Grid item xs={8}>
                         <Stack spacing={2} mt={5}>
-                            <Typography variant="h4">アプリのダウンロードリンク</Typography>
+                            <Typography variant="h4">プロジェクトのダウンロードリンク</Typography>
                             <TextField variant="outlined" inputRef={appDownloadLinkRef} />
                         </Stack>
                     </Grid>
                 </Grid>
+                <Stack spacing={2} mt={5}>
+                    <Typography variant="h4">GitHubリポジトリへのリンク</Typography>
+                    <Typography>ダウンロードボタンを押下後に遷移する画面に表示されます。</Typography>
+                    <TextField variant="outlined" inputRef={appInstallAditionalRef} />
+                </Stack>
                 <Stack spacing={2} mt={5}>
                     <Typography variant="h4">スクリーンショット({`${screenshotConfig.width}x${screenshotConfig.height}`})</Typography>
                     <div {...getRootPropsSs()}>

@@ -23,6 +23,7 @@ import { useSession } from "next-auth/react";
 import { Session } from "next-auth";
 import { installMethods } from "@/const/const";
 import { useRouter } from "next/navigation";
+import {getIdenticon} from "@/components/StableImages";
 
 interface AppInfo {
     id: string,
@@ -116,7 +117,7 @@ export default function Page({ params }: { params: { appId: string } }) {
             team: data.team,
             description: data.description || "説明はまだ追加されていません",
             youtube: data.youtube,
-            icon: data.img ?? "https://placehold.jp/4380E0/ffffff/180x180.png?text=no%20image",
+            icon: data.img ?? getIdenticon(data.id),
             details: {
                 imgScreenshot: data.details?.img_screenshot.map((item) => item.path) ?? [],
                 requiredSpec: data.details?.required_spec ?? [],
@@ -134,6 +135,7 @@ export default function Page({ params }: { params: { appId: string } }) {
     const appYoutubeRef = useRef<HTMLInputElement>()
     const appDownloadLinkRef = useRef<HTMLInputElement>()
     const appInstallMethodRef = useRef<HTMLInputElement>()
+    const appInstallAditionalRef = useRef<HTMLInputElement>()
 
     const [isEditable, setEditable] = useState<boolean>(false)
     const [appInfo, setAppInfo] = useState<AppInfo>(NullAppData)
@@ -228,7 +230,7 @@ export default function Page({ params }: { params: { appId: string } }) {
 
     const onSaveAppInfo = async () => {
         if (appNameRef.current?.value === "") {
-            enqueueSnackbar("アプリ名を入力してください", { variant: "error" })
+            enqueueSnackbar("プロジェクト名を入力してください", { variant: "error" })
             return
         }
         try {
@@ -263,7 +265,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                 setAppInfo({ ...appInfo, youtube: (appYoutubeRef.current?.value as string) })
             }
             // Install
-            if (appInstallMethodRef.current?.value !== "" || appDownloadLinkRef.current?.value !== "") {
+            if (appInstallMethodRef.current?.value !== "" || appDownloadLinkRef.current?.value !== "" || appInstallAditionalRef.current?.value !== "") {
                 if (data?.details.install) {
                     await fetch(`/api/v0/projects/${appId}/details/install/${data?.details.install[0].id}`, {
                         method: "delete",
@@ -282,7 +284,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                     body: JSON.stringify({
                         method: appInstallMethodRef.current?.value,
                         info: appDownloadLinkRef.current?.value,
-                        additional: ""
+                        additional: appInstallAditionalRef.current?.value
                     })
                 })
             }
@@ -319,7 +321,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                     }
                 })
             }
-            enqueueSnackbar("アプリの更新が完了しました", { variant: "success" })
+            enqueueSnackbar("プロジェクトの更新が完了しました", { variant: "success" })
             setEditable(false)
         } catch (e) {
             enqueueSnackbar("通信に失敗しました", { variant: "error" })
@@ -422,7 +424,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                     </Grid>
                 </Grid>
                 <Stack spacing={2} mt={5}>
-                    <Typography variant="h4">このアプリについて</Typography>
+                    <Typography variant="h4">このプロジェクトについて</Typography>
                     {isEditable ?
                         <TextField fullWidth multiline rows={5} size="small" variant="outlined"
                             inputRef={appDescriptionRef}
@@ -446,30 +448,37 @@ export default function Page({ params }: { params: { appId: string } }) {
                     <Box sx={{ textAlign: "center" }}>スクリーンショットのサイズは{`${screenshotConfig.width}x${screenshotConfig.height}`}にしてください</Box>
                 }
                 {isEditable &&
-                    <Grid container>
-                        <Grid item xs={4}>
-                            <Stack spacing={2} mt={5}>
-                                <Typography variant="h4">アプリの種類</Typography>
-                                <Select
-                                    defaultValue={appInfo.details.install.length !== 0 ? appInfo.details.install[0].method : ""}
-                                    sx={{ width: 300 }}
-                                    inputRef={appInstallMethodRef}
-                                >
-                                    {
-                                        installMethods.map((item, i) => <MenuItem value={item} key={i}>{item}</MenuItem>)
-                                    }
-                                </Select>
-                            </Stack>
+                    <>
+                        <Grid container>
+                            <Grid item xs={4}>
+                                <Stack spacing={2} mt={5}>
+                                    <Typography variant="h4">プロジェクトの種類</Typography>
+                                    <Select
+                                        defaultValue={appInfo.details.install.length !== 0 ? appInfo.details.install[0].method : ""}
+                                        sx={{ width: 300 }}
+                                        inputRef={appInstallMethodRef}
+                                    >
+                                        {
+                                            installMethods.map((item, i) => <MenuItem value={item} key={i}>{item}</MenuItem>)
+                                        }
+                                    </Select>
+                                </Stack>
+                            </Grid>
+                            <Grid item xs={8}>
+                                <Stack spacing={2} mt={5}>
+                                    <Typography variant="h4">GitHub Releasesのダウンロードリンク</Typography>
+                                    <TextField variant="outlined" inputRef={appDownloadLinkRef}
+                                        defaultValue={appInfo.details.install.length !== 0 ? appInfo.details.install[0].info : ""}
+                                    />
+                                </Stack>
+                            </Grid>
                         </Grid>
-                        <Grid item xs={8}>
-                            <Stack spacing={2} mt={5}>
-                                <Typography variant="h4">GitHub Releasesのダウンロードリンク</Typography>
-                                <TextField variant="outlined" inputRef={appDownloadLinkRef}
-                                    defaultValue={appInfo.details.install.length !== 0 ? appInfo.details.install[0].info : ""}
-                                />
-                            </Stack>
-                        </Grid>
-                    </Grid>
+                        <Stack spacing={2} mt={5}>
+                            <Typography variant="h4">GitHubリポジトリへのリンク</Typography>
+                            <Typography>ダウンロードボタンを押下後に遷移する画面に表示されます。</Typography>
+                            <TextField variant="outlined" inputRef={appInstallAditionalRef} />
+                        </Stack>
+                    </>
                 }
                 <Stack spacing={2} mt={5}>
                     <Typography variant="h4">紹介動画</Typography>
