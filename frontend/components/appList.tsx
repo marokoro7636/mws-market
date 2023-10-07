@@ -99,7 +99,18 @@ const AppList = () => {
             })
     }, [])
 
-    const updateView = () => {
+    // const updateView = () => {
+    //     let selected = data
+    //     if (selected === null) {
+    //         return
+    //     }
+    //     if (selectedYear !== null) {
+    //         selected = selected.filter((item) => selectedYear.has(item.year))
+    //     }
+    //     setViewData(selected)
+    // }
+
+    useEffect(() => {
         let selected = data
         if (selected === null) {
             return
@@ -108,11 +119,7 @@ const AppList = () => {
             selected = selected.filter((item) => selectedYear.has(item.year))
         }
         setViewData(selected)
-    }
-
-    useEffect(() => {
-        updateView()
-    }, [selectedYear, data, updateView])
+    }, [selectedYear, data])
 
     if (data === null) {
         return <Box sx={{
@@ -148,7 +155,7 @@ const AppList = () => {
                                     selectedYear.delete(item)
                                     setSelectedYear(new Set(selectedYear))
                                 }
-                                updateView()
+                                // updateView()
                             }} />
                         </ListItem>
                     })}
