@@ -112,6 +112,7 @@ class ProjectSummary(BaseModel):
     team_id: Optional[str] = None
     icon: Optional[str] = None
     img: Optional[str] = None
+    year: Optional[str] = None
 
 class TeamMember(BaseModel):
     id: str

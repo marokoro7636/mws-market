@@ -352,8 +352,10 @@ class Project:
             snapshot = snapshot.start_at(st_doc).order_by(order).limit(limit)
 
         def convert(data):
-            data["team"] = Teams(data["team"]).get_name()
+            team = Teams(data["team"]).get()
+            data["team"] = team["name"]
             data["team_id"] = data["team"]
+            data["year"] = team["year"]
 
             if "img" in data:
                 data["img"] = Project.gen_img_url(data["img"])

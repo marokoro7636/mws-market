@@ -25,7 +25,8 @@ def get_project_description(project_id: str, x_auth_token: Optional[str] = Heade
         raise StarletteHTTPException(status_code=404, detail="Youtube not found")
     try:
         description = make_description(youtube, 400)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to get project description")
     return {"description": description}
 
@@ -41,6 +42,7 @@ def get_project_short_description(project_id: str, x_auth_token: Optional[str] =
         raise StarletteHTTPException(status_code=404, detail="Youtube not found")
     try:
         short_description = make_description(youtube, 100)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to get project short description")
     return {"short_description": short_description}

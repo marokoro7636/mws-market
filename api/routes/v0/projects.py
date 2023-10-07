@@ -34,7 +34,8 @@ def get_projects(limit: int = 10, page: int = 1, order: Optional[str] = None, ye
         raise StarletteHTTPException(status_code=400, detail="Incorrect order")
     try:
         summary = Project.get_project(limit, page, order, year, team)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to get projects")
     return summary
 
@@ -45,7 +46,8 @@ def get_project(project_id: str, x_auth_token: Optional[str] = Header(None)):
     try:
         info = Project(project_id).get_info()
         info.own = isAuthed(Teams(Project(project_id).get_team()).get_members(), x_auth_token)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to get projects")
     return info
 
@@ -59,7 +61,8 @@ def post_project(req: ProjectRequest, x_auth_token: Optional[str] = Header(None)
         raise StarletteHTTPException(status_code=400, detail="Team has project")
     try:
         prj = Project.create(req)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to post project")
     return ProjectSimpleResponse(id=prj.id)
 
@@ -71,7 +74,8 @@ def delete_project(project_id: str, x_auth_token: Optional[str] = Header(None)):
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).delete()
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project")
     return ProjectSimpleResponse(id=project_id)
 

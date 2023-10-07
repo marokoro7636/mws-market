@@ -21,7 +21,8 @@ router = APIRouter()
 def get_teams():
     try:
         teams = Teams.get_teams()
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to get teams")
     return teams
 
@@ -33,7 +34,8 @@ def post_team(req: TeamRequest, x_auth_token: Optional[str] = Header(None)):
         raise StarletteHTTPException(status_code=404, detail="User not found")
     try:
         res = Teams.add_team(req)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to post team")
     return TeamSimpleResponse(id = res.id)
 
@@ -60,7 +62,8 @@ def post_team_name(team_id: str, name: str, x_auth_token: Optional[str] = Header
 
     try:
         Teams(team_id).update_name(name)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to post team name")
     return API_OK()
 
@@ -72,7 +75,8 @@ def post_team_year(team_id: str, year: int, x_auth_token: Optional[str] = Header
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Teams(team_id).update_year(year)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to post team year")
     return API_OK()
 
@@ -84,7 +88,8 @@ def post_team_description(team_id: str, description: str, x_auth_token: Optional
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Teams(team_id).update_description(description)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to post team description")
     return API_OK()
 
@@ -96,7 +101,8 @@ def delete_team_members(team_id: str, member_id: str, x_auth_token: Optional[str
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Teams(team_id).delete_member(member_id)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to delete team members")
     return API_OK()
 
@@ -112,7 +118,8 @@ def post_team_relations(team_id: str, secret: str, x_auth_token: Optional[str] =
         raise StarletteHTTPException(status_code=404, detail="Team not found")
     try:
         Teams(team_id).set_relations(team)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to post team relations")
     return API_OK()
 
@@ -124,7 +131,8 @@ def delete_team_relations(team_id: str, x_auth_token: Optional[str] = Header(Non
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Teams(team_id).delete_relations()
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to delete team relations")
     return API_OK()
 
@@ -135,7 +143,8 @@ def get_team_with_secret(team_secret: str):
         raise StarletteHTTPException(status_code=404, detail="Team not found")
     try:
         data = Teams(id).get()
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to get teams")
     return Team(**data)
 
@@ -152,6 +161,7 @@ def post_team_members(team_secret: str, member_id: str, x_auth_token: Optional[s
 
     try:
         Teams(id).add_member(member_id)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to post team members")
     return API_OK()

@@ -21,7 +21,8 @@ def post_project_name(project_id: str, name: str, x_auth_token: Optional[str] = 
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).set_name(name)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(
             status_code=500, detail="Failed to post project name"
         )
@@ -35,7 +36,8 @@ def post_project_short_description(project_id: str, short_description: str, x_au
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).set_short_description(short_description)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(
             status_code=500, detail="Failed to post project short description"
         )
@@ -49,7 +51,8 @@ def post_project_description(project_id: str, description: str, x_auth_token: Op
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).set_description(description)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(
             status_code=500, detail="Failed to post project description"
         )
@@ -63,7 +66,8 @@ def post_project_youtube(project_id: str, youtube: str, x_auth_token: Optional[s
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).set_youtube(youtube)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to post project youtube")
     return API_OK()
 
@@ -75,7 +79,8 @@ def delete_project_youtube(project_id: str, x_auth_token: Optional[str] = Header
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).delete_youtube()
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project youtube")
     return API_OK()
 
@@ -87,7 +92,8 @@ def post_project_hidden(project_id: str, hidden: bool, x_auth_token: Optional[st
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).set_hidden(hidden)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to post project hidden")
     return API_OK()
 
@@ -101,7 +107,8 @@ def post_project_icon(project_id: str, icon: UploadFile, x_auth_token: Optional[
         raise StarletteHTTPException(status_code=400, detail="Invalid image")
     try:
         Project(project_id).set_icon(icon.file)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to post project icon")
     return API_OK()
 
@@ -113,7 +120,8 @@ def delete_project_icon(project_id: str, x_auth_token: Optional[str] = Header(No
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).delete_icon()
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project icon")
     return API_OK()
 
@@ -127,7 +135,8 @@ def post_project_img(project_id: str, img: UploadFile, x_auth_token: Optional[st
         raise StarletteHTTPException(status_code=400, detail="Invalid image")
     try:
         Project(project_id).set_img(img.file)
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to post project img")
     return API_OK()
 
@@ -139,6 +148,7 @@ def delete_project_img(project_id: str, x_auth_token: Optional[str] = Header(Non
         raise StarletteHTTPException(status_code=401, detail="Unauthorized")
     try:
         Project(project_id).delete_img()
-    except:
+    except Exception as e:
+        print(e)
         raise StarletteHTTPException(status_code=500, detail="Failed to delete project img")
     return API_OK()
