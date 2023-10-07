@@ -18,3 +18,4 @@ black
 openai
 langchain
 youtube-transcript-api
+tiktoken
