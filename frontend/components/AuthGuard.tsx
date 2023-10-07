@@ -26,7 +26,7 @@ const AuthGuard = ({ enabled }: AuthGuardProps) => {
             <div />
         );
     } else {
-        signIn("slack")
+        signIn()
     }
 };
 
