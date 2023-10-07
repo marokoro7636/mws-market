@@ -1,5 +1,5 @@
 "use client"
-import React, { useCallback, useRef, useState, useEffect } from 'react'
+import React, {useCallback, useRef, useState, useEffect} from 'react'
 import {
     Box,
     Button, Card, CardContent,
@@ -412,6 +412,20 @@ export default function Page({ params }: { params: { appId: string } }) {
         </div>
     }
 
+    const installMethodToValue = (installMethod: string): string => {
+        if (installMethod === "Chrome拡張機能") {
+            return "chrome-extension"
+        } else if (installMethod === "実行ファイル") {
+            return "exe"
+        } else if (installMethod === "Webアプリ") {
+            return "web-app"
+        } else if (installMethod === "データセット") {
+            return "dataset"
+        } else {
+            return "other"
+        }
+    }
+
     return (
         <>
             <Container sx={{ mt: 3 }}>
@@ -458,12 +472,10 @@ export default function Page({ params }: { params: { appId: string } }) {
                     </Grid>
                     <Grid item xs={3}>
                         {appInfo.details.install.length >= 0 &&
-                            <Button variant="contained" sx={{ width: 2 / 3, height: 50 }}
-                                    href={appInfo.details.install.length !== 0 ? appInfo.details.install[0].info : "#"}
-                                    onClick={() => { router.push("/") }}
+                            <Button variant="contained" sx={{width: 2 / 3, height: 50}}
+                                    href={appInfo.details.install.length !== 0 ? `/install/${appId}/${installMethodToValue(appInfo.details.install[0].method)}` : "#"}
                                     disabled={isEditable || appInfo.details.install.length === 0}>ダウンロード</Button>
                         }
-                        {/*TODO アプリの種類によってインストール遷移画面を変える*/}
                     </Grid>
                 </Grid>
                 <Stack spacing={2} mt={5}>
