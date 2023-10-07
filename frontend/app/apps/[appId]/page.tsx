@@ -73,14 +73,14 @@ type AppInfoData = {
         forJob: string
     },
     review: {
-        id: string
-        user: string
-        title: string
-        content: string
+        id: string,
+        user: string,
+        title: string,
+        content: string,
         rating: number
     }[],
     rating: {
-        total: number
+        total: number,
         count: number
     }
     icon: string,
@@ -106,6 +106,12 @@ type AppSummaryData = {
 type Img = {
     url: string,
     img: File
+}
+
+type User = {
+    id: string,
+    name: string,
+    team: string[]
 }
 
 const NullAppData = {
@@ -160,6 +166,8 @@ export default function Page({ params }: { params: { appId: string } }) {
     const appDownloadLinkRef = useRef<HTMLInputElement>()
     const appInstallMethodRef = useRef<HTMLInputElement>()
     const appInstallAditionalRef = useRef<HTMLInputElement>()
+    const reviewTitleRef = useRef<HTMLInputElement>()
+    const reviewContentRef = useRef<HTMLInputElement>()
 
     const [isEditable, setEditable] = useState<boolean>(false)
     const [appInfo, setAppInfo] = useState<AppInfo>(NullAppData)
@@ -167,6 +175,8 @@ export default function Page({ params }: { params: { appId: string } }) {
     const [appIcon, setAppIcon] = useState<Img | null>(null)
     const [appScreenshot, setAppScreenshot] = useState<Img[]>([])
     const [deleteImgId, setDeleteImgId] = useState<string[]>([])
+    const [rating, setRating] = useState<number | null>(null)
+    const [reviewerName, setReviewerName] = useState<string[]>([])
 
     useEffect(() => {
         fetch(`/api/v0/projects/${appId}`)
@@ -179,16 +189,28 @@ export default function Page({ params }: { params: { appId: string } }) {
 
     useEffect(() => {
         if (status === "authenticated") {
-            fetch(`/api/v0/projects/${appId}`, {
-                headers: {
-                    "x-auth-token": session.access_token as string
-                }
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    setData(data)
-                    setAppInfo(initAppInfo(data))
+            (async() => {
+                const fetchData = await fetch(`/api/v0/projects/${appId}`, {
+                    headers: {
+                        "x-auth-token": session.access_token as string
+                    }
                 })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        setData(data)
+                        setAppInfo(initAppInfo(data))
+                        return data
+                    })
+                for (const reviewer of fetchData.review) {
+                    await fetch(`/api/v0/users/${reviewer.user}`, {
+                        headers: {
+                            "x-auth-token": session.access_token as string
+                        }
+                    })
+                        .then((response) => response.json())
+                        .then((user: User) => { if (user.name) setReviewerName([...reviewerName, user.name]) })
+                }
+            })()
         }
     }, [session, appId, status])
 
@@ -364,7 +386,7 @@ export default function Page({ params }: { params: { appId: string } }) {
         }
     }
 
-    const onSendReview = () => {
+    const onSubmitReview = () => {
 
     }
 
@@ -383,7 +405,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                         {isEditable ?
                             <>
                                 <Button variant="contained" color="secondary" onClick={onSaveAppInfo}
-                                    sx={{ mr: 1 }}>Save</Button>
+                                        sx={{ mr: 1 }}>Save</Button>
                                 <Button variant="contained" color="error" onClick={onCancelEdit}>Cancel</Button>
                             </> :
                             <Button variant="contained" color="secondary" onClick={onEditAppInfo}>Edit</Button>
@@ -408,19 +430,22 @@ export default function Page({ params }: { params: { appId: string } }) {
                     <Grid item xs={6}>
                         {isEditable ?
                             <TextField size="small" variant="outlined" inputRef={appNameRef}
-                                inputProps={{ style: { fontSize: 48 } }} sx={{ width: 500 }}
-                                defaultValue={appInfo.name} /> :
+                                       inputProps={{ style: { fontSize: 48 } }} sx={{ width: 500 }}
+                                       defaultValue={appInfo.name} /> :
                             <Typography variant="h3">{appInfo.name}</Typography>
                         }
                         <Typography variant="subtitle1">{appInfo.team}</Typography>
-                        <Rating readOnly value={ data ? data.rating.total / data.rating.count : 0 } size="small" sx={{ mt: 2 }} />
+                        <Stack spacing={0.5} direction="row" sx={{ mt: 2 }}>
+                            <Rating readOnly value={ data ? data.rating.total / data.rating.count : 0 } />
+                            { data && <Typography>({data.rating.count})</Typography> }
+                        </Stack>
                     </Grid>
                     <Grid item xs={3}>
                         {appInfo.details.install.length >= 0 &&
                             <Button variant="contained" sx={{ width: 2 / 3, height: 50 }}
-                                href={appInfo.details.install.length !== 0 ? appInfo.details.install[0].info : "#"}
-                                onClick={() => { router.push("/") }}
-                                disabled={isEditable || appInfo.details.install.length === 0}>ダウンロード</Button>
+                                    href={appInfo.details.install.length !== 0 ? appInfo.details.install[0].info : "#"}
+                                    onClick={() => { router.push("/") }}
+                                    disabled={isEditable || appInfo.details.install.length === 0}>ダウンロード</Button>
                         }
                         {/*TODO ボタンをクリックしたらダウンロードをするとともにインストール説明ページに遷移*/}
                     </Grid>
@@ -429,14 +454,14 @@ export default function Page({ params }: { params: { appId: string } }) {
                     <Typography variant="h4">このプロジェクトについて</Typography>
                     {isEditable ?
                         <TextField fullWidth multiline rows={5} size="small" variant="outlined"
-                            inputRef={appDescriptionRef}
-                            defaultValue={appInfo.description} /> :
+                                   inputRef={appDescriptionRef}
+                                   defaultValue={appInfo.description} /> :
                         <Typography component="div">{appInfo.description}</Typography>
                     }
                 </Stack>
                 <Stack sx={{ mt: 5 }} direction="row" alignItems="center">
                     <ScreenshotCarousel imgList={appInfo.details.imgScreenshot} editable={isEditable}
-                        onDelete={onDeleteScreenshot} />
+                                        onDelete={onDeleteScreenshot} />
                     {isEditable &&
                         <div {...getRootPropsSs()}>
                             <input {...getInputPropsSs()} />
@@ -470,7 +495,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                                 <Stack spacing={2} mt={5}>
                                     <Typography variant="h4">GitHub Releasesのダウンロードリンク</Typography>
                                     <TextField variant="outlined" inputRef={appDownloadLinkRef}
-                                        defaultValue={appInfo.details.install.length !== 0 ? appInfo.details.install[0].info : ""}
+                                               defaultValue={appInfo.details.install.length !== 0 ? appInfo.details.install[0].info : ""}
                                     />
                                 </Stack>
                             </Grid>
@@ -486,16 +511,16 @@ export default function Page({ params }: { params: { appId: string } }) {
                     <Typography variant="h4">紹介動画</Typography>
                     {isEditable ?
                         <TextField size="small" variant="outlined" inputRef={appYoutubeRef}
-                            defaultValue={appInfo.youtube} sx={{ width: 500 }} /> :
+                                   defaultValue={appInfo.youtube} sx={{ width: 500 }} /> :
                         <>
                             {appInfo.youtube &&
                                 <Box sx={{ display: "flex", justifyContent: "center" }}>
                                     <Box sx={{ width: 0.7 }}>
                                         <Box className="video">
                                             <iframe width="560" height="315" src={convertYoutubeLink(appInfo.youtube)}
-                                                title="YouTube video player" frameBorder="0"
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                                allowFullScreen></iframe>
+                                                    title="YouTube video player" frameBorder="0"
+                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                    allowFullScreen></iframe>
                                         </Box>
                                     </Box>
                                 </Box>
@@ -504,10 +529,31 @@ export default function Page({ params }: { params: { appId: string } }) {
 
                     }
                 </Stack>
-                {(!isEditable && status === "authenticated") &&
+                {(!isEditable) &&
                     <Stack spacing={2} mt={5}>
                         <Typography variant="h4">レビュー・コメント</Typography>
+                        {
+                            data.review.map((item, i) => {
+                                    return (
+                                        <>
+                                            <Typography variant="h5">{item.title}</Typography>
+                                            <Rating readOnly value={item.rating} size="small" />
+                                            <Typography>{reviewerName.length > 0 ? reviewerName[i] : "Anonymous"}</Typography>
+                                            <Typography>{item.content}</Typography>
+                                        </>
+                                    )
+                                }
 
+                            )
+                        }
+                        {status === "authenticated" &&
+                            <>
+                                <Rating size="large" onChange={(e, newValue) => setRating(newValue)} sx={{ mt: 2 }} />
+                                <TextField size="small" variant="outlined" inputRef={reviewTitleRef} sx={{width: 2/3}} />
+                                <TextField multiline rows={5} size="small" variant="outlined" inputRef={reviewContentRef} />
+                                <Button onClick={onSubmitReview}>Submit</Button>
+                            </>
+                        }
                     </Stack>
                 }
             </Container>
