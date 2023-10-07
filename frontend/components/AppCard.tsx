@@ -16,6 +16,7 @@ interface AppCardProps {
     id: string,
     name: string,
     team: string,
+    team_id: string,
     img: string,
     icon: string,
     description: string
@@ -24,26 +25,27 @@ interface AppCardProps {
         count: number
     }
 }
+
 import { StableAvatar, StableImgCardMedia } from "@/components/StableImages";
 
-const AppCard = ({ id, name, team, description, rating, icon, img }: AppCardProps) => {
+const AppCard = ({ id, name, team, description, rating, icon, img, team_id }: AppCardProps) => {
     return (
         <Card sx={{ maxWidth: 345, "border": "1px solid #0055df10", borderRadius: 4 }} elevation={0}>
             <CardActionArea href={`/apps/${id}`}>
                 <StableImgCardMedia
-                    height="180"
-                    width="180"
+                    height={225}
+                    width={400}
                     image={img}
-                    fallbackImage="https://placehold.jp/4380E0/ffffff/180x180.png?text=no%20image"
+                    hash={id}
                 />
                 <CardContent>
                     <Grid container columns={{ xs: 4 }}>
                         <Grid xs={2} sx={{ p: 1 }}>
                             <StableAvatar
-                                sx={{ width: 100, height: 100 }}
+                                sx={{ width: 100, height: 100, bgcolor: "#2222" }}
                                 src={icon}
                                 variant='rounded'
-                                fallbackSrc="https://placehold.jp/4380E0/ffffff/180x180.png?text=no%20image"
+                                hash={team_id}
                             />
                         </Grid>
                         <Grid xs={2} sx={{ pt: 2 }}>

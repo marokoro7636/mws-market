@@ -109,6 +109,7 @@ class ProjectSummary(BaseModel):
     rating: Rating
     youtube: Optional[str] = None
     team: Optional[str] = None
+    team_id: Optional[str] = None
     icon: Optional[str] = None
     img: Optional[str] = None
 
