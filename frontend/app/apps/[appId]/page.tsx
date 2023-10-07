@@ -386,8 +386,21 @@ export default function Page({ params }: { params: { appId: string } }) {
         }
     }
 
-    const onSubmitReview = () => {
+    const onSubmitReview = async () => {
+        await fetch(`/api/v0/projects/${appId}/review`, {
+            method: "post",
+            headers: {
+                "x-auth-token": session.access_token as string,
+                "Content-Type": "application/json"
 
+            },
+            body: JSON.stringify({
+                user: session.uid,
+                title: reviewTitleRef.current?.value ?? "",
+                content: reviewContentRef.current?.value ?? "",
+                rating: rating
+            })
+        })
     }
 
     if (data === null) {
@@ -447,7 +460,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                                     onClick={() => { router.push("/") }}
                                     disabled={isEditable || appInfo.details.install.length === 0}>ダウンロード</Button>
                         }
-                        {/*TODO ボタンをクリックしたらダウンロードをするとともにインストール説明ページに遷移*/}
+                        {/*TODO アプリの種類によってインストール遷移画面を変える*/}
                     </Grid>
                 </Grid>
                 <Stack spacing={2} mt={5}>
@@ -543,7 +556,6 @@ export default function Page({ params }: { params: { appId: string } }) {
                                         </>
                                     )
                                 }
-
                             )
                         }
                         {status === "authenticated" &&
