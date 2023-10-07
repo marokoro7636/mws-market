@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Grid, Select, MenuItem, Typography, createTheme, ThemeProvider } from "@mui/material";
+import { Box, Select, MenuItem, Typography, Grid } from "@mui/material";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import AppCard from "@/components/AppCard";
 
 import { CircularProgress } from '@mui/material';
