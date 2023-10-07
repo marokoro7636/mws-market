@@ -521,19 +521,17 @@ export default function Page({ params }: { params: { teamId: string } }) {
                     title="Project"
                 />
                 <CardContent>
-                    {
-                        projInfo !== undefined && projInfo !== null ? (
-                            <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                <AppCard
-                                    id={projInfo.id} name={projInfo.name}
-                                    description={projInfo.description} rating={projInfo.rating}
-                                    team={projInfo.team} team_id={teamId}
-                                    icon={projInfo.icon} img={projInfo.img}
-                                />
-                            </div>
+                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        {
+                            projInfo !== undefined && projInfo !== null ? (
+                                    <AppCard
+                                        id={projInfo.id} name={projInfo.name}
+                                        description={projInfo.description} rating={projInfo.rating}
+                                        team={projInfo.team} team_id={teamId}
+                                        icon={projInfo.icon} img={projInfo.img}
+                                    />
+                            ) : (
 
-                        ) : (
-                            <div style={{ display: 'flex', justifyContent: 'center' }}>
                                 <Button
                                     sx={{
                                         bgcolor: "#00389340",
@@ -555,13 +553,9 @@ export default function Page({ params }: { params: { teamId: string } }) {
                                 >
                                     <AddCircleOutlineIcon sx={{ fontSize: 100 }} ></AddCircleOutlineIcon>
                                 </Button>
-
-                            </div>
-                        )
-                    }
-                    {/* <AppCard id={teamInternalInfo.id} name={teamInternalInfo.name} >
-                            
-                        </AppCard> */}
+                            )
+                        }
+                    </Box>
                 </CardContent>
             </Card>
             <Card sx={{ mt: 5, p: 3, "border": "1px solid #0055df50", }} elevation={0}>

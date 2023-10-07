@@ -419,9 +419,19 @@ export default function Page({ params }: { params: { appId: string } }) {
     }
 
     if (data === null) {
-        return <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <CircularProgress />
-        </div>
+        return <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%'
+        }}>
+            <ThemeProvider theme={theme}>
+                <CircularProgress
+                    size={75}
+                    disableShrink
+                />
+            </ThemeProvider>
+        </Box>
     }
 
     const installMethodToValue = (installMethod: string): string => {
@@ -580,7 +590,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                                     return <></>
                                 }
                                 return (
-                                    <Card sx={{ bgcolor: "#e8e8e8" }} elevation={0}>
+                                    <Card sx={{ bgcolor: "#e8e8e8" }} elevation={0} key={i}>
                                         <CardContent>
                                             <Stack>
                                                 <Typography variant="h5">{item.title}</Typography>
@@ -607,9 +617,9 @@ export default function Page({ params }: { params: { appId: string } }) {
                                     display: "flex",
                                     justifyContent: "center"
                                 }}>
-                                <ThemeProvider theme={theme}>
-                                    <Button variant="contained" onClick={onSubmitReview} sx={{ m: 3, width: 200 }} disableElevation>Submit</Button>
-                                </ThemeProvider>
+                                    <ThemeProvider theme={theme}>
+                                        <Button variant="contained" onClick={onSubmitReview} sx={{ m: 3, width: 200 }} disableElevation>Submit</Button>
+                                    </ThemeProvider>
                                 </Box>
                             </Stack>
                         }

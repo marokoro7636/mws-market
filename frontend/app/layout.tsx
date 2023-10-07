@@ -21,13 +21,15 @@ export default function RootLayout({
             <head>
                 <link href="https://fonts.googleapis.com/css2?family=Gemunu+Libre&family=Ubuntu+Mono&display=swap" rel="stylesheet" />
             </head>
-            <body>
-                <div className={inter.className}>
-                    <NextAuthProvider>
-                        <NavAppBar />
-                        {children}
-                    </NextAuthProvider>
-                </div>
+            <body style={{
+                height: "calc(100% - 64px)",
+            }}>
+                {/* <div className={inter.className}> */}
+                <NextAuthProvider>
+                    <NavAppBar />
+                    {children}
+                </NextAuthProvider>
+                {/* </div> */}
             </body>
         </html>
     )

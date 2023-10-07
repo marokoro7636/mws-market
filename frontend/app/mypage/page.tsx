@@ -22,6 +22,7 @@ import { useRouter } from 'next/navigation';
 import { CardActionArea } from '@mui/material';
 
 import { CircularProgress } from '@mui/material';
+import { Box } from '@mui/system';
 
 const theme = createTheme({
     palette: {
@@ -66,9 +67,19 @@ export default function Home() {
     console.log(data)
 
     if (data === null) {
-        return <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <CircularProgress  />
-        </div>
+        return <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%'
+        }}>
+            <ThemeProvider theme={theme}>
+                <CircularProgress
+                    size={75}
+                    disableShrink
+                />
+            </ThemeProvider>
+        </Box>
     }
 
     data.sort((a, b) => {

@@ -99,7 +99,18 @@ const AppList = () => {
             })
     }, [])
 
-    const updateView = () => {
+    // const updateView = () => {
+    //     let selected = data
+    //     if (selected === null) {
+    //         return
+    //     }
+    //     if (selectedYear !== null) {
+    //         selected = selected.filter((item) => selectedYear.has(item.year))
+    //     }
+    //     setViewData(selected)
+    // }
+
+    useEffect(() => {
         let selected = data
         if (selected === null) {
             return
@@ -108,16 +119,22 @@ const AppList = () => {
             selected = selected.filter((item) => selectedYear.has(item.year))
         }
         setViewData(selected)
-    }
-
-    useEffect(() => {
-        updateView()
     }, [selectedYear, data])
 
     if (data === null) {
-        return <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <CircularProgress />
-        </div>
+        return <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%'
+        }}>
+            <ThemeProvider theme={theme}>
+                <CircularProgress
+                    size={75}
+                    disableShrink
+                />
+            </ThemeProvider>
+        </Box>
     }
 
     const listStyle = { display: 'flex', flexWrap: 'wrap', width: '100%' }
@@ -129,7 +146,7 @@ const AppList = () => {
                 <List sx={listStyle}>
                     {Array.from(years).sort().map((item) => {
                         console.log(years, selectedYear)
-                        return <ListItem sx={listItemStyle}>
+                        return <ListItem sx={listItemStyle} key={item}>
                             <ChipButton defaultSelected={true} label={`${item}年`} onChange={(e) => {
                                 if (e) {
                                     selectedYear.add(item)
@@ -138,7 +155,7 @@ const AppList = () => {
                                     selectedYear.delete(item)
                                     setSelectedYear(new Set(selectedYear))
                                 }
-                                updateView()
+                                // updateView()
                             }} />
                         </ListItem>
                     })}
