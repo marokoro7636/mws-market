@@ -18,7 +18,6 @@ from models.requests import (
 import routes.v0.project_info as project_info
 import routes.v0.project_details as project_details
 import routes.v0.project_review as project_review
-import routes.v0.project_option as project_option
 
 from models.projects import Project
 from models.teams import Teams
