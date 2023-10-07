@@ -26,6 +26,16 @@ import { useRouter } from "next/navigation";
 import { getIdenticon } from "@/components/StableImages";
 import { convertYoutubeLink, imageSize } from "@/util/util";
 
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+const theme = createTheme({
+    palette: {
+        primary: {
+            main: '#003893',
+        },
+    },
+});
+
 // Read and Write
 interface AppInfo {
     id: string,
@@ -474,9 +484,11 @@ export default function Page({ params }: { params: { appId: string } }) {
                     </Grid>
                     <Grid item xs={3}>
                         {appInfo.details.install.length >= 0 &&
-                            <Button variant="contained" sx={{ width: 2 / 3, height: 50 }}
-                                href={appInfo.details.install.length !== 0 ? `/install/${appId}/${installMethodToValue(appInfo.details.install[0].method)}` : "#"}
-                                disabled={isEditable || appInfo.details.install.length === 0}>ダウンロード</Button>
+                            <ThemeProvider theme={theme}>
+                                <Button variant="contained" sx={{ width: 2 / 3, height: 50 }} disableElevation color="primary"
+                                    href={appInfo.details.install.length !== 0 ? `/install/${appId}/${installMethodToValue(appInfo.details.install[0].method)}` : "#"}
+                                    disabled={isEditable || appInfo.details.install.length === 0}>ダウンロード</Button>
+                            </ThemeProvider>
                         }
                     </Grid>
                 </Grid>
@@ -568,7 +580,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                                     return <></>
                                 }
                                 return (
-                                    <Card sx={{ bgcolor: "#e8e8e8" }}>
+                                    <Card sx={{ bgcolor: "#e8e8e8" }} elevation={0}>
                                         <CardContent>
                                             <Stack>
                                                 <Typography variant="h5">{item.title}</Typography>
@@ -591,7 +603,14 @@ export default function Page({ params }: { params: { appId: string } }) {
                                 <TextField size="small" variant="outlined" inputRef={reviewTitleRef} sx={{ width: 2 / 3 }} />
                                 <Typography variant="h6" sx={{ mt: 2 }}>投稿</Typography>
                                 <TextField multiline rows={5} size="small" variant="outlined" inputRef={reviewContentRef} />
-                                <Button variant="contained" onClick={onSubmitReview} sx={{ mt: 3, width: 200 }}>Submit</Button>
+                                <Box sx={{
+                                    display: "flex",
+                                    justifyContent: "center"
+                                }}>
+                                <ThemeProvider theme={theme}>
+                                    <Button variant="contained" onClick={onSubmitReview} sx={{ m: 3, width: 200 }} disableElevation>Submit</Button>
+                                </ThemeProvider>
+                                </Box>
                             </Stack>
                         }
                     </Stack>
