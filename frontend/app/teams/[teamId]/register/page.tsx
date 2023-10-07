@@ -39,6 +39,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
     const appYoutubeRef = useRef<HTMLInputElement>()
     const appDownloadLinkRef = useRef<HTMLInputElement>()
     const appInstallMethodRef = useRef<HTMLInputElement>()
+    const appInstallAditionalRef = useRef<HTMLInputElement>()
 
     const [appIcon, setAppIcon] = useState<Img>()
     const [appScreenshot, setAppScreenshot] = useState<Img[]>([])
@@ -140,7 +141,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
                 })
             }
             // Install
-            if (appInstallMethodRef.current?.value !== "" || appDownloadLinkRef.current?.value !== "") {
+            if (appInstallMethodRef.current?.value !== "" || appDownloadLinkRef.current?.value !== "" || appInstallAditionalRef.current?.value !== "") {
                 await fetch(`/api/v0/projects/${projectId}/details/install`, {
                     method: "post",
                     headers: {
@@ -151,7 +152,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
                     body: JSON.stringify({
                         method: appInstallMethodRef.current?.value,
                         info: appDownloadLinkRef.current?.value,
-                        additional: ""
+                        additional: appInstallAditionalRef.current?.value,
                     })
                 })
             }
@@ -181,6 +182,7 @@ export default function Page({ params }: { params: { teamId : string } }) {
                     })
                 }
             }
+            enqueueSnackbar("プロジェクトの登録が完了しました")
             router.push(`/apps/${projectId}`)
         } catch (e) {
             enqueueSnackbar("通信に失敗しました", { variant: "error" })
@@ -265,6 +267,11 @@ export default function Page({ params }: { params: { teamId : string } }) {
                         </Stack>
                     </Grid>
                 </Grid>
+                <Stack spacing={2} mt={5}>
+                    <Typography variant="h4">GitHubリポジトリ</Typography>
+                    <Typography>ダウンロードボタンを押下後に遷移する画面に表示されます。</Typography>
+                    <TextField variant="outlined" inputRef={appInstallAditionalRef} />
+                </Stack>
                 <Stack spacing={2} mt={5}>
                     <Typography variant="h4">スクリーンショット({`${screenshotConfig.width}x${screenshotConfig.height}`})</Typography>
                     <div {...getRootPropsSs()}>
