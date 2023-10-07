@@ -21,7 +21,7 @@ def sanitizing_str(text: str, size: int) -> bool:
         else:
             return False
         
-def sanitizing_id(id: str) -> bool:
+def sanitizing_sha1(id: str) -> bool:
     # IDが sha1 であることの検証
     sha1 = re.compile(r"^[a-fA-F0-9]{40}$")
     if sha1.match(id):
@@ -37,4 +37,13 @@ def sanitizing_int(num: int, size: int) -> bool:
     else:
         return False
     
+def sanitizing_user_id(id: str) -> bool:
+    # user_id が想定通りの形式かの検証
+    user = re.compile(r"^[a-zA-Z0-9]{20}$") # 自動生成
+    ano = re.compile(r"^(ANONIMOUS-)[a-fA-F0-9]{40}$") # ANONIMOUS 形式
+    if user.match(id) or ano.match(id):
+        return True
+    else:
+        return False
+
     
