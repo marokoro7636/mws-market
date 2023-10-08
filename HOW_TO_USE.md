@@ -24,7 +24,7 @@
 ![Slack認証](https://github.com/marokoro7636/mws-market/assets/112614945/0d892fa0-195c-480e-b7ad-a28ff10767ec)
 
 ## テストユーザ認証
-任意のユーザ名を入力し，"Sign in TestLogin"を押してください．
+任意のユーザ名を入力し，"Sign in with TestLogin"を押してください．
 
 ![テストユーザ認証](https://github.com/marokoro7636/mws-market/assets/112614945/d459f43f-1b82-47a8-955d-e502c4a1cec7)
 
