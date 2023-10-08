@@ -36,6 +36,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import GenDescModal from '@/components/genDescModal';
 
 import InsertCommentIcon from '@mui/icons-material/InsertComment';
+import CardCarousel from "@/components/CardCarousel";
 
 const theme = createTheme({
     palette: {
@@ -627,6 +628,12 @@ export default function Page({ params }: { params: { appId: string } }) {
 
                     }
                 </Stack>
+                {data.previous &&
+                    <Stack spacing={2} mt={5}>
+                        <Typography variant="h4">このチームの過去のプロジェクト</Typography>
+                        <CardCarousel projects={data.previous} />
+                    </Stack>
+                }
                 {(!isEditable) &&
                     <Stack spacing={2} mt={5}>
                         <Typography variant="h4">レビュー・コメント</Typography>
