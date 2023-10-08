@@ -175,7 +175,7 @@ export default function Page({ params }: { params: { teamId: string } }) {
 
     const submitName = (name: string) => {
         if (name === "") {
-            enqueueSnackbar("Team name is required", { variant: "error" })
+            enqueueSnackbar("チーム名を入力してください", { variant: "error" })
             return
         }
         const query = encodeURI(name)
@@ -186,10 +186,10 @@ export default function Page({ params }: { params: { teamId: string } }) {
             },
         }).then((response) => {
             if (response.status === 200) {
-                enqueueSnackbar("Name updated successfully", { variant: "success" })
+                enqueueSnackbar("名前を更新しました", { variant: "success" })
                 return response.json()
             } else {
-                enqueueSnackbar("Failed to update name", { variant: "error" })
+                enqueueSnackbar("名前の更新に失敗しました", { variant: "error" })
                 return response.json()
             }
         }).then((e) => {
@@ -200,12 +200,12 @@ export default function Page({ params }: { params: { teamId: string } }) {
 
     const submitYear = (year: string) => {
         if (year === "") {
-            enqueueSnackbar("Year is required", { variant: "error" })
+            enqueueSnackbar("年度を入力してください", { variant: "error" })
             return
         }
         const parsed = parseFloat(year)
         if (!parsed || !(2015 <= parsed && parsed <= 2030)) {
-            enqueueSnackbar("Year should be between 2015 and 2030", { variant: "error" })
+            enqueueSnackbar("2015年から2030年を入力してください", { variant: "error" })
             return null
         }
         const query = encodeURI(year)
@@ -216,10 +216,10 @@ export default function Page({ params }: { params: { teamId: string } }) {
             },
         }).then((response) => {
             if (response.status === 200) {
-                enqueueSnackbar("Year updated successfully", { variant: "success" })
+                enqueueSnackbar("年度の更新を行いました", { variant: "success" })
                 return response.json()
             } else {
-                enqueueSnackbar("Failed to update year", { variant: "error" })
+                enqueueSnackbar("年度の更新に失敗しました", { variant: "error" })
                 return response.json()
             }
         }).then((e) => {
@@ -230,7 +230,7 @@ export default function Page({ params }: { params: { teamId: string } }) {
 
     const submitDescription = (description: string) => {
         if (description === "") {
-            enqueueSnackbar("Description is required", { variant: "error" })
+            enqueueSnackbar("説明を入力してください", { variant: "error" })
             return
         }
         const query = encodeURI(description)
@@ -241,10 +241,10 @@ export default function Page({ params }: { params: { teamId: string } }) {
             },
         }).then((response) => {
             if (response.status === 200) {
-                enqueueSnackbar("Description updated successfully", { variant: "success" })
+                enqueueSnackbar("チーム説明を更新しました", { variant: "success" })
                 return response.json()
             } else {
-                enqueueSnackbar("Failed to update description", { variant: "error" })
+                enqueueSnackbar("チーム説明の更新に失敗しました", { variant: "error" })
                 return response.json()
             }
         }).then((e) => {
@@ -261,10 +261,10 @@ export default function Page({ params }: { params: { teamId: string } }) {
             },
         }).then((response) => {
             if (response.status === 200) {
-                enqueueSnackbar("Member deleted successfully", { variant: "success" })
+                enqueueSnackbar("メンバーを削除しました", { variant: "success" })
                 return response.json()
             } else {
-                enqueueSnackbar("Failed to delete member", { variant: "error" })
+                enqueueSnackbar("メンバーの削除に失敗しました", { variant: "error" })
                 return response.json()
             }
         }).then((e) => {
@@ -300,14 +300,14 @@ export default function Page({ params }: { params: { teamId: string } }) {
                         }
                     }
                     setEditable(false)
-                }}>Save</Button>
+                }}>保存</Button>
         }
         return <Button
             size="small"
             color="primary" variant="contained" disableElevation={true}
             onClick={() => {
                 setEditable(true)
-            }}>Edit
+            }}>編集
         </Button>
     }
 
@@ -319,10 +319,10 @@ export default function Page({ params }: { params: { teamId: string } }) {
             },
         }).then((response) => {
             if (response.status === 200) {
-                enqueueSnackbar("Linked successfully", { variant: "success" })
+                enqueueSnackbar("関連付けに成功しました", { variant: "success" })
                 return response.json()
             } else {
-                enqueueSnackbar("Failed to link", { variant: "error" })
+                enqueueSnackbar("関連付けに失敗しました", { variant: "error" })
                 return response.json()
             }
         }).then((e) => {
@@ -336,7 +336,7 @@ export default function Page({ params }: { params: { teamId: string } }) {
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text)
             .then(function () {
-                enqueueSnackbar("Copied to clipboard", { variant: "success" })
+                enqueueSnackbar("クリップボードにコピーしました", { variant: "success" })
             }, function (err) {
                 //    do nothing
             });
@@ -422,7 +422,7 @@ export default function Page({ params }: { params: { teamId: string } }) {
 
             <Card sx={{ mt: 5, p: 3, "border": "1px solid #0055df50", }} elevation={0}>
                 <CardHeader
-                    title="Team Info"
+                    title="チーム情報"
                 />
                 <CardContent>
                     <Grid container spacing={2} columns={{ xs: 3, sm: 8, md: 12 }}>
@@ -524,12 +524,12 @@ export default function Page({ params }: { params: { teamId: string } }) {
                     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                         {
                             projInfo !== undefined && projInfo !== null ? (
-                                    <AppCard
-                                        id={projInfo.id} name={projInfo.name}
-                                        description={projInfo.description} rating={projInfo.rating}
-                                        team={projInfo.team} team_id={teamId}
-                                        icon={projInfo.icon} img={projInfo.img}
-                                    />
+                                <AppCard
+                                    id={projInfo.id} name={projInfo.name}
+                                    description={projInfo.description} rating={projInfo.rating}
+                                    team={projInfo.team} team_id={teamId}
+                                    icon={projInfo.icon} img={projInfo.img}
+                                />
                             ) : (
 
                                 <Button

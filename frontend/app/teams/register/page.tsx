@@ -48,16 +48,16 @@ export default function Page() {
 
     const validate = (data: FormData): FormDataValidated | null => {
         if (!data.name && data.name !== "") {
-            enqueueSnackbar("Team name is required", { variant: "error" })
+            enqueueSnackbar("チーム名を入力してください", { variant: "error" })
             return null
         }
         if (!data.year) {
-            enqueueSnackbar("Year is required", { variant: "error" })
+            enqueueSnackbar("年度を入力してください", { variant: "error" })
             return null
         }
         const year = parseFloat(data.year)
         if (!year || !(2015 <= year && year <= 2030)) {
-            enqueueSnackbar("Year should be between 2015 and 2030", { variant: "error" })
+            enqueueSnackbar("2015年から2030年の間で入力してください", { variant: "error" })
             return null
         }
         let description = "None"
@@ -82,10 +82,10 @@ export default function Page() {
             body: JSON.stringify(data),
         }).then((response) => {
             if (response.status === 200) {
-                enqueueSnackbar("Team created successfully", { variant: "success" })
+                enqueueSnackbar("チームを作成しました", { variant: "success" })
                 return response.json()
             } else {
-                enqueueSnackbar("Failed to create team", { variant: "error" })
+                enqueueSnackbar("チームの作成に失敗しました", { variant: "error" })
                 return response.json()
             }
         }).then((e) => {
