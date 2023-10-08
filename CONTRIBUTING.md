@@ -31,26 +31,31 @@ Pull Requestはいつでも歓迎しています。
 以下の手順でデータベースを作成してください。
 
 1. Firebaseでプロジェクトを追加
-2. adminSDKに登録、トークンを取得
+2. adminSDKに登録、jsonファイルを取得
 3. 本プロジェクトのルートに`creds`というディレクトリを作成し、`firebase.json`を追加
 
-### SlackBotの導入
-自身のワークスペースにSlackBotを導入してください。  
+### Slackアプリの登録
+自身のワークスペースにSlackアプリを導入してください。  
 
 1. ブラウザから[Slack API: Applications | Slack](https://api.slack.com/apps)にアクセス
-2. Create New App、Add Bot Userとしてボットを追加し、ワークスペースにインストール
+2. Create New AppとしてSlackアプリを登録(`App Credentials`から`Client ID`と`Client Secret`を控える)
+3. `Redirect URLs`を設定
+   - `https://[自分のサーバのアドレス]/api/v0/slackauth/callback`
+   - コールバックを受けるサーバのURL
+4. Scopeを設定
+   -  `email`、`openid`、`profile`を選択
 
 ### 環境変数の設定
-Firebase、SlackBot、OpenAIのSecretsを設定します。
+Firebase、Slackアプリ、OpenAIのSecretsを設定します。
 
 1.  OpenAIのアクセストークンを発行
-2. NextAuthのシークレットを生成(任意の文字列)
+2. NextAuthのシークレットを生成
    - `openssl rand -base64 32`などで生成
 2. `creds`ディレクトリに`.env.frontend`と`.env.backend`を作成
 - `.env.frontend`
 ```
-SLACK_ID="[SlackBotのID]"
-SLACK_SECRET="[Slackのアクセストークン]"
+SLACK_ID="[SlackアプリのClient ID]"
+SLACK_SECRET="[SlackアプリのClient Secret]"
 
 NEXTAUTH_URL="https://[自分のサーバのドメイン]/auth"
 NEXTAUTH_SECRET="[NextAuthのシークレット]"
