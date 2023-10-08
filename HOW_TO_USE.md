@@ -18,7 +18,9 @@
 右上のアイコンからログインしてください．
 "mws2023 auth"がMWS slackワークスぺース(現在は試験的にUndanomi slack)へのアクセス権限を要求してくるため，内容を確認のうえ，問題がなければ"許可する"を押してください．
 
-![SlackOAuthによるログイン](https://github.com/marokoro7636/mws-market/assets/112614945/c8839725-0ed1-44fd-b237-de6f5a267612)
+![SlackOAuthによるログイン](https://github.com/marokoro7636/mws-market/assets/112614945/0e37bc2e-062e-4376-aa10-bbf23cf1353c)
+
+
 # プロジェクトの閲覧
 プロジェクトを閲覧できるページとして，プロジェクト一覧ページとプロジェクト詳細ページの2つが存在します．
 ## プロジェクト一覧ページ
@@ -37,7 +39,7 @@
 - プロジェクトのキーワード検索
 - プロジェクトを開発したチーム名での検索
 
-![プロジェクト一覧ページ](https://github.com/marokoro7636/mws-market/assets/112614945/76372f78-0304-4d89-98d7-36e678f3054d)
+![プロジェクト一覧ページ](https://github.com/marokoro7636/mws-market/assets/112614945/13c0b4ff-f31b-4e06-ba59-6a04a189b36f)
 
 ## プロジェクト詳細ページ
 各プロジェクトに関する情報が記載されているページです．
@@ -52,7 +54,7 @@
 - プロジェクト情報の編集(ログイン時かつ，ご自身が登録したプロジェクトのみ)
 - プロジェクトへのレビュー(ログイン時のみ)
 
-![プロジェクト詳細ページ](https://github.com/marokoro7636/mws-market/assets/112614945/3e940d85-8218-4816-ad1b-09ed27883d61)
+![プロジェクト詳細ページ](https://github.com/marokoro7636/mws-market/assets/112614945/e1063480-5eaa-4fa1-aa25-419c843ffc63)
 
 # プロジェクトダウンロードページ
 各プロジェクトのインストールに関する情報が記載されているページです．
@@ -62,7 +64,7 @@
 - プロジェクトのインストールの際のリスク
 - プロジェクトのインストールの詳細説明
 
-![プロジェクトダウンロードページ](https://github.com/marokoro7636/mws-market/assets/112614945/173cfb6b-bb6b-4c88-9965-4802f462d588)
+![プロジェクトダウンロードページ](https://github.com/marokoro7636/mws-market/assets/112614945/b210b600-7b9a-4c1e-a330-7577c055806c)
 
 
 # チーム
@@ -81,7 +83,7 @@
 チームを選択することで，チーム詳細ページへと遷移します，
 作成されたチームがない場合は，何も表示されません．
 
-![マイページ](https://github.com/marokoro7636/mws-market/assets/112614945/9efd9d17-d5d4-4f96-ad85-e5cb0224880f)
+![マイページ](https://github.com/marokoro7636/mws-market/assets/112614945/29ee5d17-7163-4a68-b421-6bb205399560)
 
 ## チーム詳細ページ
 各チームの情報が記載されているページです．
@@ -102,7 +104,7 @@
 - プロジェクト登録ページへの遷移
 - チーム継承
 
-![チーム詳細ページ](https://github.com/marokoro7636/mws-market/assets/112614945/4978dfc2-4bb9-463d-991f-8c74e6fb57ba)
+![チーム詳細ページ](https://github.com/marokoro7636/mws-market/assets/112614945/d1f46295-fec4-4a99-91cf-c6f95797f76e)
 
 
 ## チーム作成方法
@@ -117,18 +119,18 @@
 - Team Secret
 - Team共有リンク
 
-![チーム作成方法](https://github.com/marokoro7636/mws-market/assets/112614945/d2bd15d9-5dd0-4823-9f60-c19e7813c265)
+![チーム作成方法](https://github.com/marokoro7636/mws-market/assets/112614945/bbef7bad-d6dd-4a14-8299-b24797960004)
 
 ## チーム招待方法
 チームの詳細ページに表示されているTeam共有リンクを招待したいメンバーに共有することで，他の参加者をチームに招待することができます．
 ユーザーはリンクを開き，"JOIN TEAM"からチームに加入してください．
 
-![チーム招待方法](https://github.com/marokoro7636/mws-market/assets/112614945/220ecab1-afac-4d8f-b075-76f55bbb6d9b)
+![チーム招待方法](https://github.com/marokoro7636/mws-market/assets/112614945/21612c60-b805-41db-a705-699f5af04ce1)
 
 ## チーム継承
 チームの詳細ページから，複数年にわたって同じ組織が作るチームを紐付けることができます．
 
-![チーム継承](https://github.com/marokoro7636/mws-market/assets/112614945/1bc63a39-dcdd-4ee0-8655-c72746378236)
+![チーム継承](https://github.com/marokoro7636/mws-market/assets/112614945/cbb11c83-11f6-4a74-9f12-16af6dd11060)
 
 
 # プロジェクト登録ページ
@@ -145,7 +147,7 @@
 
 プロジェクト登録後はプロジェクト閲覧/編集ページに置き換わります．
 
-![プロジェクト登録ページ](https://github.com/marokoro7636/mws-market/assets/112614945/f9943d1f-3a3d-44ac-92e5-95f456cf8272)
+![プロジェクト登録ページ](https://github.com/marokoro7636/mws-market/assets/112614945/10efe6ba-4d13-4272-916d-fb13b5eea909)
 
 # プロジェクト閲覧/編集ページ
 登録したプロジェクトを閲覧/編集するページです．
@@ -154,4 +156,4 @@
 - プロジェクトのダウンロードリンク(GitHubのリンクのみ)
 - プロジェクトの紹介動画YouTubeのリンク
 
-![プロジェクト閲覧:編集ページ](https://github.com/marokoro7636/mws-market/assets/112614945/5e996b56-3cba-48b1-a28b-ed4552d862a8)
+![プロジェクト閲覧_編集ページ](https://github.com/marokoro7636/mws-market/assets/112614945/5a888ca7-c21e-42bd-8bfc-3bbbc876f4fe)
