@@ -18,13 +18,15 @@ const getTrialgleImage = (width: number, height: number, hash: string) => {
     const seed = strHash(hash)
     const color = seed % 99
     const gap = ((seed) % 13 + 3) * 5
-    console.log(hash, color, gap)
+    // console.log(hash, color, gap)
     return `https://generative-placeholders.glitch.me/image?width=${width / 1.5}&height=${height / 1.5}&style=triangles&gap=${gap}&colors=${color}`
+    // return ""
 }
 
 const getIdenticon = (hash: string) => {
     const seed = strHash(hash)
     return `https://api.dicebear.com/7.x/thumbs/svg?seed=${seed}`
+    // return ""
 }
 
 import { Avatar } from '@mui/material';
