@@ -13,7 +13,7 @@ import { MypageButton } from './MypageButton';
 import { Avatar } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
-const appName = "MWS Market | MUUS"
+const appName = "MWS Intelligence - MINT"
 
 function NavAppBar() {
     const router = useRouter()
