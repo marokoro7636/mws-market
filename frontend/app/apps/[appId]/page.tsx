@@ -4,6 +4,7 @@ import {
     Box,
     Button, Card, CardContent,
     Container,
+    Fab,
     Grid,
     IconButton,
     MenuItem,
@@ -27,6 +28,8 @@ import { getIdenticon } from "@/components/StableImages";
 import { convertYoutubeLink, imageSize } from "@/util/util";
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+import EditIcon from '@mui/icons-material/Edit';
 
 const theme = createTheme({
     palette: {
@@ -452,18 +455,6 @@ export default function Page({ params }: { params: { appId: string } }) {
         <>
             <Container sx={{ mt: 3 }}>
                 <SnackbarProvider />
-                {data.own &&
-                    <Box sx={{ textAlign: "right" }}>
-                        {isEditable ?
-                            <>
-                                <Button variant="contained" color="secondary" onClick={onSaveAppInfo}
-                                    sx={{ mr: 1 }}>Save</Button>
-                                <Button variant="contained" color="error" onClick={onCancelEdit}>Cancel</Button>
-                            </> :
-                            <Button variant="contained" color="secondary" onClick={onEditAppInfo}>Edit</Button>
-                        }
-                    </Box>
-                }
                 <Grid container alignItems="center" sx={{ mt: 3 }}>
                     <Grid item xs={3}>
                         {isEditable ?
@@ -624,6 +615,31 @@ export default function Page({ params }: { params: { appId: string } }) {
                             </Stack>
                         }
                     </Stack>
+                }
+                {data.own &&
+                    <Box sx={{ textAlign: "right" }}>
+                        <ThemeProvider theme={theme}>
+                            {isEditable ?
+                                <>
+                                    <Button variant="contained" disableElevation
+                                        color="primary" onClick={onSaveAppInfo}
+                                        sx={{ mr: 1 }}>Save</Button>
+                                    <Button variant="contained" disableElevation
+                                        color="error" onClick={onCancelEdit}>Cancel</Button>
+                                </> :
+                                <Fab color="primary" aria-label="edit" onClick={onEditAppInfo}
+                                    variant="extended"
+                                    sx={{
+                                        position: "fixed",
+                                        bottom: 16,
+                                        right: 16,
+                                    }}>
+                                    <EditIcon />
+                                    編集
+                                </Fab>
+                            }
+                        </ThemeProvider>
+                    </Box>
                 }
             </Container>
         </>
