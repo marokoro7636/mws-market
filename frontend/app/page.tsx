@@ -3,10 +3,6 @@ import AppList from "@/components/appList";
 
 export default function Home() {
     return (
-        <Container sx={{
-            height: "100%"
-        }}>
-            <AppList />
-        </Container>
+        <AppList />
     )
 }
