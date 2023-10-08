@@ -6,6 +6,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import InstallDesktopIcon from '@mui/icons-material/InstallDesktop';
 import WarningIcon from '@mui/icons-material/Warning';
 import InfoIcon from '@mui/icons-material/Info';
+import {githubReg, githubReleaseReg, gitlabReg} from "@/const/regex";
 
 type AppInfoData = {
     id: string,
@@ -72,20 +73,34 @@ export default function Page({ params }: { params: { appId: string } }) {
             })
     }, [appId])
 
+    const linkDestination = (url: string | undefined) => {
+        if (url === undefined) {
+            return
+        }
+
+        if (githubReg.test(url)) {
+            return <Typography>アクセス先のサイトはGitHubです。</Typography>
+        } else if (githubReleaseReg.test(url)) {
+            return <Typography>アクセス先のサイトはGitHub Releaseです。</Typography>
+        } else if (gitlabReg.test(url)) {
+            return <Typography>アクセス先のサイトはGitLabです。</Typography>
+        }
+    }
+
     return (
         <Container>
             <Typography variant="h3" mt={3}>利用方法</Typography>
-            <Stack spacing={5} mt={5}>
-                <Stack spacing={1} sx={{padding: 4, borderRadius: 5}}>
+            <Stack spacing={6} mt={5}>
+                <Stack spacing={1} sx={{px: 4, py: 1, borderRadius: 5}}>
                     <Stack direction="row" alignItems="center" spacing={1}>
                         <LinkIcon fontSize="inherit" sx={{fontSize: 48}}/>
                         <Typography variant="h4">アクセス先</Typography>
                     </Stack>
-                    <Typography component="a" href={data?.details.install[0].info}></Typography>
-                    <Typography>本プロジェクトの種類は{data?.details.install[0].method}です。</Typography>
+                    <Typography component="a" href={data?.details.install[0].info}>{data?.details.install[0].info}</Typography>
+                    {linkDestination(data?.details.install[0].info)}
                     <Typography variant="body1">リンク先にあるファイルをダウンロードしてください。</Typography>
                 </Stack>
-                <Stack spacing={1} sx={{padding: 4, borderRadius: 5}}>
+                <Stack spacing={1} sx={{px: 4, py: 1, borderRadius: 5}}>
                     <Stack direction="row" alignItems="center" spacing={1}>
                         <InstallDesktopIcon fontSize="inherit" sx={{fontSize: 48}}/>
                         <Typography variant="h4">インストール手順</Typography>
@@ -111,11 +126,13 @@ export default function Page({ params }: { params: { appId: string } }) {
                     <Stack direction="row" alignItems="center" spacing={1}>
                         <InfoIcon fontSize="inherit" sx={{fontSize: 48}}/>
                         <Typography variant="h4">詳細説明</Typography>
-                        <Typography variant="body1">{data?.details.install[0].additional}</Typography>
                     </Stack>
+                    {data?.details.install[0].additional !== "" ?
+                        <Typography variant="body1">{data?.details.install[0].additional}</Typography> :
+                        <Typography variant="body1">詳細説明は登録されていません</Typography>
+                    }
                 </Stack>
             </Stack>
-
         </Container>
     )
 }
