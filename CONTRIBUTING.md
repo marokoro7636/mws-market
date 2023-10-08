@@ -36,7 +36,9 @@ Pull Requestはいつでも歓迎しています。
 
 ### SlackBotの導入
 自身のワークスペースにSlackBotを導入してください。  
-その時のScopeは以下のようにしてください。
+
+1. ブラウザから[Slack API: Applications | Slack](https://api.slack.com/apps)にアクセス
+2. Create New App、Add Bot Userとしてボットを追加し、ワークスペースにインストール
 
 ### 環境変数の設定
 Firebase、SlackBot、OpenAIのSecretsを設定します。
