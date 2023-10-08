@@ -1,6 +1,6 @@
 # MINT(MWS INTeligence)
 
-**デモスト動画**
+![デモ動画](https://user-images.githubusercontent.com/96559979/273465047-631d9518-63d2-472c-87ea-f22e04450e89.gif)
 
 ## Table of Contents
 
