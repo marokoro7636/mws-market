@@ -382,38 +382,59 @@ class Project:
     @staticmethod
     def get_project(limit: int = 10, page: int = 1, order: Optional[str] = None, year: Optional[int] = None, team: Optional[str] = None, include: Optional[bool] = True) -> list[ProjectSummary]:
         db = firestore.client()
-        snapshot = db.collection("projects")
+        # snapshot = db.collection("projects")
 
-        if year is not None:
-            docs = db.collection("teams").where(filter=firestore.firestore.FieldFilter("year", "==", year)).get()
-            candidate = [doc.id for doc in docs]
-            if len(candidate) > 0:
-                snapshot = snapshot.where(filter=firestore.firestore.FieldFilter("team", "in", candidate))
-            else:
-                return list()
-        if team is not None:
-            if Teams.is_exist(team):
-                candidate = Teams(team).get_relations()
-                if not include:
-                    if len(candidate) > 1:
-                        candidate.remove(team)
-                    else:
-                        return list()
-                snapshot = snapshot.where(filter=firestore.firestore.FieldFilter("team", "in", candidate))
-            else:
-                return list()
-        if order is None:
-            st_doc = snapshot.limit(1 + limit * (page - 1)).get()[-1]
-            snapshot = snapshot.start_at(st_doc).limit(limit)
-        else:
-            st_doc = snapshot.order_by(order).limit(1 + limit * (page - 1)).get()[-1]
-            snapshot = snapshot.start_at(st_doc).order_by(order).limit(limit)
+        # if year is not None:
+        #     docs = db.collection("teams").where(filter=firestore.firestore.FieldFilter("year", "==", year)).get()
+        #     candidate = [doc.id for doc in docs]
+        #     if len(candidate) > 0:
+        #         snapshot = snapshot.where(filter=firestore.firestore.FieldFilter("team", "in", candidate))
+        #     else:
+        #         return list()
+        # if team is not None:
+        #     if Teams.is_exist(team):
+        #         candidate = Teams(team).get_relations()
+        #         if not include:
+        #             if len(candidate) > 1:
+        #                 candidate.remove(team)
+        #             else:
+        #                 return list()
+        #         snapshot = snapshot.where(filter=firestore.firestore.FieldFilter("team", "in", candidate))
+        #     else:
+        #         return list()
+        # if order is None:
+        #     st_doc = snapshot.limit(1 + limit * (page - 1)).get()[-1]
+        #     snapshot = snapshot.start_at(st_doc).limit(limit)
+        # else:
+        #     st_doc = snapshot.order_by(order).limit(1 + limit * (page - 1)).get()[-1]
+        #     snapshot = snapshot.start_at(st_doc).order_by(order).limit(limit)
+    
+        projects = db.collection("projects").get()
+        projects = [doc.to_dict() | {"id": doc.id} for doc in projects]
+
+        teams_list = db.collection("teams").get()
+        teams = {}
+        for t in teams_list:
+            teams[t.id] = t.to_dict()
 
         def convert(data):
-            team = Teams(data["team"]).get()
+
+            team = teams[data["team"]]
             data["team"] = team["name"]
             data["team_id"] = data["team"]
             data["year"] = team["year"]
+
+            data["relations"] = []
+            for r in team["relations"]:
+                if r == data["team"]:
+                    continue
+                data["relations"].append(f'{teams[r]["name"]}({teams[r]["year"]})')
+
+            if "details" in data and "install" in data["details"]:
+                installs = list(data["details"]["install"].values())
+                if len(installs) > 0 :
+                    if "method" in installs[0]:
+                        data["method"] = installs[0]["method"]
 
             if "icon" in data:
                 data["icon"] = Project.gen_img_url(data["icon"])
@@ -421,9 +442,10 @@ class Project:
             if len(img_screenshot) > 0:
                 data["img"] = Project.gen_img_url(img_screenshot[0])
 
-            return data
-        docs =  snapshot.select(["details.img_screenshot", *ProjectSummary.__annotations__.keys()]).get()
-        return [ProjectSummary(id = doc.id, **convert(doc.to_dict())) for doc in docs]
+            return ProjectSummary(**data)
+
+        projects = [convert(data) for data in projects]
+        return projects
 
     @staticmethod
     def allow_order(order: Optional[str]):

@@ -84,9 +84,12 @@ class ProjectSummary(BaseModel):
     rating: Rating
     youtube: Optional[str] = None
     team: Optional[str] = None
+    team_id: Optional[str] = None
     icon: Optional[str] = None
     img: Optional[str] = None
-    team_id: Optional[str] = None
+    year: Optional[int] = None
+    method: Optional[str] = None
+    relations: Optional[list[str]] = list()
 
 class ProjectInfo(BaseModel):
     id: str
@@ -111,18 +114,6 @@ class ProjectInfo(BaseModel):
             return [ProjectReview(id=key, **value) for key, value in d.items()]
         else:
             return []
-
-class ProjectSummary(BaseModel):
-    id: str
-    name: str
-    description: Optional[str] = None
-    rating: Rating
-    youtube: Optional[str] = None
-    team: Optional[str] = None
-    team_id: Optional[str] = None
-    icon: Optional[str] = None
-    img: Optional[str] = None
-    year: Optional[int] = None
 
 class TeamMember(BaseModel):
     id: str
