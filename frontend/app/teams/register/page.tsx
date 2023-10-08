@@ -100,16 +100,16 @@ export default function Page() {
         <Container sx={{ mt: 3 }}>
             <SnackbarProvider />
 
-            <Typography variant="h3">Register New Team</Typography>
+            <Typography variant="h3">新規チームの登録</Typography>
 
             <Card sx={{ p: 3, "border": "1px solid #0055df50", }} elevation={0}>
                 <CardHeader
-                    title="Team Info"
+                    title="チーム情報"
                 />
                 <CardContent>
                     <Grid container spacing={2} columns={{ xs: 3, sm: 8, md: 12 }}>
                         <Grid item xs={3} md={3}>
-                            Team Name :
+                            チーム名 :
                         </Grid>
                         <Grid item xs={3} md={9}>
                             <TextField size="small"
@@ -119,7 +119,7 @@ export default function Page() {
                             </TextField>
                         </Grid>
                         <Grid item xs={3} md={3}>
-                            Year:
+                            年度 :
                         </Grid>
                         <Grid item xs={3} md={9}>
                             <TextField size="small"
@@ -129,7 +129,7 @@ export default function Page() {
                             </TextField>
                         </Grid>
                         <Grid item xs={3} md={3}>
-                            Description:
+                            チーム説明 :
                         </Grid>
                         <Grid item xs={3} md={9}>
                             <TextField size="small"
@@ -151,7 +151,7 @@ export default function Page() {
                                     return
                                 }
                                 submit(validated)
-                            }}>Create Team</Button>
+                            }}>チーム作成</Button>
                         </ThemeProvider>
                     </Grid>
                 </CardActions>

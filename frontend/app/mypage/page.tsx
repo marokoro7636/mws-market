@@ -128,7 +128,7 @@ export default function Home() {
                         title={
                             <>
                                 <Typography variant="h4" sx={{ p: 2 }}>
-                                    Teams
+                                    チーム一覧
                                 </Typography>
                             </>
 
@@ -184,7 +184,7 @@ export default function Home() {
                     }}
                 >
                     <AddIcon />
-                    Add Team
+                    チーム追加
                 </Fab>
             </ThemeProvider>
         </div >
