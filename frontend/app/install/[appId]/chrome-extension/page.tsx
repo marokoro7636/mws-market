@@ -6,6 +6,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import InstallDesktopIcon from '@mui/icons-material/InstallDesktop';
 import WarningIcon from '@mui/icons-material/Warning';
 import InfoIcon from '@mui/icons-material/Info';
+import {githubReg, githubReleaseReg, gitlabReg} from "@/const/regex";
 
 type AppInfoData = {
     id: string,
@@ -72,6 +73,20 @@ export default function Page({ params }: { params: { appId: string } }) {
             })
     }, [appId])
 
+    const linkDestination = (url: string | undefined) => {
+        if (url === undefined) {
+            return
+        }
+
+        if (githubReg.test(url)) {
+            return <Typography>アクセス先のサイトはGitHubです。</Typography>
+        } else if (githubReleaseReg.test(url)) {
+            return <Typography>アクセス先のサイトはGitHub Releaseです。</Typography>
+        } else if (gitlabReg.test(url)) {
+            return <Typography>アクセス先のサイトはGitLabです。</Typography>
+        }
+    }
+
     return (
         <Container>
             <Typography variant="h3" mt={3}>利用方法</Typography>
@@ -82,8 +97,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                         <Typography variant="h4">アクセス先</Typography>
                     </Stack>
                     <Typography component="a" href={data?.details.install[0].info}>{data?.details.install[0].info}</Typography>
-                    <Typography>本プロジェクトの種類は{data?.details.install[0].method}です。</Typography>
-                    {/*TODO Githubのリンクか否かを判定「本リンク先は[ダウンロードサイト名]です」*/}
+                    {linkDestination(data?.details.install[0].info)}
                     <Typography variant="body1">リンク先にあるファイルをダウンロードしてください。</Typography>
                 </Stack>
                 <Stack spacing={1} sx={{px: 4, py: 1, borderRadius: 5}}>
