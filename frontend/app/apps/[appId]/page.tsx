@@ -664,7 +664,7 @@ export default function Page({ params }: { params: { appId: string } }) {
                                     justifyContent: "center"
                                 }}>
                                     <ThemeProvider theme={theme}>
-                                        <Button variant="contained" onClick={onSubmitReview} sx={{ m: 3, width: 200 }} disableElevation>Submit</Button>
+                                        <Button variant="contained" onClick={onSubmitReview} sx={{ m: 3, width: 200 }} disableElevation>送信</Button>
                                     </ThemeProvider>
                                 </Box>
                             </Stack>

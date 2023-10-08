@@ -97,12 +97,12 @@ export default function Page() {
     }
 
     return (
-        <Container sx={{ p: 3 }}>
+        <Container sx={{ mt: 3 }}>
             <SnackbarProvider />
 
             <Typography variant="h3">Register New Team</Typography>
 
-            <Card sx={{ mt: 5, p: 3, "border": "1px solid #0055df50", }} elevation={0}>
+            <Card sx={{ p: 3, "border": "1px solid #0055df50", }} elevation={0}>
                 <CardHeader
                     title="Team Info"
                 />
@@ -113,8 +113,8 @@ export default function Page() {
                         </Grid>
                         <Grid item xs={3} md={9}>
                             <TextField size="small"
-                                variant="standard"
-                                onChange={(e) => { data.name = e.target.value }}
+                                       variant="standard"
+                                       onChange={(e) => { data.name = e.target.value }}
                             >
                             </TextField>
                         </Grid>
@@ -123,8 +123,8 @@ export default function Page() {
                         </Grid>
                         <Grid item xs={3} md={9}>
                             <TextField size="small"
-                                variant="standard"
-                                onChange={(e) => { data.year = e.target.value }}
+                                       variant="standard"
+                                       onChange={(e) => { data.year = e.target.value }}
                             >
                             </TextField>
                         </Grid>
@@ -133,9 +133,9 @@ export default function Page() {
                         </Grid>
                         <Grid item xs={3} md={9}>
                             <TextField size="small"
-                                multiline fullWidth
-                                variant="standard"
-                                onChange={(e) => { data.description = e.target.value }}
+                                       multiline fullWidth
+                                       variant="standard"
+                                       onChange={(e) => { data.description = e.target.value }}
                             >
                             </TextField>
                         </Grid>

@@ -30,7 +30,7 @@ import { StableAvatar, StableImgCardMedia } from "@/components/StableImages";
 
 const AppCard = ({ id, name, team, description, rating, icon, img, team_id }: AppCardProps) => {
     return (
-        <Card sx={{ maxWidth: 345, "border": "1px solid #0055df10", borderRadius: 4 }} elevation={0}>
+        <Card sx={{ width: 345, "border": "1px solid #0055df10", borderRadius: 4 }} elevation={0}>
             <CardActionArea href={`/apps/${id}`}>
                 <StableImgCardMedia
                     height={225}

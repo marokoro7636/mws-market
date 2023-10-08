@@ -87,8 +87,8 @@ export default function Page({ params }: { params: { appId: string } }) {
     }
 
     return (
-        <Container>
-            <Typography variant="h3" mt={3}>利用方法</Typography>
+        <Container sx={{ my: 3 }}>
+            <Typography variant="h3">利用方法</Typography>
             <Stack spacing={5} mt={5}>
                 <Stack spacing={1} sx={{px: 4, py: 1, borderRadius: 5}}>
                     <Stack direction="row" alignItems="center" spacing={1}>

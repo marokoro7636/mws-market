@@ -64,8 +64,6 @@ export default function Home() {
 
     const session = _session as Session
 
-    console.log(data)
-
     if (data === null) {
         return <Box sx={{
             display: 'flex',
@@ -104,7 +102,7 @@ export default function Home() {
     return (
         <div>
             <Container sx={{ mt: 3 }}>
-                <Card sx={{ mt: 5, p: 3, "border": "1px solid #0055df50", }} elevation={0}>
+                <Card sx={{ p: 3, "border": "1px solid #0055df50", }} elevation={0}>
                     <CardHeader
                         title={
                             <Typography variant="h3">
