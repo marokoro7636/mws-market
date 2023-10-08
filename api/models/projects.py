@@ -116,7 +116,7 @@ class Project:
 
     def set_description(self, description: str):
         description = sanitizing_by_html(description)
-        if sanitizing_str(description, 100):
+        if sanitizing_str(description, 1000):
             db = firestore.client()
             db.collection("projects").document(self.id).set(
                 {
