@@ -426,8 +426,6 @@ class Project:
 
             data["relations"] = []
             for r in team["relations"]:
-                if r == data["team"]:
-                    continue
                 data["relations"].append(f'{teams[r]["name"]}({teams[r]["year"]})')
 
             if "details" in data and "install" in data["details"]:

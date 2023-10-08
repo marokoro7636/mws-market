@@ -11,6 +11,7 @@ interface ChipButtonProps {
 
 function ChipButton({ label, defaultSelected = false, onChange = () => { }, sx = null }: ChipButtonProps) {
     const [selected, setSelected] = useState(defaultSelected || false);
+    console.log("CHIP", label, selected)
 
     const handleClick = () => {
         const newSelected = !selected;

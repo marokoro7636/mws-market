@@ -241,13 +241,13 @@ export default function Page({ params }: { params: { teamId : string } }) {
                     </Grid>
                     <Grid item xs={8}>
                         <Stack spacing={2} mt={5}>
-                            <Typography variant="h4">プロジェクトのダウンロードリンク</Typography>
+                            <Typography variant="h4">ダウンロードリンク</Typography>
                             <TextField variant="outlined" inputRef={appDownloadLinkRef} />
                         </Stack>
                     </Grid>
                 </Grid>
                 <Stack spacing={2} mt={5}>
-                    <Typography variant="h4">GitHubリポジトリへのリンク</Typography>
+                    <Typography variant="h4">プロジェクトの詳細情報</Typography>
                     <Typography>ダウンロードボタンを押下後に遷移する画面に表示されます。</Typography>
                     <TextField variant="outlined" inputRef={appInstallAditionalRef} />
                 </Stack>

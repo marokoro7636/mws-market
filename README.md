@@ -1,12 +1,13 @@
-# MINT(MWS INTeligence)
+[![](https://user-images.githubusercontent.com/64199605/273470339-10ecc158-660d-449e-8cec-bf7cd8e40475.png)](https://mws2023.pfpf.dev)  
+↑ 成果物ページはこちらをクリック
 
-**デモスト動画**
+![デモ動画](https://user-images.githubusercontent.com/96559979/273465047-631d9518-63d2-472c-87ea-f22e04450e89.gif)
 
 ## Table of Contents
 
 **for general**
 - About
-- 実用性と利便性
+- MWSCupのプラットフォームとしての実用性と利便性
 - 使い方
 
 
@@ -25,6 +26,10 @@ MINTはプロジェクト(ハッカソン課題)の情報を一元管理し，�
 
 プロジェクト情報の体系的な整理によるアクセシビリティの向上，およびコミュニティに寄り添ったプラットフォーム化により，プロジェクトの普及率向上とMWSCupの繁栄が本ツールの目的です．
 
+このツールの由来は，MWS INTelligenceです．
+虫よけの作用を持つミントのように，マルウェアを遠ざけ，かつ人材育成として若葉がミントのように力強く青々と広がっていくような願いを込めてこの名前にしました．
+
+> このツールは`MWSCup 2023 ハッカソン課題`として`UN頼み`が作成しました．
 
 ### MWSCupの事前課題とその問題
 2023年10月現在，MWSCupのハッカソン課題(旧事前課題)　のプロジェクトは80件を超え，この先もますます増えていくことが予想されます．
@@ -115,7 +120,7 @@ MINTはMWSCupにフォーカスしたプラットフォームとするために�
 |--- .github/workflows/
 |     自動リリースのGithub Actionsの設定ファイル
 |--- api/
-|     DB(Firebase)と通信し、情報の登録や削除を行うAPIサーバ(FastAPI/Python)
+|     DB(Firebase)と通信し，情報の登録や削除を行うAPIサーバ(FastAPI/Python)
 |       |--- Dockerfile
 |              APIサーバが動作するコンテナのビルドに必要
 |--- caddy/
@@ -130,8 +135,7 @@ MINTはMWSCupにフォーカスしたプラットフォームとするために�
 
 ## 構成技術
 
-> [!NOTE]
-> 全体像
+![全体像](https://user-images.githubusercontent.com/41366495/273464063-c6e7aed2-4a71-4076-ab78-ab3cf36f975a.png)
 
 ### フロントエンド
 - React/Next.js 13製
@@ -195,6 +199,8 @@ This software is released under the MIT License, see LICENSE.
 - チームで協力して作成している
 - 成果物による法令順守違反及び倫理問題はない
   - デモサイトでは過去成果物の情報を一部お借りしています
+  - レビューはアクセスできる情報量に基づき機械的に決定しています
+    - 実際の成果物に対するレビュー評価ではありません
 
 ### 新規性
 
