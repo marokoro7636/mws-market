@@ -110,8 +110,23 @@ MINTはMWSCupにフォーカスしたプラットフォームとするために�
 
 ## リポジトリの構成
 
-> [!NOTE]
-> GPTに書かせると楽
+```
+/
+|--- .github/workflows/
+|     自動リリースのGithub Actionsの設定ファイル
+|--- api/
+|     DB(Firebase)と通信し、情報の登録や削除を行うAPIサーバ(FastAPI/Python)
+|       |--- Dockerfile
+|              APIサーバが動作するコンテナのビルドに必要
+|--- caddy/
+|     リバースプロキシの設定ファイル
+|--- frontend/
+|     本プロジェクトの構成画面(Next.js/TypeScript)
+|       |--- Dockerfile
+|              Next.jsが動作するコンテナのビルドに必要
+|--- compose.yml
+        各サーバ(フロントエンド、バックエンド、リバースプロキシ)を起動するためのDocker compose設定ファイル
+```
 
 ## 構成技術
 
