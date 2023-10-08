@@ -8,8 +8,8 @@ import { Box } from '@mui/material';
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-    title: 'Create Next App',
-    description: 'MWSCup Market',
+    title: 'MINT',
+    description: 'MWS Intelligence - MINT',
 }
 
 export default function RootLayout({
