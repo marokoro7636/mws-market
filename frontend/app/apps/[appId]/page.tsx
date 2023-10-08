@@ -3,6 +3,7 @@ import React, { useCallback, useRef, useState, useEffect } from 'react'
 import {
     Box,
     Button, Card, CardContent,
+    Checkbox,
     Container,
     Fab,
     Grid,
@@ -27,9 +28,14 @@ import { useRouter } from "next/navigation";
 import { getIdenticon } from "@/components/StableImages";
 import { convertYoutubeLink, imageSize } from "@/util/util";
 
+import { List, ListItem } from "@mui/material";
+
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 import EditIcon from '@mui/icons-material/Edit';
+import GenDescModal from '@/components/genDescModal';
+
+import InsertCommentIcon from '@mui/icons-material/InsertComment';
 
 const theme = createTheme({
     palette: {
@@ -150,6 +156,7 @@ export default function Page({ params }: { params: { appId: string } }) {
     const router = useRouter()
     const [data, setData] = useState<AppInfoData | null>(null)
 
+
     const initAppInfo = (data: AppInfoData | null): AppInfo => {
         if (data === null) {
             return NullAppData
@@ -190,6 +197,8 @@ export default function Page({ params }: { params: { appId: string } }) {
     const [deleteImgId, setDeleteImgId] = useState<string[]>([])
     const [rating, setRating] = useState<number | null>(null)
     const [reviewerName, setReviewerName] = useState<string[]>([])
+
+    const [modalOpen, setModalOpen] = React.useState(false)
 
     useEffect(() => {
         fetch(`/api/v0/projects/${appId}`)
@@ -362,7 +371,7 @@ export default function Page({ params }: { params: { appId: string } }) {
             }
             enqueueSnackbar("プロジェクトの更新が完了しました", { variant: "success" })
             setEditable(false)
-            window.location.reload()
+            // window.location.reload()
         } catch (e) {
             enqueueSnackbar("通信に失敗しました", { variant: "error" })
             console.log(e)
@@ -451,6 +460,9 @@ export default function Page({ params }: { params: { appId: string } }) {
         }
     }
 
+    const handleModalOpen = () => setModalOpen(true);
+    const handleModalClose = () => setModalOpen(false);
+
     return (
         <>
             <Container sx={{ mt: 3 }}>
@@ -494,12 +506,55 @@ export default function Page({ params }: { params: { appId: string } }) {
                     </Grid>
                 </Grid>
                 <Stack spacing={2} mt={5}>
-                    <Typography variant="h4">このプロジェクトについて</Typography>
+                    <GenDescModal
+                        open={modalOpen}
+                        onClose={handleModalClose}
+                        onSave={(description) => {
+                            if (!appDescriptionRef.current) return
+                            appDescriptionRef.current.value = description
+                        }}
+                        appId={appId} access_token={session?.access_token as string}
+                        youtube={appYoutubeRef.current?.value}
+                        github={appDownloadLinkRef.current?.value}
+                        description={appDescriptionRef.current?.value}
+                    ></GenDescModal>
                     {isEditable ?
-                        <TextField fullWidth multiline rows={5} size="small" variant="outlined"
-                            inputRef={appDescriptionRef}
-                            defaultValue={appInfo.description} /> :
-                        <Typography component="div">{appInfo.description}</Typography>
+                        <>
+                            <Grid container columns={{ xs: 12 }}>
+                                <Grid xs={8}>
+                                    <Typography variant="h4" display="inline">このプロジェクトについて</Typography>
+                                </Grid>
+                                <Grid xs={4} sx={{
+                                    display: "flex",
+                                    justifyContent: "flex-end",
+                                    alignItems: "center"
+                                }}>
+                                    <Button
+                                        variant="outlined"
+                                        onClick={() => {
+                                            handleModalOpen()
+                                        }}
+                                        sx={{
+                                            color: "#003893",
+                                            borderColor: "#003893",
+                                            p: 1
+                                        }}>
+                                        <InsertCommentIcon sx={{
+                                            mr: 1
+                                        }} />
+                                        ChatGPTによる自動生成
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                            <TextField fullWidth multiline rows={5} size="small" variant="outlined"
+                                inputRef={appDescriptionRef}
+                                defaultValue={appInfo.description} />
+                        </>
+                        :
+                        <>
+                            <Typography variant="h4">このプロジェクトについて</Typography>
+                            <Typography component="div">{appInfo.description}</Typography>
+                        </>
                     }
                 </Stack>
                 <Stack sx={{ mt: 5 }} direction="row" alignItems="center">
