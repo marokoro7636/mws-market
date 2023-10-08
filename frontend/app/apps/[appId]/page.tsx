@@ -371,7 +371,7 @@ export default function Page({ params }: { params: { appId: string } }) {
             }
             enqueueSnackbar("プロジェクトの更新が完了しました", { variant: "success" })
             setEditable(false)
-            // window.location.reload()
+            window.location.reload()
         } catch (e) {
             enqueueSnackbar("通信に失敗しました", { variant: "error" })
             console.log(e)

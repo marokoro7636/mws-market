@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import NavAppBar from "@/components/NavAppBar";
 import NextAuthProvider from '@/providers/NextAuth'
+import { Box } from '@mui/material';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -22,12 +23,32 @@ export default function RootLayout({
                 <link href="https://fonts.googleapis.com/css2?family=Gemunu+Libre&family=Ubuntu+Mono&display=swap" rel="stylesheet" />
             </head>
             <body style={{
-                height: "calc(100% - 64px)",
+                minHeight: "calc(100%)",
+                backgroundColor: "#e0e0e3",
             }}>
                 {/* <div className={inter.className}> */}
                 <NextAuthProvider>
                     <NavAppBar />
-                    {children}
+                    <Box sx={{
+                        width: "100%",
+                        bgcolor: "#fff",
+                        height: "64px",
+                        // mt: "-64px",
+                    }}>
+                    </Box>
+                    <Box maxWidth="xl" sx={{
+                        display: "flex",
+                        pt: 5,
+                        minHeight: "calc(100% - 64px - 5 * 8px )",
+                        bgcolor: "#fff",
+                        mx: "auto",
+                    }}
+                    >
+                        <Box flexGrow={1} 
+                        >
+                            {children}
+                        </Box>
+                    </Box>
                 </NextAuthProvider>
                 {/* </div> */}
             </body>

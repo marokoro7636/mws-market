@@ -141,7 +141,7 @@ const AppList = () => {
     const listItemStyle = { width: 'auto', ml: 1 }
 
     return (
-        <Box sx={{ mt: 2 }}>
+        <Box >
             <ThemeProvider theme={theme}>
                 <List sx={listStyle}>
                     {Array.from(years).sort().map((item) => {
@@ -164,13 +164,17 @@ const AppList = () => {
             <Grid container spacing={2} rowSpacing={5}>
                 {
                     viewData?.map((item, i) => (
-                        <Grid item xs={4} key={i}>
+                        <Grid item xs={4} key={i} sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
                             <AppCard id={item.id} name={item.name} team={item.team} description={item.description} rating={item.rating} icon={item.icon} img={item.img} team_id={item.team_id} />
                         </Grid>
                     ))
                 }
             </Grid>
-        </Box>
+        </Box >
     );
 };
 

@@ -24,7 +24,7 @@ function NavAppBar() {
     }
     return (
         <AppBar
-            position="sticky"
+            position="fixed"
             elevation={0}
             style={appBarStyle}
         >
