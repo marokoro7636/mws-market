@@ -384,9 +384,9 @@ export default function Page({ params }: { params: { teamId: string } }) {
                         variant='h6'
                         color={"#94200F"}
                     >
-                        Delete Team
+                        チームメンバの削除
                     </Typography>
-                    <Typography>Are you sure to delete {userDelete.name}? </Typography>
+                    <Typography> {userDelete.name}? </Typography>
 
                     <Grid container spacing={2} columns={{ xs: 3, sm: 8, md: 12 }} justifyItems="flex-end" display="flex" sx={{
                         pt: 4, pl: 8
@@ -399,12 +399,12 @@ export default function Page({ params }: { params: { teamId: string } }) {
                                     handleModalClose()
                                 }
                             }}
-                            >Delete</Button>
+                            >削除</Button>
                         </Grid>
                         <Grid md={6} justifyContent="flex-end" >
                             <Button sx={{ color: "#555" }} onClick={() => {
                                 handleModalClose()
-                            }}>Calcel</Button>
+                            }}>キャンセル</Button>
                         </Grid>
                     </Grid>
                 </Box>
@@ -427,26 +427,26 @@ export default function Page({ params }: { params: { teamId: string } }) {
                 <CardContent>
                     <Grid container spacing={2} columns={{ xs: 3, sm: 8, md: 12 }}>
                         <Grid item xs={3} md={3}>
-                            Team Name :
+                            チーム名 :
                         </Grid>
                         <Grid item xs={3} md={9}>
                             {editableField(input_name, teamInternalInfo.name, isEditable)}
                         </Grid>
                         <Grid item xs={3} md={3}>
-                            Year:
+                            年度 :
                         </Grid>
                         <Grid item xs={3} md={9}>
                             {/* Year must be fixed after linked  */}
                             {editableField(input_year, teamInternalInfo.year, isEditable)}
                         </Grid>
                         <Grid item xs={3} md={3}>
-                            Description:
+                            チーム説明 :
                         </Grid>
                         <Grid item xs={3} md={9}>
                             {editableArea(input_description, teamInternalInfo.description, isEditable)}
                         </Grid>
                         <Grid item xs={3} md={3}>
-                            Team Secret:
+                            チームシークレット :
                         </Grid>
                         <Grid item md={9}>
                             {/* 変更しないので最初のInterfaceでOK */}
@@ -473,7 +473,7 @@ export default function Page({ params }: { params: { teamId: string } }) {
             </Card>
             <Card sx={{ mt: 5, p: 3, "border": "1px solid #0055df50", }} elevation={0}>
                 <CardHeader
-                    title="Members"
+                    title="チームメンバー"
                 />
                 <CardContent>
                     <List >
@@ -518,7 +518,7 @@ export default function Page({ params }: { params: { teamId: string } }) {
             </Card>
             <Card sx={{ mt: 5, p: 3, "border": "1px solid #0055df50", }} elevation={0}>
                 <CardHeader
-                    title="Project"
+                    title="プロジェクト"
                 />
                 <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -560,17 +560,17 @@ export default function Page({ params }: { params: { teamId: string } }) {
             </Card>
             <Card sx={{ mt: 5, p: 3, "border": "1px solid #0055df50", }} elevation={0}>
                 <CardHeader
-                    title="History"
+                    title="チームの歴史"
                 />
                 <CardContent>
                     <Typography sx={{ pb: 4 }}>
-                        過去のチームのsecretを設定することで，継承されたチームであることを表現できます(仮文)
+                        過去のチームのチームシークレットを設定することで，継承されたチームであることを表現できます
                     </Typography>
                     <Grid container spacing={2} alignItems="center">
                         <Grid item md={5}>
                             <TextField
                                 fullWidth
-                                label="team secret"
+                                label="チームシークレット"
                                 defaultValue=""
                                 onChange={(e) => {
                                     setTeamRelationSecret(e.target.value)

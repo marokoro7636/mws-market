@@ -118,33 +118,33 @@ export default function Page() {
         <Container sx={{ p: 3 }}>
             <SnackbarProvider />
 
-            <Typography variant="h3">Join New Team</Typography>
+            <Typography variant="h3">新しいチームに参加</Typography>
 
             <Card sx={{ mt: 5, p: 3, "border": "1px solid #0055df50", }} elevation={0}>
                 <CardContent>
                     <Typography variant='h4' sx={{ mb: 3 }}>Team Info</Typography>
                     <Grid container spacing={2} columns={{ xs: 3, sm: 8, md: 12 }}>
                         <Grid item xs={3} md={3}>
-                            Team Name :
+                            チーム名 :
                         </Grid>
                         <Grid item xs={3} md={9}>
                             <Typography variant="body1">{teamInternalInfo.name}</Typography>
                         </Grid>
                         <Grid item xs={3} md={3}>
-                            Year:
+                            年度 :
                         </Grid>
                         <Grid item xs={3} md={9}>
                             <Typography variant="body1">{teamInternalInfo.year}</Typography>
                         </Grid>
                         <Grid item xs={3} md={3}>
-                            Description:
+                            説明 :
                         </Grid>
                         <Grid item xs={3} md={9}>
                             <Typography variant="body1">{teamInternalInfo.description}</Typography>
                         </Grid>
                     </Grid>
                     <Divider sx={{ my: 2 }}></Divider>
-                    <Typography variant='h6'>Members</Typography>
+                    <Typography variant='h6'>メンバー</Typography>
                     <List >
                         {teamInternalInfo.members?.map((e) => (
                             <ListItem key={e.id}           >
@@ -160,7 +160,7 @@ export default function Page() {
                         ))}
                     </List>
                     <Divider sx={{ my: 2 }}></Divider>
-                    <Typography variant='h6'>Relationship</Typography>
+                    <Typography variant='h6'>関係のあるチーム</Typography>
                     <List >
                         {teamInternalInfo.relations?.map((e) => (
                             <ListItem key={e.id}>
@@ -178,7 +178,7 @@ export default function Page() {
                         <ThemeProvider theme={theme}>
                             <Button color="primary" variant="contained" disableElevation={true} onClick={() => {
                                 joinTeam()
-                            }}>Join Team</Button>
+                            }}>チームへ参加</Button>
                         </ThemeProvider>
                     </Grid>
                 </CardActions>

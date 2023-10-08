@@ -85,31 +85,31 @@ const TeamInfoEditor = ({ name, year, description, team_secret }: TeamInternalIn
         <div>
             <Card>
                 <CardHeader
-                    title="Team Infomation"
+                    title="チーム情報"
                 />
                 <CardContent>
                     <Grid container spacing={2}>
                         <Grid item xs={3}>
-                            Team Name :
+                            チーム名 :
                         </Grid>
                         <Grid item xs={9}>
                             {editableField(input_name, teamInternalInfo.name, isEditable)}
                         </Grid>
                         <Grid item xs={3}>
-                            Year:
+                            年度 :
                         </Grid>
                         <Grid item xs={9}>
                             {/* Year must be fixed after linked  */}
                             {editableField(input_year, teamInternalInfo.year, isEditable)}
                         </Grid>
                         <Grid item xs={3}>
-                            Description:
+                            チーム説明 :
                         </Grid>
                         <Grid item xs={9}>
                             {editableArea(input_description, teamInternalInfo.description, isEditable)}
                         </Grid>
                         <Grid item xs={3}>
-                            Team Secret:
+                            チームシークレット :
                         </Grid>
                         <Grid item xs={9}>
                             {/* 変更しないので最初のInterfaceでOK */}

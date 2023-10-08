@@ -58,7 +58,7 @@ function RelationGraph(teams: RelationGraphProps) {
                     }
                     cyRef.layout({ name: "klay" }).run()
                 }}
-            >Reset</Button>
+            >リセット</Button>
             <CytoscapeComponent
                 cy={(cy) => {
                     cyRef = cy
